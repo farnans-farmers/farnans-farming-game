@@ -2,6 +2,7 @@ extern crate sdl2;
 
 // Modules
 mod player;
+mod tile;
 
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
@@ -74,11 +75,25 @@ fn main() {
     // }
     // thread::sleep(Duration::from_millis(300));
 
-    // TODO temp background
+    // TODO remove background
     let temp_bg = texture_creator.load_texture("src/images/temp_bg.png").unwrap();
     let mut event_pump = sdl_cxt.event_pump().unwrap();
     let mut x_vel = 0;
     let mut y_vel = 0;
+
+    let mut tile_vec = Vec::new();
+    for x in 0..((BG_W/TILE_SIZE) as i32)+1{
+        let mut sub_vec = Vec::new(); 
+        for y in 0..((BG_H/TILE_SIZE) as i32)+1{
+            sub_vec.push(
+                tile::Tile::new(
+                    Rect::new((TILE_SIZE as i32)*x,(TILE_SIZE as i32)*y,TILE_SIZE,TILE_SIZE),
+                    texture_creator.load_texture("src/images/grass.png").unwrap(),
+                )
+            );
+        }
+        tile_vec.push(sub_vec);
+    }
     
     let mut p = player::Player::new(
         Rect::new(
@@ -159,8 +174,23 @@ fn main() {
         wincan.set_draw_color(Color::BLACK);
         wincan.clear();
 
-        // Draw subset of bg
-        wincan.copy(&temp_bg, cur_bg, None).unwrap();
+        // Draw tiles
+        for tile in tile_vec.iter().flatten(){
+            let x_pos = tile.x()-cur_bg.x();
+            let y_pos = tile.y()-cur_bg.y();
+
+            //Don't bother drawing any tiles that are off screen
+            if x_pos > -(TILE_SIZE as i32) && x_pos < (CAM_W as i32) && y_pos > -(TILE_SIZE as i32) && y_pos < (CAM_H as i32){
+                let cur_tile = Rect::new(
+                    tile.x()-cur_bg.x(),
+                    tile.y()-cur_bg.y(),
+                    TILE_SIZE,
+                    TILE_SIZE,
+                );
+                wincan.copy(tile.texture(), None, cur_tile);
+            }
+
+        }
 
         // Draw player
         wincan.copy(p.texture(), p.src(), player_cam_pos).unwrap();
