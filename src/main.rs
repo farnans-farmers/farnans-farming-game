@@ -11,6 +11,7 @@ use sdl2::render::WindowCanvas;
 
 use sdl2::render::BlendMode;
 use sdl2::render::Texture;
+use sdl2::render::TextureCreator;
 
 const VSYNC: bool = true;
 const WIDTH: u32 = 1280;
@@ -48,6 +49,32 @@ fn main() {
     wincan.set_draw_color(Color::RGBA(255, 255, 255, 255));
     wincan.clear();
 
+    // Roll group credits
+    let _ = roll_credits(&mut wincan, texture_creator, r);
+
+    // paths for group images
+    // let img1 = "src/images/jaysonCredits.png";
+    // let img2 = "src/images/JackMCredits.png";
+    // let img3 = "src/images/natCredits.png";
+    // let img4 = "src/images/jacobCredits.png";
+    // let img5 = "src/images/wesleyCredits.png";
+    // let img6 = "src/images/jackACredits.png";
+    // let img7 = "src/images/brandenCredits.png";
+    // let images = [img1, img2, img3, img4, img5, img6, img7];
+
+    // // itterate through images and display fade 
+    // for img in 0..images.len(){
+    //     let _ = fade(&mut wincan, texture_creator.load_texture(images[img]).unwrap(), r);
+    // }
+    // thread::sleep(Duration::from_millis(300));
+
+    
+}
+
+/**
+ * Method to display team credits
+ */
+fn roll_credits<T>(window: &mut WindowCanvas, tc: TextureCreator<T>, r: Rect) -> Result<(), String> {
     // paths for group images
     let img1 = "src/images/jaysonCredits.png";
     let img2 = "src/images/JackMCredits.png";
@@ -58,13 +85,13 @@ fn main() {
     let img7 = "src/images/brandenCredits.png";
     let images = [img1, img2, img3, img4, img5, img6, img7];
 
-    // itterate through images and display fade 
-    for img in 0..images.len(){
-        let _ = fade(&mut wincan, texture_creator.load_texture(images[img]).unwrap(), r);
+    // Iterate through images; fade in and out
+    for img in 0..images.len() {
+        let _ = fade(window, tc.load_texture(images[img]).unwrap(), r);
     }
-    thread::sleep(Duration::from_millis(300));
 
-    
+    Ok(())
+
 }
 
 
@@ -81,6 +108,9 @@ fn fade(window: &mut WindowCanvas, ms: Texture, r:  Rect) -> Result<(), String> 
 		thread::sleep(Duration::from_millis(1));
 		i = i + 2;
 	}
+
+    thread::sleep(Duration::from_secs(1));
+
 
 	// fade out 
 	i = 0;
