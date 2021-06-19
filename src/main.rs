@@ -206,8 +206,8 @@ fn main() {
 
         //finding the portion of the barn to print
         let barnSubSet = Rect::new(
-            320-cur_bg.x(),
-            300-cur_bg.y(),
+            cur_bg.x(),
+            cur_bg.y(),
             if cur_bg.x() < 320 {
                 320-cur_bg.x() as u32
             } else {
