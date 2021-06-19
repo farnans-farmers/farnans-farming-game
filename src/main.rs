@@ -208,8 +208,16 @@ fn main() {
         let barnSubSet = Rect::new(
             320-p.x(),
             300-p.y(),
-            320-p.x() as u32,
-            300-p.y() as u32,
+            if p.x() < 320 {
+                320-p.x() as u32
+            } else {
+                0
+            },
+            if p.y() < 320 {
+                320-p.y() as u32
+            } else {
+                0
+            },
         );
 
         // Draw barn Should be in top left of the map
