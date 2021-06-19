@@ -206,22 +206,22 @@ fn main() {
 
         //finding the portion of the barn to print
         let barnSubSet = Rect::new(
-            320-player_cam_pos.x(),
-            300-player_cam_pos.y(),
-            if player_cam_pos.x() < 320 {
-                320-player_cam_pos.x() as u32
+            320-cur_bg.x(),
+            300-cur_bg.y(),
+            if cur_bg.x() < 320 {
+                320-cur_bg.x() as u32
             } else {
                 0
             },
-            if player_cam_pos.y() < 300 {
-                300-player_cam_pos.y() as u32
+            if cur_bg.y() < 300 {
+                300-cur_bg.y() as u32
             } else {
                 0
             },
         );
 
         // Draw barn Should be in top left of the map
-        if player_cam_pos.x() < 320 && player_cam_pos.y() < 300 {
+        if cur_bg.x() < 320 && cur_bg.y() < 300 {
             wincan.copy(barnTest.texture(), barnSubSet, barnSubSet);
         }
 
