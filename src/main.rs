@@ -116,7 +116,7 @@ fn main() {
             283,
         ),
         texture_creator
-            .load_texture("src/images/barn.png").unwrap(),
+            .load_texture("src/images/Barn.png").unwrap(),
     );
 
     'gameloop: loop {
