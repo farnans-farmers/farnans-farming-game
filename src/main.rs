@@ -47,7 +47,7 @@ fn main() {
     let r = Rect::new((0) as i32, (0) as i32, WIDTH, HEIGHT);
     wincan.set_draw_color(Color::RGBA(255, 255, 255, 255));
     wincan.clear();
-
+	// Test
     // paths for group images
     let img1 = "src/images/jaysonCredits.png";
     let img2 = "src/images/JackMCredits.png";
