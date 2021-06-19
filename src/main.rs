@@ -61,13 +61,13 @@ fn main() {
     // let _ = roll_credits(&mut wincan, texture_creator, r);
 
     // paths for group images
-    // let img1 = "src/images/jaysonCredits.png";
-    // let img2 = "src/images/JackMCredits.png";
-    // let img3 = "src/images/natCredits.png";
-    // let img4 = "src/images/jacobCredits.png";
-    // let img5 = "src/images/wesleyCredits.png";
-    // let img6 = "src/images/jackACredits.png";
-    // let img7 = "src/images/brandenCredits.png";
+    // let img1 = "images/jaysonCredits.png";
+    // let img2 = "images/JackMCredits.png";
+    // let img3 = "images/natCredits.png";
+    // let img4 = "images/jacobCredits.png";
+    // let img5 = "images/wesleyCredits.png";
+    // let img6 = "images/jackACredits.png";
+    // let img7 = "images/brandenCredits.png";
     // let images = [img1, img2, img3, img4, img5, img6, img7];
 
     // // itterate through images and display fade
@@ -77,7 +77,7 @@ fn main() {
     // thread::sleep(Duration::from_millis(300));
 
     // TODO remove background
-    let temp_bg = texture_creator.load_texture("src/images/temp_bg.png").unwrap();
+    let temp_bg = texture_creator.load_texture("images/temp_bg.png").unwrap();
     let mut event_pump = sdl_cxt.event_pump().unwrap();
     let mut x_vel = 0;
     let mut y_vel = 0;
@@ -89,7 +89,7 @@ fn main() {
             sub_vec.push(
                 tile::Tile::new(
                     Rect::new((TILE_SIZE as i32)*x,(TILE_SIZE as i32)*y,TILE_SIZE,TILE_SIZE),
-                    texture_creator.load_texture("src/images/grass.png").unwrap(),
+                    texture_creator.load_texture("images/grass.png").unwrap(),
                 )
             );
         }
@@ -104,7 +104,7 @@ fn main() {
             TILE_SIZE,
         ),
         texture_creator
-            .load_texture("src/images/placeholder.png")
+            .load_texture("images/placeholder.png")
             .unwrap(),
     );
 
@@ -116,7 +116,7 @@ fn main() {
             300,
         ),
         texture_creator
-            .load_texture("src/images/Barn.png").unwrap(),
+            .load_texture("images/Barn.png").unwrap(),
     );
 
     'gameloop: loop {
@@ -205,17 +205,25 @@ fn main() {
         }
 
         //finding the portion of the barn to print
-/*        let barnSubSet = Rect::new(
-            320-p.x(),
-            300-p.y(),
-            320-p.x() as u32,
-            300-p.y() as u32,
+        let barnSubSet = Rect::new(
+            0,
+            0,
+            if cur_bg.x() < 320 {
+                320-cur_bg.x() as u32
+            } else {
+                0
+            },
+            if cur_bg.y() < 300 {
+                300-cur_bg.y() as u32
+            } else {
+                0
+            },
         );
 
         // Draw barn Should be in top left of the map
-        if p.x() < 320 && p.y() < 300 {
+        if cur_bg.x() < 320 && cur_bg.y() < 300 {
             wincan.copy(barnTest.texture(), barnSubSet, barnSubSet);
-        }*/
+        }
 
         // Draw player
         wincan.copy(p.texture(), p.src(), player_cam_pos).unwrap();
@@ -233,13 +241,13 @@ fn roll_credits<T>(
     r: Rect,
 ) -> Result<(), String> {
     // paths for group images
-    let img1 = "src/images/jaysonCredits.png";
-    let img2 = "src/images/JackMCredits.png";
-    let img3 = "src/images/natCredits.png";
-    let img4 = "src/images/jacobCredits.png";
-    let img5 = "src/images/wesleyCredits.png";
-    let img6 = "src/images/jackACredits.png";
-    let img7 = "src/images/brandenCredits.png";
+    let img1 = "images/jaysonCredits.png";
+    let img2 = "images/JackMCredits.png";
+    let img3 = "images/natCredits.png";
+    let img4 = "images/jacobCredits.png";
+    let img5 = "images/wesleyCredits.png";
+    let img6 = "images/jackACredits.png";
+    let img7 = "images/brandenCredits.png";
     let images = [img1, img2, img3, img4, img5, img6, img7];
 
     // Iterate through images; fade in and out
