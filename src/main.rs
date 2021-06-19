@@ -3,6 +3,7 @@ extern crate sdl2;
 // Modules
 mod player;
 mod tile;
+mod barn;
 
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
@@ -105,6 +106,17 @@ fn main() {
         texture_creator
             .load_texture("src/images/placeholder.png")
             .unwrap(),
+    );
+
+    let barnTest = barn::Barn::new(
+        Rect::new(
+            400,
+            400,
+            319,
+            283,
+        ),
+        texture_creator
+            .load_texture("src/images/barn.png").unwrap(),
     );
 
     'gameloop: loop {
