@@ -204,6 +204,9 @@ fn main() {
 
         }
 
+        // Draw barn
+        wincan.copy(barnTest.texture(), None, None);
+
         // Draw player
         wincan.copy(p.texture(), p.src(), player_cam_pos).unwrap();
         wincan.present();
