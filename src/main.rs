@@ -206,8 +206,8 @@ fn main() {
 
         //finding the portion of the barn to print
         let barnSubSet = Rect::new(
-            320-p.x(),
-            300-p.y(),
+            320-player_cam_pos.x(),
+            300-player_cam_pos.y(),
             if player_cam_pos.x() < 320 {
                 320-player_cam_pos.x() as u32
             } else {
