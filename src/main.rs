@@ -110,10 +110,10 @@ fn main() {
 
     let barnTest = barn::Barn::new(
         Rect::new(
-            400,
-            400,
-            319,
-            283,
+            0,
+            0,
+            320,
+            300,
         ),
         texture_creator
             .load_texture("src/images/Barn.png").unwrap(),
@@ -204,8 +204,18 @@ fn main() {
 
         }
 
-        // Draw barn
-        //wincan.copy(barnTest.texture(), None, None);
+        //finding the portion of the barn to print
+/*        let barnSubSet = Rect::new(
+            320-p.x(),
+            300-p.y(),
+            320-p.x() as u32,
+            300-p.y() as u32,
+        );
+
+        // Draw barn Should be in top left of the map
+        if p.x() < 320 && p.y() < 300 {
+            wincan.copy(barnTest.texture(), barnSubSet, barnSubSet);
+        }*/
 
         // Draw player
         wincan.copy(p.texture(), p.src(), player_cam_pos).unwrap();
