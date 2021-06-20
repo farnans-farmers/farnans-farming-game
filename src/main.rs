@@ -120,11 +120,6 @@ fn main() {
         true,
     );
 
-    let mut testHash = HashMap::new();
-
-    testHash.insert(1, 2);
-    testHash.insert(1, 3);
-
     'gameloop: loop {
         for event in event_pump.poll_iter() {
             match event {
