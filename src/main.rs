@@ -110,8 +110,8 @@ fn main() {
 
     let barn = item::Barn::new(
         Rect::new(
-            0,
-            0,
+            200,
+            200,
             400,
             320,
         ),
@@ -207,7 +207,7 @@ fn main() {
 
         let testx = barn.x() - cur_bg.x();
         let testy = barn.x() - cur_bg.y();
-        // Draw barn Should be in top left of the map
+        // Draw barn
         if testx > -(barn.width() as i32) && testx < (CAM_W as i32) &&
         testy > -(barn.height() as i32) && testy < (CAM_W as i32) {
             let barnSubSet = Rect::new(
