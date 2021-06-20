@@ -39,3 +39,33 @@ impl<'a> Tile<'a> {
     }
 
 }
+
+pub struct item<'a> {
+    pos: Rect,
+    texture: Texture<'a>,
+    printed: bool,
+}
+
+pub struct itemTile<'a> {
+    xPos: int,
+    yPos: int,
+    itemPntr: item<'a>,
+}
+
+pub struct itemMap<'a> {
+    itemTileMap: Vec<itemTile<'a>>,
+    items: Vec<T>,
+}
+
+impl<'a> itemMap<'a> {
+    pub fn contains(&self, x: int, y: int) -> bool {
+        for i in 0 ..itemTileMap.len() {
+            if itemTileMap[i].xPos == x && itemTileMap[i].yPos == y {
+                return true;
+            }
+        }
+        false
+    }
+
+
+}

@@ -4,14 +4,16 @@ use sdl2::render::Texture;
 pub struct Barn<'a> {
     pos: Rect,
     texture: Texture<'a>,
+    collision: bool,
 }
 
 impl<'a> Barn<'a> {
 
-    pub fn new(pos: Rect, texture: Texture<'a>) -> Barn {
+    pub fn new(pos: Rect, texture: Texture<'a>, collision: bool) -> Barn {
         Barn {
             pos,
             texture,
+            collision,
         }
     }
 
@@ -37,6 +39,10 @@ impl<'a> Barn<'a> {
 
     pub fn texture(&self) -> &Texture {
         &self.texture
+    }
+
+    pub fn collision(&self) -> bool {
+        self.collision
     }
 
 }
