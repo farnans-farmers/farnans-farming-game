@@ -216,7 +216,7 @@ fn main() {
                 barn.width(),
                 barn.height(),
             );
-            wincan.copy(barn.texture(), None, None);
+            wincan.copy(barn.texture(), None, barnSubSet);
         }
 
         // Draw player
