@@ -30,6 +30,20 @@ pub const TILE_SIZE: u32 = 80;  // Make this public so we can import it elsewher
 const SPEED_LIMIT: i32 = 5;
 const ACCEL_RATE: i32 = 1;
 
+fn check_collision(a: &Rect, b: &Rect) -> bool {
+	if a.bottom() < b.top()
+		|| a.top() > b.bottom()
+		|| a.right() < b.left()
+		|| a.left() > b.right()
+	{
+		false
+	}
+	else {
+		true
+	}
+}
+
+
 fn main() {
     let sdl_cxt = sdl2::init().unwrap();
     let video_subsys = sdl_cxt.video().unwrap();
@@ -84,7 +98,7 @@ fn main() {
 
     let mut tile_vec = Vec::new();
     for x in 0..((BG_W/TILE_SIZE) as i32)+1{
-        let mut sub_vec = Vec::new(); 
+        let mut sub_vec = Vec::new();
         for y in 0..((BG_H/TILE_SIZE) as i32)+1{
             sub_vec.push(
                 tile::Tile::new(
@@ -95,7 +109,7 @@ fn main() {
         }
         tile_vec.push(sub_vec);
     }
-    
+
     let mut p = player::Player::new(
         Rect::new(
             (BG_W / 2 - TILE_SIZE / 2) as i32,
@@ -152,18 +166,36 @@ fn main() {
         if keystate.contains(&Keycode::D) {
             x_deltav += ACCEL_RATE;
         }
+
         // Update player velocity
         x_deltav = resist(x_vel, x_deltav);
+
         y_deltav = resist(y_vel, y_deltav);
         x_vel = (x_vel + x_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
+
         y_vel = (y_vel + y_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
 
         // Update player position
-        p.update_pos(
-            (x_vel, y_vel),
-            (0, (BG_W - TILE_SIZE) as i32),
-            (0, (BG_H - TILE_SIZE) as i32),
-        );
+
+        if !check_collision(&p.getPos(), &barnTest.getPos())
+        {
+            p.update_pos(
+                (x_vel, y_vel),
+
+                (0, (BG_W - TILE_SIZE) as i32),
+                (0, (BG_H - TILE_SIZE) as i32),
+            );
+        }
+        else {
+            p.stay_still(
+                (x_vel, y_vel),
+
+                (0, (BG_W - TILE_SIZE) as i32),
+                (0, (BG_H - TILE_SIZE) as i32),
+            );
+
+        }
+
 
         // Determine part of background to draw
         let cur_bg = Rect::new(
@@ -228,7 +260,7 @@ fn main() {
         // Draw player
         wincan.copy(p.texture(), p.src(), player_cam_pos).unwrap();
         wincan.present();
-        
+
     } // end gameloop
 }
 

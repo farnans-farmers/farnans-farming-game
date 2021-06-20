@@ -16,7 +16,7 @@ pub struct Player<'a> {
 
 impl<'a> Player<'a> {
 	pub fn new(pos: Rect, texture: Texture<'a>) -> Player {
-		// src selects which part of the character sheet gets 
+		// src selects which part of the character sheet gets
 		// displayed. We only have one sprite on the sheet for
 		// now
 		let src = Rect::new(0 as i32, 0 as i32, TILE_SIZE, TILE_SIZE);
@@ -25,6 +25,27 @@ impl<'a> Player<'a> {
 			src,
 			texture,
 		}
+	}
+
+	pub fn getPos(&self) -> Rect {
+		self.pos
+	}
+
+
+	pub fn left(&self) -> i32 {
+		self.pos.left()
+	}
+
+	pub fn right(&self) -> i32 {
+		self.pos.right()
+	}
+
+	pub fn top(&self) -> i32 {
+		self.pos.top()
+	}
+
+	pub fn bottom(&self) -> i32 {
+		self.pos.bottom()
 	}
 
 	pub fn x(&self) -> i32 {
@@ -46,6 +67,11 @@ impl<'a> Player<'a> {
 	pub fn update_pos(&mut self, vel: (i32, i32), x_bounds: (i32, i32), y_bounds: (i32, i32)) {
 		self.pos.set_x((self.pos.x() + vel.0).clamp(x_bounds.0, x_bounds.1));
 		self.pos.set_y((self.pos.y() + vel.1).clamp(y_bounds.0, y_bounds.1));
+	}
+
+	pub fn stay_still(&mut self, vel: (i32, i32), x_bounds: (i32, i32), y_bounds: (i32, i32)) {
+		self.pos.set_x((self.pos.x() - vel.0).clamp(x_bounds.0, x_bounds.1));
+		self.pos.set_y((self.pos.y() - vel.1).clamp(y_bounds.0, y_bounds.1));
 	}
 
 	pub fn src(&self) -> Rect {

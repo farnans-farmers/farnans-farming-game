@@ -15,6 +15,26 @@ impl<'a> Barn<'a> {
         }
     }
 
+    pub fn left(&self) -> i32 {
+        self.pos.left()
+    }
+
+    pub fn right(&self) -> i32 {
+        self.pos.right()
+    }
+
+    pub fn top(&self) -> i32 {
+        self.pos.top()
+    }
+
+    pub fn bottom(&self) -> i32 {
+        self.pos.bottom()
+    }
+
+    pub fn getPos(&self) -> Rect {
+		self.pos
+	}
+
     pub fn x(&self) -> i32 {
         self.pos.x()
     }
