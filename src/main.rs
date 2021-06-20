@@ -3,7 +3,7 @@ extern crate sdl2;
 // Modules
 mod player;
 mod tile;
-mod barn;
+mod item;
 
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
@@ -95,7 +95,7 @@ fn main() {
         }
         tile_vec.push(sub_vec);
     }
-    
+
     let mut p = player::Player::new(
         Rect::new(
             (BG_W / 2 - TILE_SIZE / 2) as i32,
@@ -108,15 +108,16 @@ fn main() {
             .unwrap(),
     );
 
-    let barnTest = barn::Barn::new(
+    let barn = item::Barn::new(
         Rect::new(
             0,
             0,
+            400,
             320,
-            300,
         ),
         texture_creator
             .load_texture("images/Barn.png").unwrap(),
+        true,
     );
 
     'gameloop: loop {
@@ -204,25 +205,18 @@ fn main() {
 
         }
 
-        //finding the portion of the barn to print
-        let barnSubSet = Rect::new(
-            0,
-            0,
-            if cur_bg.x() < 320 {
-                320-cur_bg.x() as u32
-            } else {
-                0
-            },
-            if cur_bg.y() < 300 {
-                300-cur_bg.y() as u32
-            } else {
-                0
-            },
-        );
-
+        let testx = barn.x() - cur_bg.x();
+        let testy = barn.x() - cur_bg.y();
         // Draw barn Should be in top left of the map
-        if cur_bg.x() < 320 && cur_bg.y() < 300 {
-            wincan.copy(barnTest.texture(), barnSubSet, barnSubSet);
+        if testx > -(barn.width() as i32) && testx < (CAM_W as i32) &&
+        testy > -(barn.height() as i32) && testy < (CAM_W as i32) {
+            let barnSubSet = Rect::new(
+                barn.x() - cur_bg.x(),
+                barn.y() - cur_bg.y(),
+                barn.width(),
+                barn.height(),
+            );
+            wincan.copy(barn.texture(), None, barnSubSet);
         }
 
         // Draw player
