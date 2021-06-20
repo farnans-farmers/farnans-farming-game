@@ -40,7 +40,7 @@ impl<'a> Tile<'a> {
 
 }
 
-pub struct item<'a> {
+/*pub struct item<'a> {
     pos: Rect,
     texture: Texture<'a>,
     printed: bool,
@@ -68,4 +68,4 @@ impl<'a> itemMap<'a> {
     }
 
 
-}
+}*/
