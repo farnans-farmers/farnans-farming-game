@@ -45,6 +45,8 @@ impl<'a> Barn<'a> {
         self.collision
     }
 
+    // Takes wincan checks if barn needs to be printed and prints it if it does
+    // Returns the WindowCanvas
     pub fn printItem(&self, x: i32, y: i32, w: u32, h: u32, mut win: WindowCanvas) -> WindowCanvas {
         let testx = self.x() - x;
         let testy = self.y() - y;

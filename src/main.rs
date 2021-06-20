@@ -205,20 +205,8 @@ fn main() {
 
         }
 
-        wincan = barn.printItem(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
-        /*let testx = barn.x() - cur_bg.x();
-        let testy = barn.x() - cur_bg.y();
-        // Draw barn
-        if testx > -(barn.width() as i32) && testx < (CAM_W as i32) &&
-        testy > -(barn.height() as i32) && testy < (CAM_W as i32) {
-            let barnSubSet = Rect::new(
-                barn.x() - cur_bg.x(),
-                barn.y() - cur_bg.y(),
-                barn.width(),
-                barn.height(),
-            );
-            wincan.copy(barn.texture(), None, barnSubSet);
-        }*/
+        // Drawing item
+        barn.printItem(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
 
         // Draw player
         wincan.copy(p.texture(), p.src(), player_cam_pos).unwrap();
