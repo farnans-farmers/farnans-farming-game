@@ -46,7 +46,7 @@ impl<'a> Barn<'a> {
     }
 
     /*
-        Takes ownership of a WindowCanvas, checks if the item needs to be printed and prints it if it does
+        Takes ownership of a WindowCanvas, checks if the item needs to be printed, and prints it if it does.
         Inputs:
             x: current x position of the camera
             y: current y position of the camera
