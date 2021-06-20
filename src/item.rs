@@ -1,5 +1,5 @@
 use sdl2::rect::Rect;
-use sdl2::render::Texture;
+use sdl2::render::{Texture, WindowCanvas};
 
 pub struct Barn<'a> {
     pos: Rect,
@@ -45,19 +45,19 @@ impl<'a> Barn<'a> {
         self.collision
     }
 
-    pub fn printItem(&self, x: int, y: int) {
+    pub fn printItem(&self, x: i32, y: i32, w: u32, h: u32, mut win: &WindowCanvas) {
         let testx = self.x() - x;
         let testy = self.y() - y;
         // Draw barn
-        if testx > -(self.width() as i32) && testx < (CAM_W as i32) &&
-            testy > -(self.height() as i32) && testy < (CAM_W as i32) {
+        if testx > -(self.width() as i32) && testx < w as i32 &&
+            testy > -(self.height() as i32) && testy < h as i32 {
             let barnSubSet = Rect::new(
                 self.x() - x,
                 self.y() - y,
                 self.width(),
                 self.height(),
             );
-            wincan.copy(self.texture(), None, barnSubSet);
+            win.copy(self.texture(), None, barnSubSet);
         }
     }
 

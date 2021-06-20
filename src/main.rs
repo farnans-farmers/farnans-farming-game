@@ -205,7 +205,7 @@ fn main() {
 
         }
 
-        barn.printItem(cur_bg.x(), cur_bg.y);
+        barn.printItem(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, &wincan);
         /*let testx = barn.x() - cur_bg.x();
         let testy = barn.x() - cur_bg.y();
         // Draw barn
