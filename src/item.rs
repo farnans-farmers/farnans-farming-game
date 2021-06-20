@@ -45,8 +45,17 @@ impl<'a> Barn<'a> {
         self.collision
     }
 
-    // Takes wincan checks if barn needs to be printed and prints it if it does
-    // Returns the WindowCanvas
+    /*
+        Takes ownership of a WindowCanvas, checks if the item needs to be printed and prints it if it does
+        Inputs:
+            x: current x position of the camera
+            y: current y position of the camera
+            w: width of the camera
+            h: height of the camera
+            win: WindowCanvas to be updated
+        Return:
+            The updated WindowCanvas
+    */
     pub fn printItem(&self, x: i32, y: i32, w: u32, h: u32, mut win: WindowCanvas) -> WindowCanvas {
         let testx = self.x() - x;
         let testy = self.y() - y;
@@ -63,6 +72,10 @@ impl<'a> Barn<'a> {
             return win;
         }
         win
+    }
+
+    pub fn checkForCollision(&self, x: i32, y: i32, w: i32, h: i32) -> bool {
+        true
     }
 
 }
