@@ -206,7 +206,7 @@ fn main() {
         }
 
         // Drawing item
-        barn.printItem(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
+        wincan = barn.printItem(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
 
         // Draw player
         wincan.copy(p.texture(), p.src(), player_cam_pos).unwrap();
