@@ -45,4 +45,20 @@ impl<'a> Barn<'a> {
         self.collision
     }
 
+    pub fn printItem(&self, x: int, y: int) {
+        let testx = barn.x() - cur_bg.x();
+        let testy = barn.x() - cur_bg.y();
+        // Draw barn
+        if testx > -(barn.width() as i32) && testx < (CAM_W as i32) &&
+            testy > -(barn.height() as i32) && testy < (CAM_W as i32) {
+            let barnSubSet = Rect::new(
+                barn.x() - cur_bg.x(),
+                barn.y() - cur_bg.y(),
+                barn.width(),
+                barn.height(),
+            );
+            wincan.copy(barn.texture(), None, barnSubSet);
+        }
+    }
+
 }

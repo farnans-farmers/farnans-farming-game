@@ -205,7 +205,7 @@ fn main() {
 
         }
 
-        let testx = barn.x() - cur_bg.x();
+        /*let testx = barn.x() - cur_bg.x();
         let testy = barn.x() - cur_bg.y();
         // Draw barn
         if testx > -(barn.width() as i32) && testx < (CAM_W as i32) &&
@@ -217,7 +217,7 @@ fn main() {
                 barn.height(),
             );
             wincan.copy(barn.texture(), None, barnSubSet);
-        }
+        }*/
 
         // Draw player
         wincan.copy(p.texture(), p.src(), player_cam_pos).unwrap();
