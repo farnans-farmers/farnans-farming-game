@@ -190,7 +190,7 @@ fn main() {
 
         // Update player position
 
-        if !check_collision(&p.getPos(), &barnTest.getPos())
+        if !check_collision(&p.getPos(), &farmhs.pos()) && !check_collision(&p.getPos(), &barn.pos())
         {
             p.update_pos(
                 (x_vel, y_vel),
