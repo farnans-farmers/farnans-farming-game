@@ -129,6 +129,18 @@ fn main() {
         true,
     );
 
+    let farmhs = item::Item::new(
+        Rect::new(
+            2000,
+            2000,
+            400,
+            320,
+        ),
+        texture_creator
+            .load_texture("images/Farmhouse.png").unwrap(),
+        true,
+    );
+
     'gameloop: loop {
         for event in event_pump.poll_iter() {
             match event {
