@@ -1,16 +1,16 @@
 use sdl2::rect::Rect;
 use sdl2::render::{Texture, WindowCanvas};
 
-pub struct Barn<'a> {
+pub struct Item<'a> {
     pos: Rect,
     texture: Texture<'a>,
     collision: bool,
 }
 
-impl<'a> Barn<'a> {
+impl<'a> Item<'a> {
 
-    pub fn new(pos: Rect, texture: Texture<'a>, collision: bool) -> Barn {
-        Barn {
+    pub fn new(pos: Rect, texture: Texture<'a>, collision: bool) -> Item {
+        Item {
             pos,
             texture,
             collision,

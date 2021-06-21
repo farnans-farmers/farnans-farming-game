@@ -108,7 +108,7 @@ fn main() {
             .unwrap(),
     );
 
-    let barn = item::Barn::new(
+    let barn = item::Item::new(
         Rect::new(
             200,
             200,
@@ -117,6 +117,18 @@ fn main() {
         ),
         texture_creator
             .load_texture("images/Barn.png").unwrap(),
+        true,
+    );
+
+    let farmhs = item::Item::new(
+        Rect::new(
+            2000,
+            2000,
+            400,
+            320,
+        ),
+        texture_creator
+            .load_texture("images/Farmhouse.png").unwrap(),
         true,
     );
 
@@ -207,6 +219,7 @@ fn main() {
 
         // Drawing item
         wincan = barn.printItem(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
+        wincan = farmhs.printItem(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
 
         // Draw player
         wincan.copy(p.texture(), p.src(), player_cam_pos).unwrap();
