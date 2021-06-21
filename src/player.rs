@@ -64,13 +64,19 @@ impl<'a> Player<'a> {
 		self.pos.height()
 	}
 
-	pub fn update_pos(&mut self, vel: (i32, i32), x_bounds: (i32, i32), y_bounds: (i32, i32)) {
+	pub fn update_pos_x(&mut self, vel: (i32, i32), x_bounds: (i32, i32)) {
 		self.pos.set_x((self.pos.x() + vel.0).clamp(x_bounds.0, x_bounds.1));
+	}
+
+	pub fn update_pos_y(&mut self, vel: (i32, i32), y_bounds: (i32, i32)) {
 		self.pos.set_y((self.pos.y() + vel.1).clamp(y_bounds.0, y_bounds.1));
 	}
 
-	pub fn stay_still(&mut self, vel: (i32, i32), x_bounds: (i32, i32), y_bounds: (i32, i32)) {
+	pub fn stay_still_x(&mut self, vel: (i32, i32), x_bounds: (i32, i32)) {
 		self.pos.set_x((self.pos.x() - vel.0).clamp(x_bounds.0, x_bounds.1));
+	}
+
+	pub fn stay_still_y(&mut self, vel: (i32, i32), y_bounds: (i32, i32)) {
 		self.pos.set_y((self.pos.y() - vel.1).clamp(y_bounds.0, y_bounds.1));
 	}
 

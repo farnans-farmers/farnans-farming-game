@@ -189,22 +189,36 @@ fn main() {
         y_vel = (y_vel + y_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
 
         // Update player position
+		// X
+		p.update_pos_x(
+			(x_vel, y_vel),
 
-        if !check_collision(&p.getPos(), &farmhs.pos()) && !check_collision(&p.getPos(), &barn.pos())
+			(0, (BG_W - TILE_SIZE) as i32),
+		);
+
+        if check_collision(&p.getPos(), &farmhs.pos())
+		|| check_collision(&p.getPos(), &barn.pos())
         {
-            p.update_pos(
+            p.stay_still_x(
                 (x_vel, y_vel),
 
                 (0, (BG_W - TILE_SIZE) as i32),
-                (0, (BG_H - TILE_SIZE) as i32),
             );
+
         }
-        else {
-            p.stay_still(
+		//Y
+		p.update_pos_y(
+			(x_vel, y_vel),
+
+			(0, (BG_W - TILE_SIZE) as i32),
+		);
+		if check_collision(&p.getPos(), &farmhs.pos())
+		|| check_collision(&p.getPos(), &barn.pos())
+        {
+            p.stay_still_y(
                 (x_vel, y_vel),
 
                 (0, (BG_W - TILE_SIZE) as i32),
-                (0, (BG_H - TILE_SIZE) as i32),
             );
 
         }
