@@ -118,7 +118,7 @@ fn main() {
             TILE_SIZE,
         ),
         texture_creator
-            .load_texture("images/placeholder.png")
+            .load_texture("images/farmer.png")
             .unwrap(),
     );
 
@@ -142,7 +142,7 @@ fn main() {
             320,
         ),
         texture_creator
-            .load_texture("images/Farmhouse.png").unwrap(),
+            .load_texture("images/house.png").unwrap(),
         true,
     );
 
