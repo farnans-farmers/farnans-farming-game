@@ -3,7 +3,7 @@ extern crate sdl2;
 // Modules
 mod player;
 mod tile;
-mod barn;
+mod item;
 
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
@@ -122,15 +122,28 @@ fn main() {
             .unwrap(),
     );
 
-    let barnTest = barn::Barn::new(
+    let barn = item::Item::new(
         Rect::new(
-            0,
-            0,
+            200,
+            200,
+            400,
             320,
-            300,
         ),
         texture_creator
             .load_texture("images/Barn.png").unwrap(),
+        true,
+    );
+
+    let farmhs = item::Item::new(
+        Rect::new(
+            2000,
+            2000,
+            400,
+            320,
+        ),
+        texture_creator
+            .load_texture("images/Farmhouse.png").unwrap(),
+        true,
     );
 
     'gameloop: loop {
@@ -236,26 +249,9 @@ fn main() {
 
         }
 
-        //finding the portion of the barn to print
-        let barnSubSet = Rect::new(
-            0,
-            0,
-            if cur_bg.x() < 320 {
-                320-cur_bg.x() as u32
-            } else {
-                0
-            },
-            if cur_bg.y() < 300 {
-                300-cur_bg.y() as u32
-            } else {
-                0
-            },
-        );
-
-        // Draw barn Should be in top left of the map
-        if cur_bg.x() < 320 && cur_bg.y() < 300 {
-            wincan.copy(barnTest.texture(), barnSubSet, barnSubSet);
-        }
+        // Drawing item
+        wincan = barn.printItem(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
+        wincan = farmhs.printItem(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
 
         // Draw player
         wincan.copy(p.texture(), p.src(), player_cam_pos).unwrap();
