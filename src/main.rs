@@ -2,6 +2,8 @@ extern crate sdl2;
 
 // Modules
 mod player;
+mod tile;
+mod item;
 
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
@@ -27,6 +29,20 @@ const TITLE: &str = "Farnan's Farmers";
 pub const TILE_SIZE: u32 = 80;  // Make this public so we can import it elsewhere
 const SPEED_LIMIT: i32 = 5;
 const ACCEL_RATE: i32 = 1;
+
+fn check_collision(a: &Rect, b: &Rect) -> bool {
+	if a.bottom() < b.top()
+		|| a.top() > b.bottom()
+		|| a.right() < b.left()
+		|| a.left() > b.right()
+	{
+		false
+	}
+	else {
+		true
+	}
+}
+
 
 fn main() {
     let sdl_cxt = sdl2::init().unwrap();
@@ -56,30 +72,27 @@ fn main() {
     wincan.clear();
 
     // Roll group credits
-    // let _ = roll_credits(&mut wincan, texture_creator, r);
+    // let _ = roll_credits(&mut wincan, &texture_creator, r);
+    roll_credits(&mut wincan, &texture_creator, r).unwrap();
 
-    // paths for group images
-    // let img1 = "src/images/jaysonCredits.png";
-    // let img2 = "src/images/JackMCredits.png";
-    // let img3 = "src/images/natCredits.png";
-    // let img4 = "src/images/jacobCredits.png";
-    // let img5 = "src/images/wesleyCredits.png";
-    // let img6 = "src/images/jackACredits.png";
-    // let img7 = "src/images/brandenCredits.png";
-    // let images = [img1, img2, img3, img4, img5, img6, img7];
-
-    // // itterate through images and display fade
-    // for img in 0..images.len(){
-    //     let _ = fade(&mut wincan, texture_creator.load_texture(images[img]).unwrap(), r);
-    // }
-    // thread::sleep(Duration::from_millis(300));
-
-    // TODO temp background
-    let temp_bg = texture_creator.load_texture("src/images/temp_bg.png").unwrap();
     let mut event_pump = sdl_cxt.event_pump().unwrap();
     let mut x_vel = 0;
     let mut y_vel = 0;
-    
+
+    let mut tile_vec = Vec::new();
+    for x in 0..((BG_W/TILE_SIZE) as i32)+1{
+        let mut sub_vec = Vec::new();
+        for y in 0..((BG_H/TILE_SIZE) as i32)+1{
+            sub_vec.push(
+                tile::Tile::new(
+                    Rect::new((TILE_SIZE as i32)*x,(TILE_SIZE as i32)*y,TILE_SIZE,TILE_SIZE),
+                    texture_creator.load_texture("src/images/grass.png").unwrap(),
+                )
+            );
+        }
+        tile_vec.push(sub_vec);
+    }
+
     let mut p = player::Player::new(
         Rect::new(
             (BG_W / 2 - TILE_SIZE / 2) as i32,
@@ -88,8 +101,32 @@ fn main() {
             TILE_SIZE,
         ),
         texture_creator
-            .load_texture("src/images/placeholder.png")
+            .load_texture("src/images/farmer.png")
             .unwrap(),
+    );
+
+    let barn = item::Item::new(
+        Rect::new(
+            200,
+            200,
+            400,
+            320,
+        ),
+        texture_creator
+            .load_texture("src/images/Barn.png").unwrap(),
+        true,
+    );
+
+    let farmhs = item::Item::new(
+        Rect::new(
+            2000,
+            2000,
+            400,
+            320,
+        ),
+        texture_creator
+            .load_texture("src/images/house.png").unwrap(),
+        true,
     );
 
     'gameloop: loop {
@@ -125,18 +162,50 @@ fn main() {
         if keystate.contains(&Keycode::D) {
             x_deltav += ACCEL_RATE;
         }
+
         // Update player velocity
         x_deltav = resist(x_vel, x_deltav);
+
         y_deltav = resist(y_vel, y_deltav);
         x_vel = (x_vel + x_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
+
         y_vel = (y_vel + y_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
 
         // Update player position
-        p.update_pos(
-            (x_vel, y_vel),
-            (0, (BG_W - TILE_SIZE) as i32),
-            (0, (BG_H - TILE_SIZE) as i32),
-        );
+		// X
+		p.update_pos_x(
+			(x_vel, y_vel),
+
+			(0, (BG_W - TILE_SIZE) as i32),
+		);
+
+        if check_collision(&p.getPos(), &farmhs.pos())
+		|| check_collision(&p.getPos(), &barn.pos())
+        {
+            p.stay_still_x(
+                (x_vel, y_vel),
+
+                (0, (BG_W - TILE_SIZE) as i32),
+            );
+
+        }
+		//Y
+		p.update_pos_y(
+			(x_vel, y_vel),
+
+			(0, (BG_W - TILE_SIZE) as i32),
+		);
+		if check_collision(&p.getPos(), &farmhs.pos())
+		|| check_collision(&p.getPos(), &barn.pos())
+        {
+            p.stay_still_y(
+                (x_vel, y_vel),
+
+                (0, (BG_W - TILE_SIZE) as i32),
+            );
+
+        }
+
 
         // Determine part of background to draw
         let cur_bg = Rect::new(
@@ -159,13 +228,32 @@ fn main() {
         wincan.set_draw_color(Color::BLACK);
         wincan.clear();
 
-        // Draw subset of bg
-        wincan.copy(&temp_bg, cur_bg, None).unwrap();
+        // Draw tiles
+        for tile in tile_vec.iter().flatten(){
+            let x_pos = tile.x()-cur_bg.x();
+            let y_pos = tile.y()-cur_bg.y();
+
+            //Don't bother drawing any tiles that are off screen
+            if x_pos > -(TILE_SIZE as i32) && x_pos < (CAM_W as i32) && y_pos > -(TILE_SIZE as i32) && y_pos < (CAM_H as i32){
+                let cur_tile = Rect::new(
+                    tile.x()-cur_bg.x(),
+                    tile.y()-cur_bg.y(),
+                    TILE_SIZE,
+                    TILE_SIZE,
+                );
+                wincan.copy(tile.texture(), None, cur_tile).unwrap();
+            }
+
+        }
+
+        // Drawing item
+        wincan = barn.printItem(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
+        wincan = farmhs.printItem(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
 
         // Draw player
         wincan.copy(p.texture(), p.src(), player_cam_pos).unwrap();
         wincan.present();
-        
+
     } // end gameloop
 }
 
@@ -174,17 +262,17 @@ fn main() {
  */
 fn roll_credits<T>(
     window: &mut WindowCanvas,
-    tc: TextureCreator<T>,
+    tc: &TextureCreator<T>,
     r: Rect,
 ) -> Result<(), String> {
     // paths for group images
-    let img1 = "src/images/jaysonCredits.png";
-    let img2 = "src/images/JackMCredits.png";
-    let img3 = "src/images/natCredits.png";
-    let img4 = "src/images/jacobCredits.png";
-    let img5 = "src/images/wesleyCredits.png";
-    let img6 = "src/images/jackACredits.png";
-    let img7 = "src/images/brandenCredits.png";
+    let img1 = "src/images/credits/jaysonCredits.png";
+    let img2 = "src/images/credits/JackMCredits.png";
+    let img3 = "src/images/credits/natCredits.png";
+    let img4 = "src/images/credits/jacobCredits.png";
+    let img5 = "src/images/credits/wesleyCredits.png";
+    let img6 = "src/images/credits/jackACredits.png";
+    let img7 = "src/images/credits/brandenCredits.png";
     let images = [img1, img2, img3, img4, img5, img6, img7];
 
     // Iterate through images; fade in and out
