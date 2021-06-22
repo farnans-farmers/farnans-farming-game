@@ -68,7 +68,7 @@ impl<'a> Item<'a> {
                 self.width(),
                 self.height(),
             );
-            win.copy(self.texture(), None, barnSubSet);
+            win.copy(self.texture(), None, barnSubSet).unwrap();
             return win;
         }
         win

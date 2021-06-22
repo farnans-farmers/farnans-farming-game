@@ -72,26 +72,9 @@ fn main() {
     wincan.clear();
 
     // Roll group credits
-    // let _ = roll_credits(&mut wincan, texture_creator, r);
+    // let _ = roll_credits(&mut wincan, &texture_creator, r);
+    roll_credits(&mut wincan, &texture_creator, r).unwrap();
 
-    // paths for group images
-    // let img1 = "images/jaysonCredits.png";
-    // let img2 = "images/JackMCredits.png";
-    // let img3 = "images/natCredits.png";
-    // let img4 = "images/jacobCredits.png";
-    // let img5 = "images/wesleyCredits.png";
-    // let img6 = "images/jackACredits.png";
-    // let img7 = "images/brandenCredits.png";
-    // let images = [img1, img2, img3, img4, img5, img6, img7];
-
-    // // itterate through images and display fade
-    // for img in 0..images.len(){
-    //     let _ = fade(&mut wincan, texture_creator.load_texture(images[img]).unwrap(), r);
-    // }
-    // thread::sleep(Duration::from_millis(300));
-
-    // TODO remove background
-    let temp_bg = texture_creator.load_texture("images/temp_bg.png").unwrap();
     let mut event_pump = sdl_cxt.event_pump().unwrap();
     let mut x_vel = 0;
     let mut y_vel = 0;
@@ -103,7 +86,7 @@ fn main() {
             sub_vec.push(
                 tile::Tile::new(
                     Rect::new((TILE_SIZE as i32)*x,(TILE_SIZE as i32)*y,TILE_SIZE,TILE_SIZE),
-                    texture_creator.load_texture("images/grass.png").unwrap(),
+                    texture_creator.load_texture("src/images/grass.png").unwrap(),
                 )
             );
         }
@@ -118,7 +101,7 @@ fn main() {
             TILE_SIZE,
         ),
         texture_creator
-            .load_texture("images/farmer.png")
+            .load_texture("src/images/farmer.png")
             .unwrap(),
     );
 
@@ -130,7 +113,7 @@ fn main() {
             320,
         ),
         texture_creator
-            .load_texture("images/Barn.png").unwrap(),
+            .load_texture("src/images/Barn.png").unwrap(),
         true,
     );
 
@@ -142,7 +125,7 @@ fn main() {
             320,
         ),
         texture_creator
-            .load_texture("images/house.png").unwrap(),
+            .load_texture("src/images/house.png").unwrap(),
         true,
     );
 
@@ -258,7 +241,7 @@ fn main() {
                     TILE_SIZE,
                     TILE_SIZE,
                 );
-                wincan.copy(tile.texture(), None, cur_tile);
+                wincan.copy(tile.texture(), None, cur_tile).unwrap();
             }
 
         }
@@ -279,17 +262,17 @@ fn main() {
  */
 fn roll_credits<T>(
     window: &mut WindowCanvas,
-    tc: TextureCreator<T>,
+    tc: &TextureCreator<T>,
     r: Rect,
 ) -> Result<(), String> {
     // paths for group images
-    let img1 = "images/jaysonCredits.png";
-    let img2 = "images/JackMCredits.png";
-    let img3 = "images/natCredits.png";
-    let img4 = "images/jacobCredits.png";
-    let img5 = "images/wesleyCredits.png";
-    let img6 = "images/jackACredits.png";
-    let img7 = "images/brandenCredits.png";
+    let img1 = "src/images/credits/jaysonCredits.png";
+    let img2 = "src/images/credits/JackMCredits.png";
+    let img3 = "src/images/credits/natCredits.png";
+    let img4 = "src/images/credits/jacobCredits.png";
+    let img5 = "src/images/credits/wesleyCredits.png";
+    let img6 = "src/images/credits/jackACredits.png";
+    let img7 = "src/images/credits/brandenCredits.png";
     let images = [img1, img2, img3, img4, img5, img6, img7];
 
     // Iterate through images; fade in and out
