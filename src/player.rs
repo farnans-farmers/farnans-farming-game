@@ -17,7 +17,6 @@ pub struct Player<'a> {
 impl<'a> Player<'a> {
 	pub fn new(pos: Rect, texture: Texture<'a>) -> Player {
 		// src selects which part of the character sheet gets
-=======
 		// displayed. We only have one sprite on the sheet for
 		// now
 		let src = Rect::new(0 as i32, 0 as i32, TILE_SIZE, TILE_SIZE);
