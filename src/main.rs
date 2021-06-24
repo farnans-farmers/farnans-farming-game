@@ -225,8 +225,8 @@ fn main() {
 			(0, (BG_W - TILE_SIZE) as i32),
 		);
 
-        if check_collision(&p.getPos(), &farmhs.pos())
-		|| check_collision(&p.getPos(), &barn.pos())
+        if check_collision(&p.get_pos(), &farmhs.pos())
+		|| check_collision(&p.get_pos(), &barn.pos())
         {
             p.stay_still_x(
                 (x_vel, y_vel),
@@ -241,8 +241,8 @@ fn main() {
 
 			(0, (BG_W - TILE_SIZE) as i32),
 		);
-		if check_collision(&p.getPos(), &farmhs.pos())
-		|| check_collision(&p.getPos(), &barn.pos())
+		if check_collision(&p.get_pos(), &farmhs.pos())
+		|| check_collision(&p.get_pos(), &barn.pos())
         {
             p.stay_still_y(
                 (x_vel, y_vel),
@@ -293,8 +293,8 @@ fn main() {
         }
 
         // Drawing item
-        wincan = barn.printItem(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
-        wincan = farmhs.printItem(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
+        wincan = barn.print_item(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
+        wincan = farmhs.print_item(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
 
         // Draw inventory
         inventory.draw(&mut wincan);
