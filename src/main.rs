@@ -5,6 +5,8 @@ mod player;
 mod tile;
 mod item;
 
+mod inventory;
+
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
@@ -93,6 +95,20 @@ fn main() {
         tile_vec.push(sub_vec);
     }
 
+    let inventory_slots: Vec<item::Item> = (0..10).map(|x|item::Item::new(
+        Rect::new(
+            200,
+            200,
+            400,
+            320,
+        ),
+        texture_creator
+            .load_texture("src/images/Barn.png").unwrap(),
+        false,
+    )).collect();
+
+    let mut inventory = inventory::Inventory::new(inventory_slots);
+
     let mut p = player::Player::new(
         Rect::new(
             (BG_W / 2 - TILE_SIZE / 2) as i32,
@@ -161,6 +177,36 @@ fn main() {
         }
         if keystate.contains(&Keycode::D) {
             x_deltav += ACCEL_RATE;
+        }
+        if keystate.contains(&Keycode::Num1){
+            inventory.set_selected(0);
+        }
+        if keystate.contains(&Keycode::Num2){
+            inventory.set_selected(1);
+        }
+        if keystate.contains(&Keycode::Num3){
+            inventory.set_selected(2);
+        }
+        if keystate.contains(&Keycode::Num4){
+            inventory.set_selected(3);
+        }
+        if keystate.contains(&Keycode::Num5){
+            inventory.set_selected(4);
+        }
+        if keystate.contains(&Keycode::Num6){
+            inventory.set_selected(5);
+        }
+        if keystate.contains(&Keycode::Num7){
+            inventory.set_selected(6);
+        }
+        if keystate.contains(&Keycode::Num8){
+            inventory.set_selected(7);
+        }
+        if keystate.contains(&Keycode::Num9){
+            inventory.set_selected(8);
+        }
+        if keystate.contains(&Keycode::Num0){
+            inventory.set_selected(9);
         }
 
         // Update player velocity
@@ -249,6 +295,9 @@ fn main() {
         // Drawing item
         wincan = barn.printItem(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
         wincan = farmhs.printItem(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
+
+        // Draw inventory
+        inventory.draw(&mut wincan);
 
         // Draw player
         wincan.copy(p.texture(), p.src(), player_cam_pos).unwrap();
