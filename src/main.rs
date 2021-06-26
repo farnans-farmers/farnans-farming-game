@@ -1,6 +1,7 @@
 extern crate sdl2;
 
 // Modules
+mod anim;
 mod player;
 mod tile;
 mod item;
