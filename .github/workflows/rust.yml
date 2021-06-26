@@ -16,6 +16,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Ensure latest Rust
+      run: sudo rustup update
     - name: Install SDL2 dependencies
       run: |
         sudo apt-get update
