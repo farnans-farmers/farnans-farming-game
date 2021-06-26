@@ -27,7 +27,7 @@ impl<'a> Player<'a> {
 		}
 	}
 
-	pub fn getPos(&self) -> Rect {
+	pub fn get_pos(&self) -> Rect {
 		self.pos
 	}
 

@@ -56,25 +56,25 @@ impl<'a> Item<'a> {
         Return:
             The updated WindowCanvas
     */
-    pub fn printItem(&self, x: i32, y: i32, w: u32, h: u32, mut win: WindowCanvas) -> WindowCanvas {
+    pub fn print_item(&self, x: i32, y: i32, w: u32, h: u32, mut win: WindowCanvas) -> WindowCanvas {
         let testx = self.x() - x;
         let testy = self.y() - y;
         // Draw barn
         if testx > -(self.width() as i32) && testx < w as i32 &&
             testy > -(self.height() as i32) && testy < h as i32 {
-            let barnSubSet = Rect::new(
+            let barn_sub_set = Rect::new(
                 self.x() - x,
                 self.y() - y,
                 self.width(),
                 self.height(),
             );
-            win.copy(self.texture(), None, barnSubSet).unwrap();
+            win.copy(self.texture(), None, barn_sub_set).unwrap();
             return win;
         }
         win
     }
 
-    pub fn checkForCollision(&self, x: i32, y: i32, w: i32, h: i32) -> bool {
+    pub fn check_for_collision(&self, x: i32, y: i32, w: i32, h: i32) -> bool {
         true
     }
 
