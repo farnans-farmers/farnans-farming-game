@@ -16,6 +16,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install latest stable Rust version
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        default: true
+        override: true
     - name: Install SDL2 dependencies
       run: |
         sudo apt-get update
