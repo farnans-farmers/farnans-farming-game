@@ -1,9 +1,10 @@
 extern crate sdl2;
 
 // Modules
+mod crop;
+mod item;
 mod player;
 mod tile;
-mod item;
 
 mod inventory;
 
@@ -22,29 +23,24 @@ use std::time::Duration;
 
 const VSYNC: bool = true;
 // Camera dimensions
-const CAM_W: u32 = 1280;
-const CAM_H: u32 = 720;
+pub const CAM_W: u32 = 1280;
+pub const CAM_H: u32 = 720;
 // Background dimensions
 const BG_W: u32 = 3000;
 const BG_H: u32 = 3000;
 const TITLE: &str = "Farnan's Farmers";
-pub const TILE_SIZE: u32 = 80;  // Make this public so we can import it elsewhere
+pub const TILE_SIZE: u32 = 80; // Make this public so we can import it elsewhere
 const SPEED_LIMIT: i32 = 5;
 const ACCEL_RATE: i32 = 1;
 
 fn check_collision(a: &Rect, b: &Rect) -> bool {
-	if a.bottom() < b.top()
-		|| a.top() > b.bottom()
-		|| a.right() < b.left()
-		|| a.left() > b.right()
-	{
-		false
-	}
-	else {
-		true
-	}
+    if a.bottom() < b.top() || a.top() > b.bottom() || a.right() < b.left() || a.left() > b.right()
+    {
+        false
+    } else {
+        true
+    }
 }
-
 
 fn main() {
     let sdl_cxt = sdl2::init().unwrap();
@@ -75,37 +71,40 @@ fn main() {
 
     // Roll group credits
     // let _ = roll_credits(&mut wincan, &texture_creator, r);
-    roll_credits(&mut wincan, &texture_creator, r).unwrap();
+    // roll_credits(&mut wincan, &texture_creator, r).unwrap();
 
     let mut event_pump = sdl_cxt.event_pump().unwrap();
     let mut x_vel = 0;
     let mut y_vel = 0;
 
     let mut tile_vec = Vec::new();
-    for x in 0..((BG_W/TILE_SIZE) as i32)+1{
+    for x in 0..((BG_W / TILE_SIZE) as i32) + 1 {
         let mut sub_vec = Vec::new();
-        for y in 0..((BG_H/TILE_SIZE) as i32)+1{
-            sub_vec.push(
-                tile::Tile::new(
-                    Rect::new((TILE_SIZE as i32)*x,(TILE_SIZE as i32)*y,TILE_SIZE,TILE_SIZE),
-                    texture_creator.load_texture("src/images/grass.png").unwrap(),
-                )
-            );
+        for y in 0..((BG_H / TILE_SIZE) as i32) + 1 {
+            sub_vec.push(tile::Tile::new(
+                Rect::new(
+                    (TILE_SIZE as i32) * x,
+                    (TILE_SIZE as i32) * y,
+                    TILE_SIZE,
+                    TILE_SIZE,
+                ),
+                texture_creator
+                    .load_texture("src/images/grass.png")
+                    .unwrap(),
+            ));
         }
         tile_vec.push(sub_vec);
     }
 
-    let inventory_slots: Vec<item::Item> = (0..10).map(|x|item::Item::new(
-        Rect::new(
-            200,
-            200,
-            400,
-            320,
-        ),
-        texture_creator
-            .load_texture("src/images/Barn.png").unwrap(),
-        false,
-    )).collect();
+    let inventory_slots: Vec<item::Item> = (0..10)
+        .map(|x| {
+            item::Item::new(
+                Rect::new(200, 200, 400, 320),
+                texture_creator.load_texture("src/images/Barn.png").unwrap(),
+                false,
+            )
+        })
+        .collect();
 
     let mut inventory = inventory::Inventory::new(inventory_slots);
 
@@ -122,28 +121,64 @@ fn main() {
     );
 
     let barn = item::Item::new(
-        Rect::new(
-            200,
-            200,
-            400,
-            320,
-        ),
-        texture_creator
-            .load_texture("src/images/Barn.png").unwrap(),
+        Rect::new(200, 200, 400, 320),
+        texture_creator.load_texture("src/images/Barn.png").unwrap(),
         true,
     );
 
     let farmhs = item::Item::new(
-        Rect::new(
-            2000,
-            2000,
-            400,
-            320,
-        ),
+        Rect::new(2000, 2000, 400, 320),
         texture_creator
-            .load_texture("src/images/house.png").unwrap(),
+            .load_texture("src/images/house.png")
+            .unwrap(),
         true,
     );
+
+    // TODO testing crop render with placeholder; remove later
+    let mut test_crops: Vec<crop::Crop> = vec![
+        crop::Crop::new(
+            crop::CropType::Carrot,
+            Rect::new(
+                0 * TILE_SIZE as i32,
+                0 * TILE_SIZE as i32,
+                TILE_SIZE,
+                TILE_SIZE,
+            ),
+            texture_creator
+                .load_texture("src/images/CropPlaceholder.png")
+                .unwrap(),
+        ),
+        crop::Crop::new(
+            crop::CropType::Corn,
+            Rect::new(
+                1 * TILE_SIZE as i32,
+                0 * TILE_SIZE as i32,
+                TILE_SIZE,
+                TILE_SIZE,
+            ),
+            texture_creator
+                .load_texture("src/images/CropPlaceholder.png")
+                .unwrap(),
+        ),
+        crop::Crop::new(
+            crop::CropType::Potato,
+            Rect::new(
+                0 * TILE_SIZE as i32,
+                1 * TILE_SIZE as i32,
+                TILE_SIZE,
+                TILE_SIZE,
+            ),
+            texture_creator
+                .load_texture("src/images/CropPlaceholder.png")
+                .unwrap(),
+        ),
+    ];
+
+    // crop 2 should grow, crop 0 should not
+    test_crops.get_mut(2).unwrap().set_water(true);
+    test_crops.get_mut(2).unwrap().grow();
+    test_crops.get_mut(0).unwrap().grow();
+    // TODO remove crop test ^
 
     'gameloop: loop {
         for event in event_pump.poll_iter() {
@@ -178,34 +213,34 @@ fn main() {
         if keystate.contains(&Keycode::D) {
             x_deltav += ACCEL_RATE;
         }
-        if keystate.contains(&Keycode::Num1){
+        if keystate.contains(&Keycode::Num1) {
             inventory.set_selected(0);
         }
-        if keystate.contains(&Keycode::Num2){
+        if keystate.contains(&Keycode::Num2) {
             inventory.set_selected(1);
         }
-        if keystate.contains(&Keycode::Num3){
+        if keystate.contains(&Keycode::Num3) {
             inventory.set_selected(2);
         }
-        if keystate.contains(&Keycode::Num4){
+        if keystate.contains(&Keycode::Num4) {
             inventory.set_selected(3);
         }
-        if keystate.contains(&Keycode::Num5){
+        if keystate.contains(&Keycode::Num5) {
             inventory.set_selected(4);
         }
-        if keystate.contains(&Keycode::Num6){
+        if keystate.contains(&Keycode::Num6) {
             inventory.set_selected(5);
         }
-        if keystate.contains(&Keycode::Num7){
+        if keystate.contains(&Keycode::Num7) {
             inventory.set_selected(6);
         }
-        if keystate.contains(&Keycode::Num8){
+        if keystate.contains(&Keycode::Num8) {
             inventory.set_selected(7);
         }
-        if keystate.contains(&Keycode::Num9){
+        if keystate.contains(&Keycode::Num9) {
             inventory.set_selected(8);
         }
-        if keystate.contains(&Keycode::Num0){
+        if keystate.contains(&Keycode::Num0) {
             inventory.set_selected(9);
         }
 
@@ -218,40 +253,21 @@ fn main() {
         y_vel = (y_vel + y_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
 
         // Update player position
-		// X
-		p.update_pos_x(
-			(x_vel, y_vel),
-
-			(0, (BG_W - TILE_SIZE) as i32),
-		);
+        // X
+        p.update_pos_x((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
 
         if check_collision(&p.get_pos(), &farmhs.pos())
-		|| check_collision(&p.get_pos(), &barn.pos())
+            || check_collision(&p.get_pos(), &barn.pos())
         {
-            p.stay_still_x(
-                (x_vel, y_vel),
-
-                (0, (BG_W - TILE_SIZE) as i32),
-            );
-
+            p.stay_still_x((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
         }
-		//Y
-		p.update_pos_y(
-			(x_vel, y_vel),
-
-			(0, (BG_W - TILE_SIZE) as i32),
-		);
-		if check_collision(&p.get_pos(), &farmhs.pos())
-		|| check_collision(&p.get_pos(), &barn.pos())
+        //Y
+        p.update_pos_y((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
+        if check_collision(&p.get_pos(), &farmhs.pos())
+            || check_collision(&p.get_pos(), &barn.pos())
         {
-            p.stay_still_y(
-                (x_vel, y_vel),
-
-                (0, (BG_W - TILE_SIZE) as i32),
-            );
-
+            p.stay_still_y((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
         }
-
 
         // Determine part of background to draw
         let cur_bg = Rect::new(
@@ -264,32 +280,31 @@ fn main() {
         );
 
         // Convert player map position to be camera-relative
-        let player_cam_pos = Rect::new(
-            p.x() - cur_bg.x(),
-            p.y() - cur_bg.y(),
-            TILE_SIZE,
-            TILE_SIZE,
-        );
+        let player_cam_pos =
+            Rect::new(p.x() - cur_bg.x(), p.y() - cur_bg.y(), TILE_SIZE, TILE_SIZE);
 
         wincan.set_draw_color(Color::BLACK);
         wincan.clear();
 
         // Draw tiles
-        for tile in tile_vec.iter().flatten(){
-            let x_pos = tile.x()-cur_bg.x();
-            let y_pos = tile.y()-cur_bg.y();
+        for tile in tile_vec.iter().flatten() {
+            let x_pos = tile.x() - cur_bg.x();
+            let y_pos = tile.y() - cur_bg.y();
 
             //Don't bother drawing any tiles that are off screen
-            if x_pos > -(TILE_SIZE as i32) && x_pos < (CAM_W as i32) && y_pos > -(TILE_SIZE as i32) && y_pos < (CAM_H as i32){
+            if x_pos > -(TILE_SIZE as i32)
+                && x_pos < (CAM_W as i32)
+                && y_pos > -(TILE_SIZE as i32)
+                && y_pos < (CAM_H as i32)
+            {
                 let cur_tile = Rect::new(
-                    tile.x()-cur_bg.x(),
-                    tile.y()-cur_bg.y(),
+                    tile.x() - cur_bg.x(),
+                    tile.y() - cur_bg.y(),
                     TILE_SIZE,
                     TILE_SIZE,
                 );
                 wincan.copy(tile.texture(), None, cur_tile).unwrap();
             }
-
         }
 
         // Drawing item
@@ -299,10 +314,15 @@ fn main() {
         // Draw inventory
         inventory.draw(&mut wincan);
 
+        // TODO crops will probably be stored with the tile grid
+        // eventually. Change this to loop over that structure then
+        for c in test_crops.iter() {
+            wincan = c.print_crop(cur_bg.x(), cur_bg.y(), wincan);
+        }
+
         // Draw player
         wincan.copy(p.texture(), p.src(), player_cam_pos).unwrap();
         wincan.present();
-
     } // end gameloop
 }
 
