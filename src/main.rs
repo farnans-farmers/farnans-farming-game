@@ -3,6 +3,7 @@ extern crate sdl2;
 // Modules
 mod crop;
 mod item;
+mod anim;
 mod player;
 mod tile;
 
