@@ -22,6 +22,8 @@ use std::collections::HashSet;
 use std::thread;
 use std::time::Duration;
 
+use crate::player::{PLAYER_HEIGHT, PLAYER_WIDTH};
+
 const VSYNC: bool = true;
 // Camera dimensions
 pub const CAM_W: u32 = 1280;
@@ -111,10 +113,10 @@ fn main() {
 
     let mut p = player::Player::new(
         Rect::new(
-            (BG_W / 2 - TILE_SIZE / 2) as i32,
-            (BG_H / 2 - TILE_SIZE / 2) as i32,
-            TILE_SIZE,
-            TILE_SIZE,
+            (BG_W / 2 - PLAYER_WIDTH / 2) as i32,
+            (BG_H / 2 - PLAYER_HEIGHT / 2) as i32,
+            PLAYER_WIDTH,
+            PLAYER_HEIGHT,
         ),
         texture_creator
             .load_texture("src/images/farmer.png")
@@ -253,6 +255,9 @@ fn main() {
 
         y_vel = (y_vel + y_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
 
+        // Update player animation status based on movement
+        p.set_moving(x_vel != 0 || y_vel != 0);
+
         // Update player position
         // X
         p.update_pos_x((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
@@ -282,7 +287,7 @@ fn main() {
 
         // Convert player map position to be camera-relative
         let player_cam_pos =
-            Rect::new(p.x() - cur_bg.x(), p.y() - cur_bg.y(), TILE_SIZE, TILE_SIZE);
+            Rect::new(p.x() - cur_bg.x(), p.y() - cur_bg.y(), PLAYER_WIDTH, PLAYER_HEIGHT);
 
         wincan.set_draw_color(Color::BLACK);
         wincan.clear();
@@ -322,7 +327,8 @@ fn main() {
         }
 
         // Draw player
-        wincan.copy(p.texture(), p.src(), player_cam_pos).unwrap();
+        let src = p.src();
+        wincan.copy(p.texture(), src, player_cam_pos).unwrap();
         wincan.present();
     } // end gameloop
 }
