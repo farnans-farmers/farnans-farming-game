@@ -22,7 +22,7 @@ use std::collections::HashSet;
 use std::thread;
 use std::time::Duration;
 
-use crate::player::{PLAYER_HEIGHT, PLAYER_WIDTH};
+use crate::player::{Direction, PLAYER_HEIGHT, PLAYER_WIDTH};
 
 const VSYNC: bool = true;
 // Camera dimensions
@@ -249,13 +249,23 @@ fn main() {
 
         // Update player velocity
         x_deltav = resist(x_vel, x_deltav);
-
         y_deltav = resist(y_vel, y_deltav);
         x_vel = (x_vel + x_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
-
         y_vel = (y_vel + y_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
 
         // Update player animation status based on movement
+        let player_dir = if x_vel > 0 {
+            Some(Direction::Right)
+        } else if x_vel < 0 {
+            Some(Direction::Left)
+        } else if y_vel < 0 {
+            Some(Direction::Up)
+        } else if y_vel > 0 {
+            Some(Direction::Down)
+        } else {
+            None
+        };
+        p.set_direction(player_dir);
         p.set_moving(x_vel != 0 || y_vel != 0);
 
         // Update player position
