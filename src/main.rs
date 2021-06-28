@@ -203,23 +203,18 @@ fn main() {
 
         let mut x_deltav = 0;
         let mut y_deltav = 0;
-        let mut player_dir = None;
         // Change directions using WASD
         if keystate.contains(&Keycode::W) {
             y_deltav -= ACCEL_RATE;
-            player_dir = Some(Direction::Up);
         }
         if keystate.contains(&Keycode::A) {
             x_deltav -= ACCEL_RATE;
-            player_dir = Some(Direction::Left);
         }
         if keystate.contains(&Keycode::S) {
             y_deltav += ACCEL_RATE;
-            player_dir = Some(Direction::Down);
         }
         if keystate.contains(&Keycode::D) {
             x_deltav += ACCEL_RATE;
-            player_dir = Some(Direction::Right);
         }
         if keystate.contains(&Keycode::Num1) {
             inventory.set_selected(0);
