@@ -3,6 +3,7 @@ extern crate sdl2;
 // Modules
 mod crop;
 mod item;
+mod anim;
 mod player;
 mod tile;
 
@@ -20,6 +21,8 @@ use sdl2::render::WindowCanvas;
 use std::collections::HashSet;
 use std::thread;
 use std::time::Duration;
+
+use crate::player::{Direction, PLAYER_HEIGHT, PLAYER_WIDTH};
 
 const VSYNC: bool = true;
 // Camera dimensions
@@ -110,10 +113,10 @@ fn main() {
 
     let mut p = player::Player::new(
         Rect::new(
-            (BG_W / 2 - TILE_SIZE / 2) as i32,
-            (BG_H / 2 - TILE_SIZE / 2) as i32,
-            TILE_SIZE,
-            TILE_SIZE,
+            (BG_W / 2 - PLAYER_WIDTH / 2) as i32,
+            (BG_H / 2 - PLAYER_HEIGHT / 2) as i32,
+            PLAYER_WIDTH,
+            PLAYER_HEIGHT,
         ),
         texture_creator
             .load_texture("src/images/farmer.png")
@@ -246,11 +249,24 @@ fn main() {
 
         // Update player velocity
         x_deltav = resist(x_vel, x_deltav);
-
         y_deltav = resist(y_vel, y_deltav);
         x_vel = (x_vel + x_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
-
         y_vel = (y_vel + y_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
+
+        // Update player animation status based on movement
+        let player_dir = if x_vel > 0 {
+            Some(Direction::Right)
+        } else if x_vel < 0 {
+            Some(Direction::Left)
+        } else if y_vel < 0 {
+            Some(Direction::Up)
+        } else if y_vel > 0 {
+            Some(Direction::Down)
+        } else {
+            None
+        };
+        p.set_direction(player_dir);
+        p.set_moving(x_vel != 0 || y_vel != 0);
 
         // Update player position
         // X
@@ -281,7 +297,7 @@ fn main() {
 
         // Convert player map position to be camera-relative
         let player_cam_pos =
-            Rect::new(p.x() - cur_bg.x(), p.y() - cur_bg.y(), TILE_SIZE, TILE_SIZE);
+            Rect::new(p.x() - cur_bg.x(), p.y() - cur_bg.y(), PLAYER_WIDTH, PLAYER_HEIGHT);
 
         wincan.set_draw_color(Color::BLACK);
         wincan.clear();
@@ -321,7 +337,8 @@ fn main() {
         }
 
         // Draw player
-        wincan.copy(p.texture(), p.src(), player_cam_pos).unwrap();
+        let src = p.src();
+        wincan.copy(p.texture(), src, player_cam_pos).unwrap();
         wincan.present();
     } // end gameloop
 }

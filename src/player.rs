@@ -1,19 +1,38 @@
+use std::time::{Duration, Instant};
+
 // Imports
 use sdl2::rect::Rect;
 use sdl2::render::Texture;
 
-// Import constant from main
-use crate::TILE_SIZE;
+use crate::anim::Animation;
+
+// Player sprites are 54x90 px.
+pub const PLAYER_WIDTH: u32 = 54;
+pub const PLAYER_HEIGHT: u32 = 90;
+/// PLAYER_EFF_HEIGHT_SKIP is the number of pixels to skip when computing
+/// collision.
+const PLAYER_EFF_HEIGHT_SKIP: i32 = 10;
+
+/// Sprite directions.
+pub enum Direction {
+	Down,
+	Left,
+	Right,
+	Up,
+}
 
 /// Player struct
 pub struct Player<'a> {
 	/// Rectangle to manage player position
 	pos: Rect,
-	/// Rectangle to crop the sprite sheet to
-	/// the appropriate tile
-	src: Rect,
+	/// Animation spritesheet
+	src: Vec<Animation<Rect>>,
 	/// Texture of sprite sheet
 	texture: Texture<'a>,
+	/// Direction the player is facing
+	dir: Direction,
+	/// Whether the player is moving
+	moving: bool,
 }
 
 // TODO implement player animation
@@ -24,20 +43,31 @@ impl<'a> Player<'a> {
 	/// * `pos` - Position of the player. 
 	/// * `texture` - Sprite sheet texture
 	pub fn new(pos: Rect, texture: Texture<'a>) -> Player {
-		// src selects which part of the character sheet gets
-		// displayed. We only have one sprite on the sheet for
-		// now
-		let src = Rect::new(0 as i32, 0 as i32, TILE_SIZE, TILE_SIZE);
+		// Derive the number of frames from the size of the texture.
+		let sz = texture.query();
+		let bounds = Rect::new(0, 0, sz.width, sz.height);
+		let dur = Duration::from_secs_f64(1.0/30.0);
+		let mut anims = Vec::with_capacity(4);
+		let now = Instant::now();
+		for i in 0..4 {
+			let anim = Animation::from_sheet(&bounds, i*PLAYER_HEIGHT as i32, PLAYER_WIDTH, PLAYER_HEIGHT, dur, now);
+			anims.push(anim);
+		}
 		Player{
 			pos,
-			src,
+			src: anims,
 			texture,
+			dir: Direction::Down,
+			moving: false,
 		}
 	}
 
 	/// Get player position `Rect`
 	pub fn get_pos(&self) -> Rect {
-		self.pos
+		let mut pos = self.pos;
+		pos.set_y(pos.y + PLAYER_EFF_HEIGHT_SKIP);
+		pos.set_height((pos.height() as i32 - PLAYER_EFF_HEIGHT_SKIP) as u32);
+		pos
 	}
 
 	/// Get left bound of player
@@ -100,9 +130,35 @@ impl<'a> Player<'a> {
 		self.pos.set_y((self.pos.y() - vel.1).clamp(y_bounds.0, y_bounds.1));
 	}
 
+	/// Set the player's sprite facing direction.
+	pub fn set_direction(&mut self, dir: Option<Direction>) {
+		if let Some(dir) = dir {
+			self.dir = dir;
+		}
+	}
+
+	/// Set the player's movement animation status
+	pub fn set_moving(&mut self, moving: bool) {
+		self.moving = moving;
+	}
+
 	/// Get `src` of player
-	pub fn src(&self) -> Rect {
-		self.src
+	pub fn src(&mut self) -> Rect {
+		let k = match self.dir {
+			Direction::Down => 0,
+			Direction::Left => 1,
+			Direction::Right => 2,
+			Direction::Up => 3,
+		};
+		let src = &mut self.src[k];
+		// Animate if the player is moving *or* if the animation hasn't looped
+		// yet, so that the sprite doesn't jerk downward when stopping.
+		if self.moving || src.current_index() != 0 {
+			*src.tick()
+		} else {
+			src.reset(Instant::now());
+			*src.current()
+		}
 	}
 
 	/// Get texture of player
