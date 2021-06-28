@@ -13,16 +13,26 @@ pub const PLAYER_HEIGHT: u32 = 90;
 /// collision.
 const PLAYER_EFF_HEIGHT_SKIP: i32 = 10;
 
+/// Sprite directions.
+pub enum Direction {
+	Down,
+	Left,
+	Right,
+	Up,
+}
+
 /// Player struct
 pub struct Player<'a> {
 	/// Rectangle to manage player position
 	pos: Rect,
 	/// Animation spritesheet
-	src: Animation<Rect>,
+	src: Vec<Animation<Rect>>,
 	/// Texture of sprite sheet
 	texture: Texture<'a>,
+	/// Direction the player is facing
+	dir: Direction,
 	/// Whether the player is moving
-	moving: bool
+	moving: bool,
 }
 
 // TODO implement player animation
@@ -37,12 +47,18 @@ impl<'a> Player<'a> {
 		let sz = texture.query();
 		let bounds = Rect::new(0, 0, sz.width, sz.height);
 		let dur = Duration::from_secs_f64(1.0/30.0);
-		let anim = Animation::from_sheet(&bounds, 0, PLAYER_WIDTH, PLAYER_HEIGHT, dur, Instant::now());
+		let mut anims = Vec::with_capacity(4);
+		let now = Instant::now();
+		for i in 0..4 {
+			let anim = Animation::from_sheet(&bounds, i*PLAYER_HEIGHT as i32, PLAYER_WIDTH, PLAYER_HEIGHT, dur, now);
+			anims.push(anim);
+		}
 		Player{
 			pos,
-			src: anim,
+			src: anims,
 			texture,
-			moving: false
+			dir: Direction::Down,
+			moving: false,
 		}
 	}
 
@@ -114,6 +130,13 @@ impl<'a> Player<'a> {
 		self.pos.set_y((self.pos.y() - vel.1).clamp(y_bounds.0, y_bounds.1));
 	}
 
+	/// Set the player's sprite facing direction.
+	pub fn set_direction(&mut self, dir: Option<Direction>) {
+		if let Some(dir) = dir {
+			self.dir = dir;
+		}
+	}
+
 	/// Set the player's movement animation status
 	pub fn set_moving(&mut self, moving: bool) {
 		self.moving = moving;
@@ -121,13 +144,20 @@ impl<'a> Player<'a> {
 
 	/// Get `src` of player
 	pub fn src(&mut self) -> Rect {
+		let k = match self.dir {
+			Direction::Down => 0,
+			Direction::Left => 1,
+			Direction::Right => 2,
+			Direction::Up => 3,
+		};
+		let src = &mut self.src[k];
 		// Animate if the player is moving *or* if the animation hasn't looped
 		// yet, so that the sprite doesn't jerk downward when stopping.
-		if self.moving || self.src.current_index() != 0 {
-			*self.src.tick()
+		if self.moving || src.current_index() != 0 {
+			*src.tick()
 		} else {
-			self.src.reset(Instant::now());
-			*self.src.current()
+			src.reset(Instant::now());
+			*src.current()
 		}
 	}
 

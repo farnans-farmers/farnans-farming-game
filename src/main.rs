@@ -22,7 +22,7 @@ use std::collections::HashSet;
 use std::thread;
 use std::time::Duration;
 
-use crate::player::{PLAYER_HEIGHT, PLAYER_WIDTH};
+use crate::player::{Direction, PLAYER_HEIGHT, PLAYER_WIDTH};
 
 const VSYNC: bool = true;
 // Camera dimensions
@@ -203,18 +203,23 @@ fn main() {
 
         let mut x_deltav = 0;
         let mut y_deltav = 0;
+        let mut player_dir = None;
         // Change directions using WASD
         if keystate.contains(&Keycode::W) {
             y_deltav -= ACCEL_RATE;
+            player_dir = Some(Direction::Up);
         }
         if keystate.contains(&Keycode::A) {
             x_deltav -= ACCEL_RATE;
+            player_dir = Some(Direction::Left);
         }
         if keystate.contains(&Keycode::S) {
             y_deltav += ACCEL_RATE;
+            player_dir = Some(Direction::Down);
         }
         if keystate.contains(&Keycode::D) {
             x_deltav += ACCEL_RATE;
+            player_dir = Some(Direction::Right);
         }
         if keystate.contains(&Keycode::Num1) {
             inventory.set_selected(0);
@@ -249,13 +254,23 @@ fn main() {
 
         // Update player velocity
         x_deltav = resist(x_vel, x_deltav);
-
         y_deltav = resist(y_vel, y_deltav);
         x_vel = (x_vel + x_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
-
         y_vel = (y_vel + y_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
 
         // Update player animation status based on movement
+        let player_dir = if x_vel > 0 {
+            Some(Direction::Right)
+        } else if x_vel < 0 {
+            Some(Direction::Left)
+        } else if y_vel < 0 {
+            Some(Direction::Up)
+        } else if y_vel > 0 {
+            Some(Direction::Down)
+        } else {
+            None
+        };
+        p.set_direction(player_dir);
         p.set_moving(x_vel != 0 || y_vel != 0);
 
         // Update player position
