@@ -35,8 +35,6 @@ const BG_W: u32 = 3000;
 const BG_H: u32 = 3000;
 const TITLE: &str = "Farnan's Farmers";
 pub const TILE_SIZE: u32 = 80; // Make this public so we can import it elsewhere
-const SPEED_LIMIT: i32 = 5;
-const ACCEL_RATE: i32 = 1;
 
 fn check_collision(a: &Rect, b: &Rect) -> bool {
     if a.bottom() < b.top() || a.top() > b.bottom() || a.right() < b.left() || a.left() > b.right()
@@ -79,8 +77,6 @@ fn main() {
     // roll_credits(&mut wincan, &texture_creator, r).unwrap();
 
     let mut event_pump = sdl_cxt.event_pump().unwrap();
-    let mut x_vel = 0;
-    let mut y_vel = 0;
 
     let mut tile_vec = Vec::new();
     for x in 0..((BG_W / TILE_SIZE) as i32) + 1 {
@@ -268,20 +264,20 @@ fn main() {
             .filter_map(Keycode::from_scancode)
             .collect();
 
-        let mut x_deltav = 0;
-        let mut y_deltav = 0;
+        let mut x_deltav_f: f32 = 0.0;
+        let mut y_deltav_f: f32 = 0.0;
         // Change directions using WASD
         if keystate.contains(&Keycode::W) {
-            y_deltav -= ACCEL_RATE;
+            y_deltav_f -= player::ACCEL_RATE;
         }
         if keystate.contains(&Keycode::A) {
-            x_deltav -= ACCEL_RATE;
+            x_deltav_f -= player::ACCEL_RATE;
         }
         if keystate.contains(&Keycode::S) {
-            y_deltav += ACCEL_RATE;
+            y_deltav_f += player::ACCEL_RATE;
         }
         if keystate.contains(&Keycode::D) {
-            x_deltav += ACCEL_RATE;
+            x_deltav_f += player::ACCEL_RATE;
         }
         if keystate.contains(&Keycode::Num1) {
             inventory.set_selected(0);
@@ -314,47 +310,31 @@ fn main() {
             inventory.set_selected(9);
         }
 
-        // Update player velocity
-        x_deltav = resist(x_vel, x_deltav);
-        y_deltav = resist(y_vel, y_deltav);
-        x_vel = (x_vel + x_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
-        y_vel = (y_vel + y_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
 
-        // Update player animation status based on movement
-        let player_dir = if x_vel > 0 {
-            Some(Direction::Right)
-        } else if x_vel < 0 {
-            Some(Direction::Left)
-        } else if y_vel < 0 {
-            Some(Direction::Up)
-        } else if y_vel > 0 {
-            Some(Direction::Down)
-        } else {
-            None
-        };
-        p.set_direction(player_dir);
-        p.set_moving(x_vel != 0 || y_vel != 0);
+        let player_vel = p.set_speed((x_deltav_f,y_deltav_f));
+
+        p.set_direction(player_vel);
 
         // Update player position
         // X
-        p.update_pos_x((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
+        p.update_pos_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
 
         for item in &item_vec {
             if check_collision(&p.get_pos(), &item.pos()){
-                p.stay_still_x((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
+                p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
             }
         }
         /*if check_collision(&p.get_pos(), &farmhs.pos())
             || check_collision(&p.get_pos(), &barn.pos())
         {
-            p.stay_still_x((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
+            p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
         }*/
 
         //Y
-        p.update_pos_y((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
+        p.update_pos_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
         for item in &item_vec {
             if check_collision(&p.get_pos(), &item.pos()){
-                p.stay_still_y((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
+                p.stay_still_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
             }
         }
 
@@ -471,18 +451,4 @@ fn fade(window: &mut WindowCanvas, ms: Texture, r: Rect) -> Result<(), String> {
         i = i + 2;
     }
     Ok(())
-}
-
-fn resist(vel: i32, deltav: i32) -> i32 {
-    if deltav == 0 {
-        if vel > 0 {
-            -1
-        } else if vel < 0 {
-            1
-        } else {
-            deltav
-        }
-    } else {
-        deltav
-    }
 }
