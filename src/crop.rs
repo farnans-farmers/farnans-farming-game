@@ -4,6 +4,8 @@ use sdl2::render::{Texture, WindowCanvas};
 
 // Import constant from main
 use crate::{CAM_H, CAM_W, TILE_SIZE};
+use std::str::FromStr;
+use std::string::ParseError;
 
 /// Crop type enum
 pub enum CropType {
@@ -28,6 +30,10 @@ pub struct Crop<'a> {
 	/// Boolean to hold whether plant has been
 	/// watered or not.
 	watered: bool,
+
+	tex_path: String,
+
+	t: CropType,
 }
 // TODO add crop genetics
 
@@ -41,7 +47,7 @@ impl<'a> Crop<'a> {
 	/// * `t` - Enum to select type of crop
 	/// * `pos` - Position of the crop. Make sure `pos % TILE_SIZE == 0`
 	/// * `texture` - Sprite sheet texture
-	pub fn new(t: CropType, pos: Rect, texture: Texture<'a>) -> Crop {
+	pub fn new(t: CropType, pos: Rect, texture: Texture<'a>, tex_path: String) -> Crop {
 		let (x, y) = match t {
 			CropType::Carrot => (0, 0),
 			CropType::Corn => (0, TILE_SIZE),
@@ -51,11 +57,13 @@ impl<'a> Crop<'a> {
 
 		let src = Rect::new(x as i32, y as i32, TILE_SIZE, TILE_SIZE);
 		Crop {
+			t,
 			pos,
 			stage: 0 as u8,
 			src,
 			texture,
 			watered: false,
+			tex_path,
 		}
 	}
 
@@ -137,5 +145,31 @@ impl<'a> Crop<'a> {
 	/// Get a Crop's watered status
 	pub fn watered(&self) -> bool {
 		self.watered
+	}
+
+	pub fn tex_path(&self) -> &String { &self.tex_path }
+
+	pub fn CropType(&self) -> &str {
+		match self.t {
+			CropType::Carrot => "Carrot",
+			CropType::Corn => "Corn",
+			CropType::Lettuce => "Lettuce",
+			CropType::Potato => "Potato",
+		}
+	}
+
+}
+
+impl FromStr for CropType {
+	type Err = ();
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"Carrot" => Ok(CropType::Carrot),
+			"Corn" => Ok(CropType::Corn),
+			"Lettuce" => Ok(CropType::Lettuce),
+			"Potato" => Ok(CropType::Potato),
+			_ => Err(()),
+		}
 	}
 }
