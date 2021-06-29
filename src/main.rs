@@ -35,6 +35,8 @@ const BG_W: u32 = 3000;
 const BG_H: u32 = 3000;
 const TITLE: &str = "Farnan's Farmers";
 pub const TILE_SIZE: u32 = 80; // Make this public so we can import it elsewhere
+const SPEED_LIMIT: i32 = 5;
+const ACCEL_RATE: i32 = 1;
 
 fn check_collision(a: &Rect, b: &Rect) -> bool {
     if a.bottom() < b.top() || a.top() > b.bottom() || a.right() < b.left() || a.left() > b.right()
@@ -77,6 +79,8 @@ fn main() {
     // roll_credits(&mut wincan, &texture_creator, r).unwrap();
 
     let mut event_pump = sdl_cxt.event_pump().unwrap();
+    let mut x_vel = 0;
+    let mut y_vel = 0;
 
     let mut tile_vec = Vec::new();
     for x in 0..((BG_W / TILE_SIZE) as i32) + 1 {
@@ -97,14 +101,17 @@ fn main() {
         tile_vec.push(sub_vec);
     }
 
+    let mut menu_location = 0 ;
+
     let inventory_slots: Vec<item::Item> = (0..10)
         .map(|x| {
             item::Item::new(
-                Rect::new(200, 200, 400, 320),
-                texture_creator.load_texture("src/images/Barn.png").unwrap(),
-                "src/images/Barn.png".parse().unwrap(),
+                Rect::new(x*32 , 0 , 32, 32),
+                texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
+                "src/images/itemMenu.png".parse().unwrap(),
                 false,
             )
+
         })
         .collect();
 
@@ -225,6 +232,8 @@ fn main() {
     crop_vec.get_mut(0).unwrap().grow();
     // TODO remove crop test ^
 
+    // variable for sleep menu
+    let mut in_menu = false;
     'gameloop: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -264,77 +273,120 @@ fn main() {
             .filter_map(Keycode::from_scancode)
             .collect();
 
-        let mut x_deltav_f: f32 = 0.0;
-        let mut y_deltav_f: f32 = 0.0;
-        // Change directions using WASD
-        if keystate.contains(&Keycode::W) {
-            y_deltav_f -= player::ACCEL_RATE;
+        let mut x_deltav = 0;
+        let mut y_deltav = 0;
+
+        if in_menu {
+            if keystate.contains(&Keycode::Y) {
+                println!("Yes");
+                for c in 1..crop_vec.len() {
+                    crop_vec[c].grow();
+                }
+                in_menu = false;
+            }
+            if keystate.contains(&Keycode::N) {
+                println!("No");
+                in_menu = false;
+            }
         }
-        if keystate.contains(&Keycode::A) {
-            x_deltav_f -= player::ACCEL_RATE;
-        }
-        if keystate.contains(&Keycode::S) {
-            y_deltav_f += player::ACCEL_RATE;
-        }
-        if keystate.contains(&Keycode::D) {
-            x_deltav_f += player::ACCEL_RATE;
-        }
-        if keystate.contains(&Keycode::Num1) {
-            inventory.set_selected(0);
-        }
-        if keystate.contains(&Keycode::Num2) {
-            inventory.set_selected(1);
-        }
-        if keystate.contains(&Keycode::Num3) {
-            inventory.set_selected(2);
-        }
-        if keystate.contains(&Keycode::Num4) {
-            inventory.set_selected(3);
-        }
-        if keystate.contains(&Keycode::Num5) {
-            inventory.set_selected(4);
-        }
-        if keystate.contains(&Keycode::Num6) {
-            inventory.set_selected(5);
-        }
-        if keystate.contains(&Keycode::Num7) {
-            inventory.set_selected(6);
-        }
-        if keystate.contains(&Keycode::Num8) {
-            inventory.set_selected(7);
-        }
-        if keystate.contains(&Keycode::Num9) {
-            inventory.set_selected(8);
-        }
-        if keystate.contains(&Keycode::Num0) {
-            inventory.set_selected(9);
+
+        else {
+            // Change directions using WASD
+            if keystate.contains(&Keycode::W) {
+                y_deltav -= ACCEL_RATE;
+            }
+            if keystate.contains(&Keycode::A) {
+                x_deltav -= ACCEL_RATE;
+            }
+            if keystate.contains(&Keycode::S) {
+                y_deltav += ACCEL_RATE;
+            }
+            if keystate.contains(&Keycode::D) {
+                x_deltav += ACCEL_RATE;
+            }
+
+            if keystate.contains(&Keycode::Num1) {
+                inventory.set_selected(0);
+            }
+            if keystate.contains(&Keycode::Num2) {
+                inventory.set_selected(1);
+            }
+            if keystate.contains(&Keycode::Num3) {
+                inventory.set_selected(2);
+            }
+            if keystate.contains(&Keycode::Num4) {
+                inventory.set_selected(3);
+            }
+            if keystate.contains(&Keycode::Num5) {
+                inventory.set_selected(4);
+            }
+            if keystate.contains(&Keycode::Num6) {
+                inventory.set_selected(5);
+            }
+            if keystate.contains(&Keycode::Num7) {
+                inventory.set_selected(6);
+            }
+            if keystate.contains(&Keycode::Num8) {
+                inventory.set_selected(7);
+            }
+            if keystate.contains(&Keycode::Num9) {
+                inventory.set_selected(8);
+            }
+            if keystate.contains(&Keycode::Num0) {
+                inventory.set_selected(9);
+            }
         }
 
 
-        let player_vel = p.set_speed((x_deltav_f,y_deltav_f));
+        // Update player velocity
+        x_deltav = resist(x_vel, x_deltav);
+        y_deltav = resist(y_vel, y_deltav);
+        x_vel = (x_vel + x_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
+        y_vel = (y_vel + y_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
 
-        p.set_direction(player_vel);
+        // Update player animation status based on movement
+        let player_dir = if x_vel > 0 {
+            Some(Direction::Right)
+        } else if x_vel < 0 {
+            Some(Direction::Left)
+        } else if y_vel < 0 {
+            Some(Direction::Up)
+        } else if y_vel > 0 {
+            Some(Direction::Down)
+        } else {
+            None
+        };
+        p.set_direction(player_dir);
+        p.set_moving(x_vel != 0 || y_vel != 0);
 
         // Update player position
         // X
-        p.update_pos_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
+        p.update_pos_x((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
 
         for item in &item_vec {
-            if check_collision(&p.get_pos(), &item.pos()){
-                p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-            }
+            if check_collision(&p.get_pos(), &item.pos()) { 
+                p.stay_still_x((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
+                if (item.tex_path() == "src/images/house.png") {
+                    in_menu = true;
+
+                }
+
+            } 
         }
         /*if check_collision(&p.get_pos(), &farmhs.pos())
             || check_collision(&p.get_pos(), &barn.pos())
         {
-            p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
+            p.stay_still_x((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
         }*/
 
         //Y
-        p.update_pos_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
+        p.update_pos_y((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
         for item in &item_vec {
             if check_collision(&p.get_pos(), &item.pos()){
-                p.stay_still_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
+                p.stay_still_y((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
+                if (item.tex_path() == "src/images/house.png") {
+                    in_menu = true;
+                }
             }
         }
 
@@ -381,8 +433,7 @@ fn main() {
             wincan = item.print_item(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
         }
 
-        // Draw inventory
-        inventory.draw(&mut wincan);
+
 
         // TODO crops will probably be stored with the tile grid
         // eventually. Change this to loop over that structure then
@@ -393,12 +444,24 @@ fn main() {
         // Draw player
         let src = p.src();
         wincan.copy(p.texture(), src, player_cam_pos).unwrap();
+
+        // Draw inventory
+        inventory.draw(&mut wincan);
+  
+        if in_menu {
+            
+            let sleep_box = texture_creator.load_texture("src/images/sleep.png").unwrap();
+            wincan.copy(&sleep_box, None, Rect::new(400, 400, 600, 180)).unwrap();
+        }
+
+
         wincan.present();
     } // end gameloop
+
 }
 
 /**
- * Method to display team credits
+ * Method to display team creditsF
  */
 fn roll_credits<T>(
     window: &mut WindowCanvas,
@@ -451,4 +514,18 @@ fn fade(window: &mut WindowCanvas, ms: Texture, r: Rect) -> Result<(), String> {
         i = i + 2;
     }
     Ok(())
+}
+
+fn resist(vel: i32, deltav: i32) -> i32 {
+    if deltav == 0 {
+        if vel > 0 {
+            -1
+        } else if vel < 0 {
+            1
+        } else {
+            deltav
+        }
+    } else {
+        deltav
+    }
 }
