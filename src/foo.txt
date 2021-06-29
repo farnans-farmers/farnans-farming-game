@@ -1,5 +1,5 @@
 item;200;200;400;320;src/images/Barn.png;true
 item;2000;2000;400;320;src/images/house.png;true
 crop;Carrot;0;0;src/images/CropPlaceholder.png
-crop;Corn;6400;0;src/images/CropPlaceholder.png
-crop;Potato;0;6400;src/images/CropPlaceholder.png
+crop;Corn;1;0;src/images/CropPlaceholder.png
+crop;Potato;0;1;src/images/CropPlaceholder.png

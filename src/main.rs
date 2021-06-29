@@ -249,8 +249,8 @@ fn main() {
                         }
                     }
                     for crop in crop_vec {
-                        let mut output = "crop;".to_owned() + &crop.CropType() + ";" + &crop.x().to_string()
-                            + ";" + &crop.y().to_string() + ";" + &crop.tex_path() + "\n";
+                        let mut output = "crop;".to_owned() + &crop.CropType() + ";" + &(crop.x()/TILE_SIZE as i32).to_string()
+                            + ";" + &(crop.y()/TILE_SIZE as i32).to_string() + ";" + &crop.tex_path() + "\n";
                         match file.write_all(output.as_ref()) {
                             Err(why) => panic!("couldn't write to foo.txt: {}", why),
                             Ok(_) => println!("successfully wrote crop to foo.txt"),
