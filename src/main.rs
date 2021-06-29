@@ -35,8 +35,8 @@ const BG_W: u32 = 3000;
 const BG_H: u32 = 3000;
 const TITLE: &str = "Farnan's Farmers";
 pub const TILE_SIZE: u32 = 80; // Make this public so we can import it elsewhere
-const SPEED_LIMIT: i32 = 5;
-const ACCEL_RATE: i32 = 1;
+const SPEED_LIMIT: f32 = 5.0;
+const ACCEL_RATE: f32 = 1.0;
 
 fn check_collision(a: &Rect, b: &Rect) -> bool {
     if a.bottom() < b.top() || a.top() > b.bottom() || a.right() < b.left() || a.left() > b.right()
@@ -79,8 +79,8 @@ fn main() {
     // roll_credits(&mut wincan, &texture_creator, r).unwrap();
 
     let mut event_pump = sdl_cxt.event_pump().unwrap();
-    let mut x_vel = 0;
-    let mut y_vel = 0;
+    let mut x_vel_f: f32 = 0.0;
+    let mut y_vel_f: f32 = 0.0;
 
     let mut tile_vec = Vec::new();
     for x in 0..((BG_W / TILE_SIZE) as i32) + 1 {
@@ -268,20 +268,20 @@ fn main() {
             .filter_map(Keycode::from_scancode)
             .collect();
 
-        let mut x_deltav = 0;
-        let mut y_deltav = 0;
+        let mut x_deltav_f: f32 = 0.0;
+        let mut y_deltav_f: f32 = 0.0;
         // Change directions using WASD
         if keystate.contains(&Keycode::W) {
-            y_deltav -= ACCEL_RATE;
+            y_deltav_f -= ACCEL_RATE;
         }
         if keystate.contains(&Keycode::A) {
-            x_deltav -= ACCEL_RATE;
+            x_deltav_f -= ACCEL_RATE;
         }
         if keystate.contains(&Keycode::S) {
-            y_deltav += ACCEL_RATE;
+            y_deltav_f += ACCEL_RATE;
         }
         if keystate.contains(&Keycode::D) {
-            x_deltav += ACCEL_RATE;
+            x_deltav_f += ACCEL_RATE;
         }
         if keystate.contains(&Keycode::Num1) {
             inventory.set_selected(0);
@@ -315,12 +315,24 @@ fn main() {
         }
 
         // Update player velocity
-        x_deltav = resist(x_vel, x_deltav);
+        x_deltav_f = resist(x_vel_f, x_deltav_f);
+        y_deltav_f = resist(y_vel_f, y_deltav_f);
 
-        y_deltav = resist(y_vel, y_deltav);
-        x_vel = (x_vel + x_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
+        x_vel_f = (x_vel_f + x_deltav_f as f32).clamp(-SPEED_LIMIT, SPEED_LIMIT);
+        y_vel_f = (y_vel_f + y_deltav_f as f32).clamp(-SPEED_LIMIT, SPEED_LIMIT);
 
-        y_vel = (y_vel + y_deltav).clamp(-SPEED_LIMIT, SPEED_LIMIT);
+        let speed = (x_vel_f*x_vel_f + y_vel_f*y_vel_f).sqrt();
+        if speed > 0.0 && x_vel_f != 0.0 && y_vel_f != 0.0{
+            let angle: f32 = (y_vel_f/x_vel_f).abs().atan();
+            let kx = angle.cos() * SPEED_LIMIT ;
+            let ky = angle.sin() * SPEED_LIMIT;
+
+            x_vel_f = x_vel_f.clamp(-kx,kx);
+            y_vel_f = y_vel_f.clamp(-ky,ky);
+        }
+        let x_vel = x_vel_f as i32;
+        let y_vel = y_vel_f as i32;
+
 
         // Update player animation status based on movement
         let player_dir = if x_vel > 0 {
@@ -475,14 +487,14 @@ fn fade(window: &mut WindowCanvas, ms: Texture, r: Rect) -> Result<(), String> {
     Ok(())
 }
 
-fn resist(vel: i32, deltav: i32) -> i32 {
-    if deltav == 0 {
-        if vel > 0 {
-            -1
-        } else if vel < 0 {
-            1
+fn resist(vel: f32, deltav: f32) -> f32 {
+    if deltav == 0.0 {
+        if vel > 1.0 {
+            -1.0
+        } else if vel < -1.0 {
+            1.0
         } else {
-            deltav
+            -vel
         }
     } else {
         deltav
