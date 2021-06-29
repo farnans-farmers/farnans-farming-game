@@ -13,6 +13,9 @@ pub const PLAYER_HEIGHT: u32 = 90;
 /// collision.
 const PLAYER_EFF_HEIGHT_SKIP: i32 = 10;
 
+const SPEED_LIMIT: f32 = 5.0;
+pub const ACCEL_RATE: f32 = 1.0;
+
 /// Sprite directions.
 pub enum Direction {
 	Down,
@@ -33,6 +36,8 @@ pub struct Player<'a> {
 	dir: Direction,
 	/// Whether the player is moving
 	moving: bool,
+	/// Player's velocity vector
+	velocity: (f32,f32),
 }
 
 // TODO implement player animation
@@ -59,6 +64,7 @@ impl<'a> Player<'a> {
 			texture,
 			dir: Direction::Down,
 			moving: false,
+			velocity: (0.0,0.0),
 		}
 	}
 
@@ -130,18 +136,63 @@ impl<'a> Player<'a> {
 		self.pos.set_y((self.pos.y() - vel.1).clamp(y_bounds.0, y_bounds.1));
 	}
 
+	pub fn set_speed(&mut self, vel: (f32, f32)) -> (i32,i32){
+
+        // Update player velocity
+        let mut x_deltav_f = self.resist(self.velocity.0, vel.0);
+        let mut y_deltav_f = self.resist(self.velocity.1, vel.1);
+
+        self.velocity.0 = (self.velocity.0 + x_deltav_f as f32).clamp(-SPEED_LIMIT, SPEED_LIMIT);
+        self.velocity.1 = (self.velocity.1 + y_deltav_f as f32).clamp(-SPEED_LIMIT, SPEED_LIMIT);
+
+        let speed = (self.velocity.0*self.velocity.0 + self.velocity.1*self.velocity.1).sqrt();
+        if speed > 0.0 && self.velocity.0 != 0.0 && self.velocity.1 != 0.0{
+            let angle: f32 = (self.velocity.1/self.velocity.0).abs().atan();
+            let kx = angle.cos() * SPEED_LIMIT ;
+            let ky = angle.sin() * SPEED_LIMIT;
+
+            self.velocity.0 = self.velocity.0.clamp(-kx,kx);
+            self.velocity.1 = self.velocity.1.clamp(-ky,ky);
+        }
+        (self.velocity.0 as i32, self.velocity.1 as i32)
+	}
+
+	fn resist(&mut self,vel: f32, deltav: f32) -> f32 {
+	    if deltav == 0.0 {
+	        if vel > 1.0 {
+	            -1.0
+	        } else if vel < -1.0 {
+	            1.0
+	        } else {
+	            -vel
+	        }
+	    } else {
+	        deltav
+	    }
+	}
+
 	/// Set the player's sprite facing direction.
-	pub fn set_direction(&mut self, dir: Option<Direction>) {
-		if let Some(dir) = dir {
-			self.dir = dir;
+	pub fn set_direction(&mut self, vel: (i32, i32)) {
+
+		/// Set the player's movement animation status
+		if vel.0 == 0 && vel.1 == 0{
+			self.moving = false;
+			return
 		}
-	}
+		self.moving = true;
 
-	/// Set the player's movement animation status
-	pub fn set_moving(&mut self, moving: bool) {
-		self.moving = moving;
-	}
+        // Update player animation status based on movement
+        self.dir = if vel.0 > 0 {
+            Direction::Right
+        } else if vel.0 < 0 {
+            Direction::Left
+        } else if vel.1 < 0 {
+            Direction::Up
+        } else {
+            Direction::Down
+        };
 
+	}
 	/// Get `src` of player
 	pub fn src(&mut self) -> Rect {
 		let k = match self.dir {
