@@ -136,7 +136,7 @@ fn main() {
         let mut file = File::open("src/foo.txt").expect("Can't open save file");
         let mut contents = String::new();
         file.read_to_string(&mut contents).expect("Can't read file");
-
+        print!("{}", contents);
         for line in contents.lines() {
             let results: Vec<&str> = line.split(";").collect();
             if (results[0] == "item") {
@@ -152,23 +152,23 @@ fn main() {
             } else if (results[0] == "crop") {
                 crop_vec.push(
                     crop::Crop::new(
-                        results[1].parse::<crop::CropType>().unwrap(),
                         Rect::new(
+                            results[1].parse::<i32>().unwrap() * TILE_SIZE as i32,
                             results[2].parse::<i32>().unwrap() * TILE_SIZE as i32,
-                            results[3].parse::<i32>().unwrap() * TILE_SIZE as i32,
                             TILE_SIZE,
                             TILE_SIZE,
                         ),
+                        results[3].parse::<u8>().unwrap(),
                         texture_creator
                             .load_texture(results[4])
                             .unwrap(),
+                        results[5].parse::<bool>().unwrap(),
                         results[4].parse().unwrap(),
+                        results[6].parse::<crop::CropType>().unwrap(),
                     ));
             }
         }
     }
-
-
 
 
 /*    let barn = item::Item::new(
@@ -226,9 +226,9 @@ fn main() {
     ];*/
 
     // crop 2 should grow, crop 0 should not
-    crop_vec.get_mut(2).unwrap().set_water(true);
+/*    crop_vec.get_mut(2).unwrap().set_water(true);
     crop_vec.get_mut(2).unwrap().grow();
-    crop_vec.get_mut(0).unwrap().grow();
+    crop_vec.get_mut(0).unwrap().grow();*/
     // TODO remove crop test ^
 
     // variable for sleep menu
@@ -253,8 +253,8 @@ fn main() {
                         }
                     }
                     for crop in crop_vec {
-                        let mut output = "crop;".to_owned() + &crop.CropType() + ";" + &(crop.x()/TILE_SIZE as i32).to_string()
-                            + ";" + &(crop.y()/TILE_SIZE as i32).to_string() + ";" + &crop.tex_path() + "\n";
+                        let mut output = "crop;".to_owned() + &(crop.x()/TILE_SIZE as i32).to_string() + ";" + &(crop.y()/TILE_SIZE as i32).to_string() +
+                            ";" + &crop.stage().to_string() + ";" + &crop.tex_path() + ";" + &crop.watered().to_string() + ";" + &crop.CropType() + "\n";
                         match file.write_all(output.as_ref()) {
                             Err(why) => panic!("couldn't write to foo.txt: {}", why),
                             Ok(_) => println!("successfully wrote crop to foo.txt"),
@@ -278,7 +278,7 @@ fn main() {
         if in_menu {
             if keystate.contains(&Keycode::Y) {
                 println!("Yes");
-                for c in 1..crop_vec.len() {
+                for c in 0..crop_vec.len() {
                     crop_vec[c].grow();
                 }
                 in_menu = false;
