@@ -23,6 +23,8 @@ use std::thread;
 use std::time::Duration;
 
 use crate::player::{Direction, PLAYER_HEIGHT, PLAYER_WIDTH};
+use std::fs::File;
+use std::io::{Read, Write};
 
 const VSYNC: bool = true;
 // Camera dimensions
@@ -104,6 +106,7 @@ fn main() {
             item::Item::new(
                 Rect::new(200, 200, 400, 320),
                 texture_creator.load_texture("src/images/Barn.png").unwrap(),
+                "src/images/Barn.png".parse().unwrap(),
                 false,
             )
         })
@@ -123,22 +126,65 @@ fn main() {
             .unwrap(),
     );
 
-    let barn = item::Item::new(
+    let mut item_vec = Vec::new();
+    let mut crop_vec = Vec::new();
+
+    //Loading items and crops into the game
+    {
+        let mut file = File::open("src/foo.txt").expect("Can't open save file");
+        let mut contents = String::new();
+        file.read_to_string(&mut contents).expect("Can't read file");
+
+        for line in contents.lines() {
+            let results: Vec<&str> = line.split(";").collect();
+            if (results[0] == "item") {
+                item_vec.push(item::Item::new(
+                    Rect::new(results[1].parse::<i32>().unwrap(),
+                              results[2].parse::<i32>().unwrap(),
+                              results[3].parse::<u32>().unwrap(),
+                              results[4].parse::<u32>().unwrap()),
+                    texture_creator.load_texture(results[5]).unwrap(),
+                    results[5].parse().unwrap(),
+                    results[6].parse::<bool>().unwrap(),
+                ));
+            } else if (results[0] == "crop") {
+                crop_vec.push(
+                    crop::Crop::new(
+                        results[1].parse::<crop::CropType>().unwrap(),
+                        Rect::new(
+                            results[2].parse::<i32>().unwrap() * TILE_SIZE as i32,
+                            results[3].parse::<i32>().unwrap() * TILE_SIZE as i32,
+                            TILE_SIZE,
+                            TILE_SIZE,
+                        ),
+                        texture_creator
+                            .load_texture(results[4])
+                            .unwrap(),
+                        results[4].parse().unwrap(),
+                    ));
+            }
+        }
+    }
+
+
+
+
+/*    let barn = item::Item::new(
         Rect::new(200, 200, 400, 320),
         texture_creator.load_texture("src/images/Barn.png").unwrap(),
         true,
-    );
+    );*/
 
-    let farmhs = item::Item::new(
+/*    let farmhs = item::Item::new(
         Rect::new(2000, 2000, 400, 320),
         texture_creator
             .load_texture("src/images/house.png")
             .unwrap(),
         true,
-    );
+    );*/
 
     // TODO testing crop render with placeholder; remove later
-    let mut test_crops: Vec<crop::Crop> = vec![
+/*    let mut test_crops: Vec<crop::Crop> = vec![
         crop::Crop::new(
             crop::CropType::Carrot,
             Rect::new(
@@ -175,22 +221,43 @@ fn main() {
                 .load_texture("src/images/CropPlaceholder.png")
                 .unwrap(),
         ),
-    ];
+    ];*/
 
     // crop 2 should grow, crop 0 should not
-    test_crops.get_mut(2).unwrap().set_water(true);
-    test_crops.get_mut(2).unwrap().grow();
-    test_crops.get_mut(0).unwrap().grow();
+    crop_vec.get_mut(2).unwrap().set_water(true);
+    crop_vec.get_mut(2).unwrap().grow();
+    crop_vec.get_mut(0).unwrap().grow();
     // TODO remove crop test ^
 
     'gameloop: loop {
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. }
-                | Event::KeyDown {
-                    keycode: Some(Keycode::Escape),
-                    ..
-                } => break 'gameloop,
+                | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
+
+                    //Iterates through item vector and crop vector saving their positions into a txt file
+                    let mut file = match File::create("src/foo.txt") {
+                        Err(why) => panic!("couldn't create foo.txt: {}", why),
+                        Ok(file) => file,
+                    };
+                    for item in item_vec {
+                        let mut output = "item;".to_owned() + &item.x().to_string() + ";" + &item.y().to_string() + ";" + &item.width().to_string()
+                            + ";" + &item.height().to_string() + ";" + &item.tex_path() + ";" + &item.collision().to_string() + "\n";
+                        match file.write_all(output.as_ref()) {
+                            Err(why) => panic!("couldn't write to foo.txt: {}", why),
+                            Ok(_) => println!("successfully wrote item to foo.txt"),
+                        }
+                    }
+                    for crop in crop_vec {
+                        let mut output = "crop;".to_owned() + &crop.CropType() + ";" + &(crop.x()/TILE_SIZE as i32).to_string()
+                            + ";" + &(crop.y()/TILE_SIZE as i32).to_string() + ";" + &crop.tex_path() + "\n";
+                        match file.write_all(output.as_ref()) {
+                            Err(why) => panic!("couldn't write to foo.txt: {}", why),
+                            Ok(_) => println!("successfully wrote crop to foo.txt"),
+                        }
+                    }
+                    break 'gameloop
+                },
                 _ => {}
             }
         }
@@ -272,17 +339,23 @@ fn main() {
         // X
         p.update_pos_x((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
 
-        if check_collision(&p.get_pos(), &farmhs.pos())
+        for item in &item_vec {
+            if check_collision(&p.get_pos(), &item.pos()){
+                p.stay_still_x((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
+            }
+        }
+        /*if check_collision(&p.get_pos(), &farmhs.pos())
             || check_collision(&p.get_pos(), &barn.pos())
         {
             p.stay_still_x((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
-        }
+        }*/
+
         //Y
         p.update_pos_y((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
-        if check_collision(&p.get_pos(), &farmhs.pos())
-            || check_collision(&p.get_pos(), &barn.pos())
-        {
-            p.stay_still_y((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
+        for item in &item_vec {
+            if check_collision(&p.get_pos(), &item.pos()){
+                p.stay_still_y((x_vel, y_vel), (0, (BG_W - TILE_SIZE) as i32));
+            }
         }
 
         // Determine part of background to draw
@@ -324,15 +397,16 @@ fn main() {
         }
 
         // Drawing item
-        wincan = barn.print_item(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
-        wincan = farmhs.print_item(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
+        for item in &item_vec{
+            wincan = item.print_item(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
+        }
 
         // Draw inventory
         inventory.draw(&mut wincan);
 
         // TODO crops will probably be stored with the tile grid
         // eventually. Change this to loop over that structure then
-        for c in test_crops.iter() {
+        for c in crop_vec.iter() {
             wincan = c.print_crop(cur_bg.x(), cur_bg.y(), wincan);
         }
 

@@ -4,15 +4,17 @@ use sdl2::render::{Texture, WindowCanvas};
 pub struct Item<'a> {
     pos: Rect,
     texture: Texture<'a>,
+    tex_path: String,
     collision: bool,
 }
 
 impl<'a> Item<'a> {
 
-    pub fn new(pos: Rect, texture: Texture<'a>, collision: bool) -> Item {
+    pub fn new(pos: Rect, texture: Texture<'a>, tex_path: String, collision: bool) -> Item {
         Item {
             pos,
             texture,
+            tex_path,
             collision,
         }
     }
@@ -44,6 +46,8 @@ impl<'a> Item<'a> {
     pub fn collision(&self) -> bool {
         self.collision
     }
+
+    pub fn tex_path(&self) -> &String { &self.tex_path }
 
     /*
         Takes ownership of a WindowCanvas, checks if the item needs to be printed, and prints it if it does.
