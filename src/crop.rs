@@ -47,23 +47,23 @@ impl<'a> Crop<'a> {
 	/// * `t` - Enum to select type of crop
 	/// * `pos` - Position of the crop. Make sure `pos % TILE_SIZE == 0`
 	/// * `texture` - Sprite sheet texture
-	pub fn new(t: CropType, pos: Rect, texture: Texture<'a>, tex_path: String) -> Crop {
+	pub fn new(pos: Rect, stage: u8, texture: Texture<'a>, watered: bool, tex_path: String, t: CropType) -> Crop {
 		let (x, y) = match t {
-			CropType::Carrot => (0, 0),
-			CropType::Corn => (0, TILE_SIZE),
-			CropType::Potato => (0, TILE_SIZE * 2),
-			CropType::Lettuce => (0, TILE_SIZE * 3),
+			CropType::Carrot => (stage as u32 * TILE_SIZE, 0),
+			CropType::Corn => (stage as u32 * TILE_SIZE, TILE_SIZE),
+			CropType::Potato => (stage as u32 * TILE_SIZE, TILE_SIZE * 2),
+			CropType::Lettuce => (stage as u32 * TILE_SIZE, TILE_SIZE * 3),
 		};
 
 		let src = Rect::new(x as i32, y as i32, TILE_SIZE, TILE_SIZE);
 		Crop {
-			t,
 			pos,
-			stage: 0 as u8,
+			stage,
 			src,
 			texture,
-			watered: false,
+			watered,
 			tex_path,
+			t,
 		}
 	}
 
@@ -75,7 +75,7 @@ impl<'a> Crop<'a> {
 	/// Checks if a crop has been watered, then increments its
 	/// stage of growth, clamping to `0..3`
 	pub fn grow(&mut self) {
-		if self.watered() {
+		if self.watered() && self.stage != 3 {
 			self.stage = (self.stage + 1).clamp(0, 3);
 			// Change src from sprite sheet
 			self.src.set_x(self.src.x() + (TILE_SIZE as i32));
@@ -92,15 +92,20 @@ impl<'a> Crop<'a> {
 	/// * `y` - current y position of camera
 	/// * `win` - `WindowCanvas` to be updated
 	pub fn print_crop(&self, x: i32, y: i32, mut win: WindowCanvas) -> WindowCanvas {
-		let testx = self.x();
-		let testy = self.y();
+		let testx = self.x() - x;
+		let testy = self.y() - y;
 
 		if testx > -(self.width() as i32)
 			&& testx < CAM_W as i32
 			&& testy > -(self.height() as i32)
 			&& testy < CAM_H as i32
 		{
-			let crop_sub_set = Rect::new(self.x() - x, self.y() - y, self.width(), self.height());
+			let crop_sub_set = Rect::new(
+				self.x() - x,
+				self.y() - y,
+				self.width(),
+				self.height()
+			);
 			win.copy(self.texture(), self.src(), crop_sub_set).unwrap();
 			return win;
 		}
@@ -148,6 +153,8 @@ impl<'a> Crop<'a> {
 	}
 
 	pub fn tex_path(&self) -> &String { &self.tex_path }
+
+	pub fn stage(&self) -> u8 { self.stage }
 
 	pub fn CropType(&self) -> &str {
 		match self.t {
