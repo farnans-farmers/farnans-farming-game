@@ -336,7 +336,7 @@ fn main() {
             }
 
         }
-        
+
         let player_vel = p.set_speed((x_deltav_f,y_deltav_f));
         p.set_direction(player_vel);
 
@@ -345,14 +345,14 @@ fn main() {
         p.update_pos_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
 
         for item in &item_vec {
-            if check_collision(&p.get_pos(), &item.pos()) { 
+            if check_collision(&p.get_pos(), &item.pos()) {
                 p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
                 if (item.tex_path() == "src/images/house.png") {
                     in_menu = true;
 
                 }
 
-            } 
+            }
         }
         /*if check_collision(&p.get_pos(), &farmhs.pos())
             || check_collision(&p.get_pos(), &barn.pos())
@@ -428,9 +428,9 @@ fn main() {
 
         // Draw inventory
         inventory.draw(&mut wincan);
-  
+
         if in_menu {
-            
+
             let sleep_box = texture_creator.load_texture("src/images/sleep.png").unwrap();
             wincan.copy(&sleep_box, None, Rect::new(400, 400, 600, 180)).unwrap();
         }
