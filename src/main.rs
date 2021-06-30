@@ -496,17 +496,3 @@ fn fade(window: &mut WindowCanvas, ms: Texture, r: Rect) -> Result<(), String> {
     }
     Ok(())
 }
-
-fn resist(vel: i32, deltav: i32) -> i32 {
-    if deltav == 0 {
-        if vel > 0 {
-            -1
-        } else if vel < 0 {
-            1
-        } else {
-            deltav
-        }
-    } else {
-        deltav
-    }
-}
