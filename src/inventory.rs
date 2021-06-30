@@ -55,7 +55,7 @@ impl<'a> Inventory<'a> {
 
         let mut x = 0;
         for inventory in &self.inventory_slots{
-            wincan.copy(inventory.texture(), None, 
+            wincan.copy(inventory.texture(), inventory.pos(), 
 
                  Rect::new(
                     INVENTORY_X_POS+(x*(ITEM_BOX_SIZE+BORDER_SIZE)),
