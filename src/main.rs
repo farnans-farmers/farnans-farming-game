@@ -8,6 +8,7 @@ mod player;
 mod tile;
 
 mod inventory;
+mod population;
 
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
@@ -85,20 +86,37 @@ fn main() {
     for x in 0..((BG_W / TILE_SIZE) as i32) + 1 {
         let mut sub_vec = Vec::new();
         for y in 0..((BG_H / TILE_SIZE) as i32) + 1 {
-            sub_vec.push(tile::Tile::new(
-                Rect::new(
-                    (TILE_SIZE as i32) * x,
-                    (TILE_SIZE as i32) * y,
-                    TILE_SIZE,
-                    TILE_SIZE,
+            sub_vec.push(population::CropTile::new(
+                tile::Tile::new(
+                    Rect::new(
+                        (TILE_SIZE as i32) * x,
+                        (TILE_SIZE as i32) * y,
+                        TILE_SIZE,
+                        TILE_SIZE,
+                    ),
+                    texture_creator
+                        .load_texture("src/images/grass.png")
+                        .unwrap(),
                 ),
-                texture_creator
-                    .load_texture("src/images/grass.png")
-                    .unwrap(),
-            ));
+                crop::Crop::new(
+                    Rect::new(
+                        (TILE_SIZE as i32) * x,
+                        (TILE_SIZE as i32) * y,
+                        TILE_SIZE,
+                        TILE_SIZE,
+                    ),
+                    0,
+                    texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap(),
+                    false,
+                    "src/images/Crop_Tileset.png".parse().unwrap(),
+                    crop::CropType::None,
+                )
+            )
+            );
         }
         tile_vec.push(sub_vec);
-    }
+    };
+    let mut pop = population::Population::new(tile_vec);
 
     let mut menu_location = 0 ;
 
@@ -253,8 +271,8 @@ fn main() {
                         }
                     }
                     for crop in crop_vec {
-                        let mut output = "crop;".to_owned() + &(crop.x()/TILE_SIZE as i32).to_string() + ";" + &(crop.y()/TILE_SIZE as i32).to_string() +
-                            ";" + &crop.stage().to_string() + ";" + &crop.tex_path() + ";" + &crop.watered().to_string() + ";" + &crop.CropType() + "\n";
+                        let mut output = "crop;".to_owned() + &(crop.getX()/TILE_SIZE as i32).to_string() + ";" + &(crop.getY()/TILE_SIZE as i32).to_string() +
+                            ";" + &crop.getStage().to_string() + ";" + &crop.getTex_path() + ";" + &crop.getWatered().to_string() + ";" + &crop.GetCropType() + "\n";
                         match file.write_all(output.as_ref()) {
                             Err(why) => panic!("couldn't write to foo.txt: {}", why),
                             Ok(_) => println!("successfully wrote crop to foo.txt"),
@@ -389,9 +407,9 @@ fn main() {
         wincan.clear();
 
         // Draw tiles
-        for tile in tile_vec.iter().flatten() {
-            let x_pos = tile.x() - cur_bg.x();
-            let y_pos = tile.y() - cur_bg.y();
+        for croptile in pop.getVec().iter().flatten() {
+            let x_pos = croptile.tile.x() - cur_bg.x();
+            let y_pos = croptile.tile.y() - cur_bg.y();
 
             //Don't bother drawing any tiles that are off screen
             if x_pos > -(TILE_SIZE as i32)
@@ -400,12 +418,12 @@ fn main() {
                 && y_pos < (CAM_H as i32)
             {
                 let cur_tile = Rect::new(
-                    tile.x() - cur_bg.x(),
-                    tile.y() - cur_bg.y(),
+                    croptile.tile.x() - cur_bg.x(),
+                    croptile.tile.y() - cur_bg.y(),
                     TILE_SIZE,
                     TILE_SIZE,
                 );
-                wincan.copy(tile.texture(), None, cur_tile).unwrap();
+                wincan.copy(croptile.tile.texture(), None, cur_tile).unwrap();
             }
         }
 
