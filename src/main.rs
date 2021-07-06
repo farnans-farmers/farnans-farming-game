@@ -113,19 +113,6 @@ fn main() {
 
     let mut menu_location = 0 ;
 
-    let inventory_slots: Vec<item::Item> = (0..10)
-        .map(|x| {
-            item::Item::new(
-                Rect::new(x*32 , 0 , 32, 32),
-                texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
-                "src/images/itemMenu.png".parse().unwrap(),
-                false,
-            )
-
-        })
-        .collect();
-
-    let mut inventory = inventory::Inventory::new(inventory_slots);
 
     let mut p = player::Player::new(
         Rect::new(
@@ -137,6 +124,7 @@ fn main() {
         texture_creator
             .load_texture("src/images/farmer.png")
             .unwrap(),
+        &texture_creator
     );
 
     let mut item_vec = Vec::new();
@@ -322,34 +310,34 @@ fn main() {
             }
 
             if keystate.contains(&Keycode::Num1) {
-                inventory.set_selected(0);
+                p.set_selected(0);
             }
             if keystate.contains(&Keycode::Num2) {
-                inventory.set_selected(1);
+                p.set_selected(1);
             }
             if keystate.contains(&Keycode::Num3) {
-                inventory.set_selected(2);
+                p.set_selected(2);
             }
             if keystate.contains(&Keycode::Num4) {
-                inventory.set_selected(3);
+                p.set_selected(3);
             }
             if keystate.contains(&Keycode::Num5) {
-                inventory.set_selected(4);
+                p.set_selected(4);
             }
             if keystate.contains(&Keycode::Num6) {
-                inventory.set_selected(5);
+                p.set_selected(5);
             }
             if keystate.contains(&Keycode::Num7) {
-                inventory.set_selected(6);
+                p.set_selected(6);
             }
             if keystate.contains(&Keycode::Num8) {
-                inventory.set_selected(7);
+                p.set_selected(7);
             }
             if keystate.contains(&Keycode::Num9) {
-                inventory.set_selected(8);
+                p.set_selected(8);
             }
             if keystate.contains(&Keycode::Num0) {
-                inventory.set_selected(9);
+                p.set_selected(9);
             }
 
         }
@@ -436,11 +424,11 @@ fn main() {
         }
 
         // Draw player
-        let src = p.src();
-        wincan.copy(p.texture(), src, player_cam_pos).unwrap();
+        //let src = p.src();
+        //wincan.copy(p.texture(), src, player_cam_pos).unwrap();
 
         // Draw inventory
-        inventory.draw(&mut wincan);
+        p.draw(&mut wincan,player_cam_pos);
         //ui.draw(&mut wincan);
 
         if in_menu {

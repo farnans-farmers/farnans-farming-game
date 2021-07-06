@@ -3,8 +3,14 @@ use std::time::{Duration, Instant};
 // Imports
 use sdl2::rect::Rect;
 use sdl2::render::Texture;
+use sdl2::render::TextureCreator;
+use sdl2::video::WindowContext;
+use sdl2::image::LoadTexture;
+use sdl2::render::WindowCanvas;
 
 use crate::anim::Animation;
+use crate::inventory::Inventory;
+use crate::item::Item;
 
 // Player sprites are 54x90 px.
 pub const PLAYER_WIDTH: u32 = 54;
@@ -38,6 +44,7 @@ pub struct Player<'a> {
 	moving: bool,
 	/// Player's velocity vector
 	velocity: (f32,f32),
+	inventory: Inventory<'a>,
 }
 
 // TODO implement player animation
@@ -47,7 +54,7 @@ impl<'a> Player<'a> {
 	/// # Arguments
 	/// * `pos` - Position of the player. 
 	/// * `texture` - Sprite sheet texture
-	pub fn new(pos: Rect, texture: Texture<'a>) -> Player {
+	pub fn new(pos: Rect, texture: Texture<'a>, texture_creator: &'a TextureCreator<WindowContext>) -> Player<'a> {
 		// Derive the number of frames from the size of the texture.
 		let sz = texture.query();
 		let bounds = Rect::new(0, 0, sz.width, sz.height);
@@ -58,6 +65,22 @@ impl<'a> Player<'a> {
 			let anim = Animation::from_sheet(&bounds, i*PLAYER_HEIGHT as i32, PLAYER_WIDTH, PLAYER_HEIGHT, dur, now);
 			anims.push(anim);
 		}
+
+
+    	let inventory_slots: Vec<Item> = (0..10)
+	        .map(|x| {
+	            Item::new(
+	                Rect::new(x*32 , 0 , 32, 32),
+	                texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
+	                "src/images/itemMenu.png".parse().unwrap(),
+	                false,
+	            )
+
+	        })
+	        .collect();
+
+    	let inventory = Inventory::new(inventory_slots);
+
 		Player{
 			pos,
 			src: anims,
@@ -65,6 +88,7 @@ impl<'a> Player<'a> {
 			dir: Direction::Down,
 			moving: false,
 			velocity: (0.0,0.0),
+			inventory
 		}
 	}
 
@@ -114,6 +138,15 @@ impl<'a> Player<'a> {
 	/// Get height of player
 	pub fn height(&self) -> u32 {
 		self.pos.height()
+	}
+
+	pub fn set_selected(&mut self,_selected: i32){
+		self.inventory.set_selected(_selected);
+	}
+	pub fn draw(&mut self,wincan: &mut WindowCanvas,player_cam_pos:Rect){
+		self.inventory.draw(wincan);
+		let src = self.src();
+		wincan.copy(self.texture(), src, player_cam_pos).unwrap();
 	}
 
 	/// Set a player's x position, clamping between given bounds
