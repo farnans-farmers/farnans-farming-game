@@ -10,6 +10,8 @@ mod utilities;
 
 mod inventory;
 mod population;
+mod store;
+
 
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
@@ -120,6 +122,8 @@ fn main() {
     let mut pop = population::Population::new(tile_vec);
 
     let mut menu_location = 0;
+
+    let mut store = store::Store::new(100);
 
     let inventory_slots: Vec<item::Item> = (0..10)
         .map(|x| {
@@ -261,6 +265,8 @@ fn main() {
 
     // variable for sleep menu
     let mut in_menu = false;
+    let mut in_shop = false;
+
     'gameloop: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -378,7 +384,31 @@ fn main() {
                 println!("No");
                 in_menu = false;
             }
-        } else {
+        } 
+
+        if in_shop {
+            if keystate.contains(&Keycode::Q) {
+                in_shop = false;
+            }
+            if keystate.contains(&Keycode::Up) {
+                store.navigate(-1);
+                thread::sleep(Duration::from_millis(80));
+            }
+            if keystate.contains(&Keycode::Down) {
+                store.navigate(1);
+                thread::sleep(Duration::from_millis(80));
+            }
+            if keystate.contains(&Keycode::Left) {
+                store.cycle(-1);
+                thread::sleep(Duration::from_millis(80));
+            }
+            if keystate.contains(&Keycode::Right) {
+                store.cycle(1);
+                thread::sleep(Duration::from_millis(80));
+            }
+        } 
+
+        else {
             // Change directions using WASD
             if keystate.contains(&Keycode::W) {
                 y_deltav_f -= player::ACCEL_RATE;
@@ -450,6 +480,10 @@ fn main() {
                 if (item.tex_path() == "src/images/house.png") {
                     in_menu = true;
                 }
+                if (item.tex_path() == "src/images/Barn.png") {
+                    in_shop = true;
+                }
+
             }
         }
         /*if check_collision(&p.get_pos(), &farmhs.pos())
@@ -465,6 +499,9 @@ fn main() {
                 p.stay_still_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
                 if (item.tex_path() == "src/images/house.png") {
                     in_menu = true;
+                }
+                if (item.tex_path() == "src/images/Barn.png") {
+                    in_shop = true;
                 }
             }
         }
@@ -550,6 +587,10 @@ fn main() {
             wincan
                 .copy(&sleep_box, None, Rect::new(400, 400, 600, 180))
                 .unwrap();
+        }
+
+        if in_shop {
+            store.draw(&mut wincan);
         }
 
         wincan.present();
