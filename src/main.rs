@@ -7,7 +7,6 @@ mod item;
 mod player;
 mod tile;
 mod utilities;
-
 mod inventory;
 mod population;
 
@@ -364,11 +363,9 @@ fn main() {
 
                 for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
                     for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
-
                         let mut _c = pop.get_crop_with_index_mut(_x as u32, _y as u32);
                         match _c.get_crop_type() {
                             "None" => {},
-
                             _ => {
                                 _c.grow();
                             }
@@ -412,6 +409,105 @@ fn main() {
             }
 
             if keystate.contains(&Keycode::C) {
+                if p.get_selected() == 0 {
+                    if p.get_dir() == 0 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 0);
+                    }
+                    if p.get_dir() == 1 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 0);
+                    }
+                    if p.get_dir() == 2 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 0);
+                    }
+                    if p.get_dir() == 3{
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 0);
+                    }
+
+                }
+                if p.get_selected() == 1 {
+                    if p.get_dir() == 0 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
+                    }
+                    if p.get_dir() == 1 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
+                    }
+                    if p.get_dir() == 2 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
+                    }
+                    if p.get_dir() == 3{
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
+                    }
+                }
+                if p.get_selected() == 2 {
+                    if p.get_dir() == 0 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
+                    }
+                    if p.get_dir() == 1 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
+                    }
+                    if p.get_dir() == 2 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
+                    }
+                    if p.get_dir() == 3{
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
+                    }
+                }
+                if p.get_selected() == 3 {
+                    if p.get_dir() == 0 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
+                    }
+                    if p.get_dir() == 1 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
+                    }
+                    if p.get_dir() == 2 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
+                    }
+                    if p.get_dir() == 3{
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
+                    }
+                }
+                if p.get_selected() == 4 {
+                    if p.get_dir() == 0 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
+                    }
+                    if p.get_dir() == 1 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
+                    }
+                    if p.get_dir() == 2 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
+                    }
+                    if p.get_dir() == 3{
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
+                    }
+                }
+                if p.get_selected() == 5 {
+                    if p.get_dir() == 0 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
+                    }
+                    if p.get_dir() == 1 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
+                    }
+                    if p.get_dir() == 2 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
+                    }
+                    if p.get_dir() == 3 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
+                    }
+                }
+                if p.get_selected() == 6 {
+                    if p.get_dir() == 0 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
+                    }
+                    if p.get_dir() == 1 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
+                    }
+                    if p.get_dir() == 2 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
+                    }
+                    if p.get_dir() == 3 {
+                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
+                    }
+                }
                 // TESTS
                 // Harvest [21, 22]
                 // utilities::use_tool(21, 22, &mut pop, 0);
@@ -464,7 +560,7 @@ fn main() {
         p.update_pos_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
 
         for item in &item_vec {
-            if p.check_collision(&item.pos()) { 
+            if p.check_collision(&item.pos()) {
                 p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
                 if (item.tex_path() == "src/images/house.png") {
                     in_menu = true;
@@ -524,6 +620,7 @@ fn main() {
 
                 wincan
                     .copy(crop_tile.tile.texture(), crop_tile.tile.src(), cur_tile)
+
                     .unwrap();
 
             }

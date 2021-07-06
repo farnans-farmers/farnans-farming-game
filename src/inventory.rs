@@ -33,20 +33,20 @@ impl<'a> Inventory<'a> {
             squares
         }
     }
-    pub fn draw(&self,wincan: &mut WindowCanvas){ 
+    pub fn draw(&self,wincan: &mut WindowCanvas){
         wincan.set_draw_color(Color::RGBA(159,82,30,255));
         wincan.fill_rect(Rect::new(
             INVENTORY_X_POS-BORDER_SIZE,
             INVENTORY_Y_POS-BORDER_SIZE,
-            (10*(ITEM_BOX_SIZE+BORDER_SIZE)+BORDER_SIZE) as u32, 
+            (10*(ITEM_BOX_SIZE+BORDER_SIZE)+BORDER_SIZE) as u32,
             (ITEM_BOX_SIZE+2*BORDER_SIZE) as u32
             )).expect("ERROR");
 
         wincan.set_draw_color(Color::RGBA(244,0,0,255));
         wincan.fill_rect(Rect::new(
-            INVENTORY_X_POS - SELECTED_SIZE+(self.selected*(ITEM_BOX_SIZE + 2*SELECTED_SIZE)), 
-            INVENTORY_Y_POS - SELECTED_SIZE, 
-            (ITEM_BOX_SIZE + 2*SELECTED_SIZE) as u32, 
+            INVENTORY_X_POS - SELECTED_SIZE+(self.selected*(ITEM_BOX_SIZE + 2*SELECTED_SIZE)),
+            INVENTORY_Y_POS - SELECTED_SIZE,
+            (ITEM_BOX_SIZE + 2*SELECTED_SIZE) as u32,
             (ITEM_BOX_SIZE + 2*SELECTED_SIZE) as u32
             )).expect("ERROR");
 
@@ -55,7 +55,7 @@ impl<'a> Inventory<'a> {
 
         let mut x = 0;
         for inventory in &self.inventory_slots{
-            wincan.copy(inventory.texture(), inventory.pos(), 
+            wincan.copy(inventory.texture(), inventory.pos(),
 
                  Rect::new(
                     INVENTORY_X_POS+(x*(ITEM_BOX_SIZE+BORDER_SIZE)),

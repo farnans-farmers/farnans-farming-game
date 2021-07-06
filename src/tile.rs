@@ -60,5 +60,6 @@ impl<'a> Tile<'a> {
         } else {
             self.src = Rect::new(0, 0, TILE_SIZE, TILE_SIZE);
         }
+
     }
 }
