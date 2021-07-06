@@ -13,15 +13,18 @@ pub fn use_tool(x: i32, y: i32, mut pop: &mut population::Population, tool: i32)
 				// TODO add to inventory
 				// Set tile's crop to "None" type to hide it
 
+
 				let mut _c = pop.get_crop_with_index_mut(x as u32, y as u32);
 				_c.set_crop_type("None");
 				_c.set_stage(0);
 				_c.set_water(false);
 
+
 			}
 		}
 		// Hoe
 		1 => {
+
 
 			// If tile is empty, set as tilled dirt
 			if pop
@@ -32,6 +35,7 @@ pub fn use_tool(x: i32, y: i32, mut pop: &mut population::Population, tool: i32)
 				let mut _tile = pop.get_tile_with_index_mut(x as u32, y as u32);
 				_tile.set_tilled(true);
 			}
+
 
 		}
 		// Watering can
