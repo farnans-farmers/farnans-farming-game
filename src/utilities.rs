@@ -13,7 +13,7 @@ pub fn use_tool(x: i32, y: i32, mut pop: &mut population::Population, tool: i32)
 				// TODO add to inventory
 				// Set tile's crop to "None" type to hide it
 
-				let mut _c = pop.getCropWithIndex_mut(x as u32, y as u32);
+				let mut _c = pop.get_crop_with_index_mut(x as u32, y as u32);
 				_c.set_crop_type("None");
 				_c.set_stage(0);
 				_c.set_water(false);
