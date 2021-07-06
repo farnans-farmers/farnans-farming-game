@@ -39,6 +39,7 @@ const BG_H: u32 = 3000;
 const TITLE: &str = "Farnan's Farmers";
 pub const TILE_SIZE: u32 = 80; // Make this public so we can import it elsewhere
 
+
 fn main() {
     let sdl_cxt = sdl2::init().unwrap();
     let video_subsys = sdl_cxt.video().unwrap();
@@ -112,6 +113,7 @@ fn main() {
     let mut pop = population::Population::new(tile_vec);
 
     let mut menu_location = 0;
+
 
     let mut p = player::Player::new(
         Rect::new(
@@ -375,7 +377,15 @@ fn main() {
             }
 
             if keystate.contains(&Keycode::C) {
+                // TESTS
+                // Harvest [21, 22]
                 // utilities::use_tool(21, 22, &mut pop, 0);
+                // Till [21,22]
+                // utilities::use_tool(21, 22, &mut pop, 1);
+                // Plant [21, 22]
+                // utilities::use_tool(21, 22, &mut pop, 3);
+                // Water [21, 22]
+                // utilities::use_tool(21, 22, &mut pop, 2);
             }
 
             if keystate.contains(&Keycode::Num1) {
@@ -513,7 +523,6 @@ fn main() {
         // Draw inventory
         p.draw(&mut wincan,player_cam_pos);
         //ui.draw(&mut wincan);
-
 
         if in_menu {
             let sleep_box = texture_creator
