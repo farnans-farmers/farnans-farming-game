@@ -39,6 +39,7 @@ const BG_H: u32 = 3000;
 const TITLE: &str = "Farnan's Farmers";
 pub const TILE_SIZE: u32 = 80; // Make this public so we can import it elsewhere
 
+
 fn main() {
     let sdl_cxt = sdl2::init().unwrap();
     let video_subsys = sdl_cxt.video().unwrap();
