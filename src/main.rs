@@ -1,11 +1,12 @@
 extern crate sdl2;
 
 // Modules
+mod anim;
 mod crop;
 mod item;
-mod anim;
 mod player;
 mod tile;
+mod utilities;
 
 mod inventory;
 mod population;
@@ -37,7 +38,6 @@ const BG_W: u32 = 3000;
 const BG_H: u32 = 3000;
 const TITLE: &str = "Farnan's Farmers";
 pub const TILE_SIZE: u32 = 80; // Make this public so we can import it elsewhere
-
 
 fn main() {
     let sdl_cxt = sdl2::init().unwrap();
@@ -98,20 +98,20 @@ fn main() {
                         TILE_SIZE,
                     ),
                     0,
-                    texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap(),
+                    texture_creator
+                        .load_texture("src/images/Crop_Tileset.png")
+                        .unwrap(),
                     false,
                     "src/images/Crop_Tileset.png".parse().unwrap(),
                     crop::CropType::None,
-                )
-            )
-            );
+                ),
+            ));
         }
         tile_vec.push(sub_vec);
-    };
+    }
     let mut pop = population::Population::new(tile_vec);
 
-    let mut menu_location = 0 ;
-
+    let mut menu_location = 0;
 
     let mut p = player::Player::new(
         Rect::new(
@@ -127,7 +127,7 @@ fn main() {
     );
 
     let mut item_vec = Vec::new();
-    let mut crop_vec = Vec::new();
+    let mut crop_vec: Vec<crop::Crop> = Vec::new();
 
     //Loading items and crops into the game
     {
@@ -139,43 +139,51 @@ fn main() {
             let results: Vec<&str> = line.split(";").collect();
             if (results[0] == "item") {
                 item_vec.push(item::Item::new(
-                    Rect::new(results[1].parse::<i32>().unwrap(),
-                              results[2].parse::<i32>().unwrap(),
-                              results[3].parse::<u32>().unwrap(),
-                              results[4].parse::<u32>().unwrap()),
+                    Rect::new(
+                        results[1].parse::<i32>().unwrap(),
+                        results[2].parse::<i32>().unwrap(),
+                        results[3].parse::<u32>().unwrap(),
+                        results[4].parse::<u32>().unwrap(),
+                    ),
                     texture_creator.load_texture(results[5]).unwrap(),
                     results[5].parse().unwrap(),
                     results[6].parse::<bool>().unwrap(),
                 ));
             } else if (results[0] == "crop") {
-                crop_vec.push(
-                    crop::Crop::new(
-                        Rect::new(
-                            results[1].parse::<i32>().unwrap() * TILE_SIZE as i32,
-                            results[2].parse::<i32>().unwrap() * TILE_SIZE as i32,
-                            TILE_SIZE,
-                            TILE_SIZE,
+                let _x = results[1].parse::<i32>().unwrap();
+                let _y = results[2].parse::<i32>().unwrap();
+                pop.getVec_mut()
+                    .get_mut(_x as usize)
+                    .unwrap()
+                    .get_mut(_y as usize)
+                    .unwrap()
+                    .setCrop(
+                        // crop_vec.push(
+                        crop::Crop::new(
+                            Rect::new(
+                                results[1].parse::<i32>().unwrap() * TILE_SIZE as i32,
+                                results[2].parse::<i32>().unwrap() * TILE_SIZE as i32,
+                                TILE_SIZE,
+                                TILE_SIZE,
+                            ),
+                            results[3].parse::<u8>().unwrap(),
+                            texture_creator.load_texture(results[4]).unwrap(),
+                            results[5].parse::<bool>().unwrap(),
+                            results[4].parse().unwrap(),
+                            results[6].parse::<crop::CropType>().unwrap(),
                         ),
-                        results[3].parse::<u8>().unwrap(),
-                        texture_creator
-                            .load_texture(results[4])
-                            .unwrap(),
-                        results[5].parse::<bool>().unwrap(),
-                        results[4].parse().unwrap(),
-                        results[6].parse::<crop::CropType>().unwrap(),
-                    ));
+                    );
             }
         }
     }
 
-
-/*    let barn = item::Item::new(
+    /*    let barn = item::Item::new(
         Rect::new(200, 200, 400, 320),
         texture_creator.load_texture("src/images/Barn.png").unwrap(),
         true,
     );*/
 
-/*    let farmhs = item::Item::new(
+    /*    let farmhs = item::Item::new(
         Rect::new(2000, 2000, 400, 320),
         texture_creator
             .load_texture("src/images/house.png")
@@ -184,7 +192,7 @@ fn main() {
     );*/
 
     // TODO testing crop render with placeholder; remove later
-/*    let mut test_crops: Vec<crop::Crop> = vec![
+    /*    let mut test_crops: Vec<crop::Crop> = vec![
         crop::Crop::new(
             crop::CropType::Carrot,
             Rect::new(
@@ -224,7 +232,7 @@ fn main() {
     ];*/
 
     // crop 2 should grow, crop 0 should not
-/*    crop_vec.get_mut(2).unwrap().set_water(true);
+    /*    crop_vec.get_mut(2).unwrap().set_water(true);
     crop_vec.get_mut(2).unwrap().grow();
     crop_vec.get_mut(0).unwrap().grow();*/
     // TODO remove crop test ^
@@ -237,31 +245,83 @@ fn main() {
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. }
-                | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
-
+                | Event::KeyDown {
+                    keycode: Some(Keycode::Escape),
+                    ..
+                } => {
                     //Iterates through item vector and crop vector saving their positions into a txt file
                     let mut file = match File::create("src/foo.txt") {
                         Err(why) => panic!("couldn't create foo.txt: {}", why),
                         Ok(file) => file,
                     };
                     for item in item_vec {
-                        let mut output = "item;".to_owned() + &item.x().to_string() + ";" + &item.y().to_string() + ";" + &item.width().to_string()
-                            + ";" + &item.height().to_string() + ";" + &item.tex_path() + ";" + &item.collision().to_string() + "\n";
+                        let mut output = "item;".to_owned()
+                            + &item.x().to_string()
+                            + ";"
+                            + &item.y().to_string()
+                            + ";"
+                            + &item.width().to_string()
+                            + ";"
+                            + &item.height().to_string()
+                            + ";"
+                            + &item.tex_path()
+                            + ";"
+                            + &item.collision().to_string()
+                            + "\n";
                         match file.write_all(output.as_ref()) {
                             Err(why) => panic!("couldn't write to foo.txt: {}", why),
                             Ok(_) => println!("successfully wrote item to foo.txt"),
                         }
                     }
-                    for crop in crop_vec {
-                        let mut output = "crop;".to_owned() + &(crop.get_x()/TILE_SIZE as i32).to_string() + ";" + &(crop.get_y()/TILE_SIZE as i32).to_string() +
-                            ";" + &crop.get_stage().to_string() + ";" + &crop.get_tex_path() + ";" + &crop.get_watered().to_string() + ";" + &crop.get_crop_type() + "\n";
-                        match file.write_all(output.as_ref()) {
-                            Err(why) => panic!("couldn't write to foo.txt: {}", why),
-                            Ok(_) => println!("successfully wrote crop to foo.txt"),
+
+                    for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
+                        for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
+                            let _c = pop.getCropWithIndex(_x as u32, _y as u32);
+                            match _c.GetCropType() {
+                                "None" => {}
+                                _ => {
+                                    let output = "crop;".to_owned()
+                                        + &(_c.getX() / TILE_SIZE as i32).to_string()
+                                        + ";"
+                                        + &(_c.getY() / TILE_SIZE as i32).to_string()
+                                        + ";"
+                                        + &_c.getStage().to_string()
+                                        + ";"
+                                        + &_c.getTex_path()
+                                        + ";"
+                                        + &_c.getWatered().to_string()
+                                        + ";"
+                                        + &_c.GetCropType()
+                                        + "\n";
+                                    match file.write_all(output.as_ref()) {
+                                        Err(why) => panic!("couldn't write to foo.txt: {}", why),
+                                        Ok(_) => println!("successfully wrote crop to foo.txt"),
+                                    }
+                                }
+                            }
                         }
                     }
-                    break 'gameloop
-                },
+                    // for crop in crop_vec {
+                    //     let mut output = "crop;".to_owned()
+                    //         + &(crop.getX() / TILE_SIZE as i32).to_string()
+                    //         + ";"
+                    //         + &(crop.getY() / TILE_SIZE as i32).to_string()
+                    //         + ";"
+                    //         + &crop.getStage().to_string()
+                    //         + ";"
+                    //         + &crop.getTex_path()
+                    //         + ";"
+                    //         + &crop.getWatered().to_string()
+                    //         + ";"
+                    //         + &crop.GetCropType()
+                    //         + "\n";
+                    //     match file.write_all(output.as_ref()) {
+                    //         Err(why) => panic!("couldn't write to foo.txt: {}", why),
+                    //         Ok(_) => println!("successfully wrote crop to foo.txt"),
+                    //     }
+                    // }
+                    break 'gameloop;
+                }
                 _ => {}
             }
         }
@@ -278,8 +338,20 @@ fn main() {
         if in_menu {
             if keystate.contains(&Keycode::Y) {
                 println!("Yes");
-                for c in 0..crop_vec.len() {
-                    crop_vec[c].grow();
+                // for c in 0..crop_vec.len() {
+                //     crop_vec[c].grow();
+                // }
+                // Call grow() on all valid plants
+                for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
+                    for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
+                        let mut _c = pop.getCropWithIndex_mut(_x as u32, _y as u32);
+                        match _c.GetCropType() {
+                            "None" => {},
+                            _ => {
+                                _c.grow();
+                            }
+                        }
+                    }
                 }
                 in_menu = false;
             }
@@ -287,9 +359,7 @@ fn main() {
                 println!("No");
                 in_menu = false;
             }
-        }
-
-        else {
+        } else {
             // Change directions using WASD
             if keystate.contains(&Keycode::W) {
                 y_deltav_f -= player::ACCEL_RATE;
@@ -302,6 +372,10 @@ fn main() {
             }
             if keystate.contains(&Keycode::D) {
                 x_deltav_f += player::ACCEL_RATE;
+            }
+
+            if keystate.contains(&Keycode::C) {
+                // utilities::use_tool(21, 22, &mut pop, 0);
             }
 
             if keystate.contains(&Keycode::Num1) {
@@ -334,10 +408,9 @@ fn main() {
             if keystate.contains(&Keycode::Num0) {
                 p.set_selected(9);
             }
-
         }
-        
-        let player_vel = p.set_speed((x_deltav_f,y_deltav_f));
+
+        let player_vel = p.set_speed((x_deltav_f, y_deltav_f));
         p.set_direction(player_vel);
 
         // Update player position
@@ -350,10 +423,8 @@ fn main() {
                 p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
                 if (item.tex_path() == "src/images/house.png") {
                     in_menu = true;
-
                 }
-
-            } 
+            }
         }
 
         //Y
@@ -378,8 +449,12 @@ fn main() {
         );
 
         // Convert player map position to be camera-relative
-        let player_cam_pos =
-            Rect::new(p.x() - cur_bg.x(), p.y() - cur_bg.y(), PLAYER_WIDTH, PLAYER_HEIGHT);
+        let player_cam_pos = Rect::new(
+            p.x() - cur_bg.x(),
+            p.y() - cur_bg.y(),
+            PLAYER_WIDTH,
+            PLAYER_HEIGHT,
+        );
 
         wincan.set_draw_color(Color::BLACK);
         wincan.clear();
@@ -401,21 +476,34 @@ fn main() {
                     TILE_SIZE,
                     TILE_SIZE,
                 );
+
                 wincan.copy(crop_tile.tile.texture(), None, cur_tile).unwrap();
+
             }
         }
 
         // Drawing item
-        for item in &item_vec{
+        for item in &item_vec {
             wincan = item.print_item(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
         }
 
-
-
         // TODO crops will probably be stored with the tile grid
         // eventually. Change this to loop over that structure then
-        for c in crop_vec.iter() {
-            wincan = c.print_crop(cur_bg.x(), cur_bg.y(), wincan);
+        // for c in crop_vec.iter() {
+        //     wincan = c.print_crop(cur_bg.x(), cur_bg.y(), wincan);
+        // }
+
+        // Draw crops
+        for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
+            for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
+                let _c = pop.getCropWithIndex(_x as u32, _y as u32);
+                match _c.GetCropType() {
+                    "None" => {}
+                    _ => {
+                        wincan = _c.print_crop(cur_bg.x(), cur_bg.y(), wincan);
+                    }
+                }
+            }
         }
 
         // Draw player
@@ -426,16 +514,18 @@ fn main() {
         p.draw(&mut wincan,player_cam_pos);
         //ui.draw(&mut wincan);
 
-        if in_menu {
-            
-            let sleep_box = texture_creator.load_texture("src/images/sleep.png").unwrap();
-            wincan.copy(&sleep_box, None, Rect::new(400, 400, 600, 180)).unwrap();
-        }
 
+        if in_menu {
+            let sleep_box = texture_creator
+                .load_texture("src/images/sleep.png")
+                .unwrap();
+            wincan
+                .copy(&sleep_box, None, Rect::new(400, 400, 600, 180))
+                .unwrap();
+        }
 
         wincan.present();
     } // end gameloop
-
 }
 
 /**

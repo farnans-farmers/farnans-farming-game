@@ -1,3 +1,6 @@
+//! Module containing the Player struct and its 
+//! associated functions
+
 use std::time::{Duration, Instant};
 
 // Imports
