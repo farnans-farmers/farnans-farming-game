@@ -74,4 +74,8 @@ impl<'a> Inventory<'a> {
     pub fn set_selected(&mut self,_selected: i32){
         self.selected = _selected
     }
+
+    pub fn get_selected(&self) -> i32 {
+        self.selected
+    }
 }

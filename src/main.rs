@@ -394,7 +394,7 @@ fn main() {
             }
 
             if keystate.contains(&Keycode::C) {
-                utilities::use_tool(21, 22, &mut pop, 0);
+                // utilities::use_tool(21, 22, &mut pop, 0);
             }
 
             if keystate.contains(&Keycode::Num1) {
