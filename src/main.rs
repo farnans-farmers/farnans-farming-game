@@ -277,14 +277,42 @@ fn main() {
 
         if in_menu {
             if keystate.contains(&Keycode::Y) {
-                println!("Yes");
+                //Player has chosen to Sleep
+                
+                let mut i = 0;
+                while i < 254 {
+                    //wincan.clear();
+                    wincan.copy(&texture_creator.load_texture("src/images/sleeping_screen.png").unwrap(), None, None);
+                    wincan.set_draw_color(Color::RGBA(0, 0, 0, 255 - i));
+                    wincan.fill_rect(r);
+                    wincan.present();
+                    thread::sleep(Duration::from_millis(1));
+                    i = i + 2;
+                }
+
+
                 for c in 0..crop_vec.len() {
-                    crop_vec[c].grow();
+                    if crop_vec[c].watered()==true{
+                        crop_vec[c].grow();
+                    } 
+                        
+                }
+
+                i = 0;
+                while i < 254 {
+                    wincan.clear();
+                    wincan.copy(&texture_creator.load_texture("src/images/sleeping_screen.png").unwrap(), None, None);
+                    wincan.set_draw_color(Color::RGBA(255, 255, 255, i));
+                    wincan.fill_rect(r);
+                    wincan.present();
+                    thread::sleep(Duration::from_millis(1));
+                    i = i + 2;
                 }
                 in_menu = false;
+
             }
             if keystate.contains(&Keycode::N) {
-                println!("No");
+                //Player has chosen not to sleep
                 in_menu = false;
             }
         }
