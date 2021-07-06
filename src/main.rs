@@ -79,7 +79,7 @@ fn main() {
     for x in 0..((BG_W / TILE_SIZE) as i32) + 1 {
         let mut sub_vec = Vec::new();
         for y in 0..((BG_H / TILE_SIZE) as i32) + 1 {
-            sub_vec.push(population::CropTile::new(
+            sub_vec.push(population::Crop_Tile::new(
                 tile::Tile::new(
                     Rect::new(
                         (TILE_SIZE as i32) * x,
@@ -231,10 +231,6 @@ fn main() {
     // TODO remove crop test ^
 
 
-    //let mut ui = ui::UI::new(&mut inventory);
-
-
-
 
     // variable for sleep menu
     let mut in_menu = false;
@@ -258,8 +254,8 @@ fn main() {
                         }
                     }
                     for crop in crop_vec {
-                        let mut output = "crop;".to_owned() + &(crop.getX()/TILE_SIZE as i32).to_string() + ";" + &(crop.getY()/TILE_SIZE as i32).to_string() +
-                            ";" + &crop.getStage().to_string() + ";" + &crop.getTex_path() + ";" + &crop.getWatered().to_string() + ";" + &crop.GetCropType() + "\n";
+                        let mut output = "crop;".to_owned() + &(crop.get_x()/TILE_SIZE as i32).to_string() + ";" + &(crop.get_y()/TILE_SIZE as i32).to_string() +
+                            ";" + &crop.get_stage().to_string() + ";" + &crop.get_tex_path() + ";" + &crop.get_watered().to_string() + ";" + &crop.get_crop_type() + "\n";
                         match file.write_all(output.as_ref()) {
                             Err(why) => panic!("couldn't write to foo.txt: {}", why),
                             Ok(_) => println!("successfully wrote crop to foo.txt"),
@@ -390,9 +386,9 @@ fn main() {
         wincan.clear();
 
         // Draw tiles
-        for croptile in pop.getVec().iter().flatten() {
-            let x_pos = croptile.tile.x() - cur_bg.x();
-            let y_pos = croptile.tile.y() - cur_bg.y();
+        for crop_tile in pop.get_vec().iter().flatten() {
+            let x_pos = crop_tile.tile.x() - cur_bg.x();
+            let y_pos = crop_tile.tile.y() - cur_bg.y();
 
             //Don't bother drawing any tiles that are off screen
             if x_pos > -(TILE_SIZE as i32)
@@ -401,12 +397,12 @@ fn main() {
                 && y_pos < (CAM_H as i32)
             {
                 let cur_tile = Rect::new(
-                    croptile.tile.x() - cur_bg.x(),
-                    croptile.tile.y() - cur_bg.y(),
+                    crop_tile.tile.x() - cur_bg.x(),
+                    crop_tile.tile.y() - cur_bg.y(),
                     TILE_SIZE,
                     TILE_SIZE,
                 );
-                wincan.copy(croptile.tile.texture(), None, cur_tile).unwrap();
+                wincan.copy(crop_tile.tile.texture(), None, cur_tile).unwrap();
             }
         }
 

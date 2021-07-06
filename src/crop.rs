@@ -77,7 +77,7 @@ impl<'a> Crop<'a> {
 	/// Checks if a crop has been watered, then increments its
 	/// stage of growth, clamping to `0..3`
 	pub fn grow(&mut self) {
-		if self.getWatered() && self.stage != 3 {
+		if self.get_watered() && self.stage != 3 {
 			self.stage = (self.stage + 1).clamp(0, 3);
 			// Change src from sprite sheet
 			self.src.set_x(self.src.x() + (TILE_SIZE as i32));
@@ -94,75 +94,75 @@ impl<'a> Crop<'a> {
 	/// * `y` - current y position of camera
 	/// * `win` - `WindowCanvas` to be updated
 	pub fn print_crop(&self, x: i32, y: i32, mut win: WindowCanvas) -> WindowCanvas {
-		let testx = self.getX() - x;
-		let testy = self.getY() - y;
+		let testx = self.get_x() - x;
+		let testy = self.get_y() - y;
 
-		if testx > -(self.getWidth() as i32)
+		if testx > -(self.get_width() as i32)
 			&& testx < CAM_W as i32
-			&& testy > -(self.getHeight() as i32)
+			&& testy > -(self.get_height() as i32)
 			&& testy < CAM_H as i32
 		{
 			let crop_sub_set = Rect::new(
-				self.getX() - x,
-				self.getY() - y,
-				self.getWidth(),
-				self.getHeight()
+				self.get_x() - x,
+				self.get_y() - y,
+				self.get_width(),
+				self.get_height()
 			);
-			win.copy(self.getTexture(), self.getSrc(), crop_sub_set).unwrap();
+			win.copy(self.get_texture(), self.get_src(), crop_sub_set).unwrap();
 			return win;
 		}
 		win
 	}
 
 	/// Get a Crop's texture
-	pub fn getTexture(&self) -> &Texture {
+	pub fn get_texture(&self) -> &Texture {
 		&self.texture
 	}
 
 	/// Get a Crop's `src`
-	pub fn getSrc(&self) -> Rect {
+	pub fn get_src(&self) -> Rect {
 		self.src
 	}
 
 	/// Get a Crop's position
-	pub fn getPos(&self) -> Rect {
+	pub fn get_pos(&self) -> Rect {
 		self.pos
 	}
 
 	/// Get a Crop's width
-	pub fn getWidth(&self) -> u32 {
-		self.getPos().width()
+	pub fn get_width(&self) -> u32 {
+		self.get_pos().width()
 	}
 
 	/// Get a Crop's height
-	pub fn getHeight(&self) -> u32 {
-		self.getPos().height()
+	pub fn get_height(&self) -> u32 {
+		self.get_pos().height()
 	}
 
 	/// Get a Crop's x position
-	pub fn getX(&self) -> i32 {
-		self.getPos().x()
+	pub fn get_x(&self) -> i32 {
+		self.get_pos().x()
 	}
 
 	/// Get a Crop's y position
-	pub fn getY(&self) -> i32 {
-		self.getPos().y()
+	pub fn get_y(&self) -> i32 {
+		self.get_pos().y()
 	}
 
 	/// Get a Crop's watered status
-	pub fn getWatered(&self) -> bool {
+	pub fn get_watered(&self) -> bool {
 		self.watered
 	}
 
-	pub fn getTex_path(&self) -> &String { &self.tex_path }
+	pub fn get_tex_path(&self) -> &String { &self.tex_path }
 
-	pub fn getStage(&self) -> u8 { self.stage }
+	pub fn get_stage(&self) -> u8 { self.stage }
 
-	pub fn setStage(&mut self, n: u8) {
+	pub fn set_stage(&mut self, n: u8) {
 		self.stage = n;
 	}
-
-	pub fn GetCropType(&self) -> &str {
+	
+	pub fn get_crop_type(&self) -> &str {
 		match self.t {
 			CropType::None => "None",
 			CropType::Carrot => "Carrot",
@@ -172,7 +172,7 @@ impl<'a> Crop<'a> {
 		}
 	}
 
-	pub fn SetCropType(&mut self, string: &str) {
+	pub fn set_crop_type(&mut self, string: &str) {
 		match string {
 			"None" => self.t = CropType::None,
 			"Carrot" => self.t = CropType::Carrot,
