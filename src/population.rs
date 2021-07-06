@@ -91,5 +91,4 @@ impl<'a> Population<'a> {
 
     pub fn plantSeed(&self) {}
 
-    pub fn destroyPlant(&self) {}
-}
+    pub fn destroy_plant(&self) {
