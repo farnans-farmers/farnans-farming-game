@@ -4,6 +4,7 @@ use sdl2::render::Texture;
 pub struct Tile<'a> {
     pos: Rect,
     texture: Texture<'a>,
+    tilled: bool,
 }
 
 impl<'a> Tile<'a> {
@@ -11,6 +12,7 @@ impl<'a> Tile<'a> {
         Tile {
             pos,
             texture,
+            tilled: false,
         }
     }
 
@@ -36,6 +38,14 @@ impl<'a> Tile<'a> {
 
     pub fn texture(&self) -> &Texture {
         &self.texture
+    }
+
+    pub fn tilled(&self) -> bool {
+        self.tilled
+    }
+
+    pub fn set_tilled(&mut self, till: bool) {
+        self.tilled = till;
     }
 
 }
