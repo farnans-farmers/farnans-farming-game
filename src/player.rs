@@ -146,6 +146,11 @@ impl<'a> Player<'a> {
 	pub fn set_selected(&mut self,_selected: i32){
 		self.inventory.set_selected(_selected);
 	}
+
+	pub fn get_selected(&self) -> i32 {
+		self.inventory.get_selected()
+	}
+
 	pub fn draw(&mut self,wincan: &mut WindowCanvas,player_cam_pos:Rect){
 		self.inventory.draw(wincan);
 		let src = self.src();

@@ -409,7 +409,7 @@ fn main() {
             }
 
             if keystate.contains(&Keycode::C) {
-                if inventory.get_selected() == 0 {
+                if p.get_selected() == 0 {
                     if p.get_dir() == 0 {
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 0);
                     }
@@ -424,7 +424,7 @@ fn main() {
                     }
 
                 }
-                if inventory.get_selected() == 1 {
+                if p.get_selected() == 1 {
                     if p.get_dir() == 0 {
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
                     }
@@ -438,7 +438,7 @@ fn main() {
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
                     }
                 }
-                if inventory.get_selected() == 2 {
+                if p.get_selected() == 2 {
                     if p.get_dir() == 0 {
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
                     }
@@ -452,7 +452,7 @@ fn main() {
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
                     }
                 }
-                if inventory.get_selected() == 3 {
+                if p.get_selected() == 3 {
                     if p.get_dir() == 0 {
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
                     }
@@ -466,7 +466,7 @@ fn main() {
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
                     }
                 }
-                if inventory.get_selected() == 4 {
+                if p.get_selected() == 4 {
                     if p.get_dir() == 0 {
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
                     }
@@ -480,7 +480,7 @@ fn main() {
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
                     }
                 }
-                if inventory.get_selected() == 5 {
+                if p.get_selected() == 5 {
                     if p.get_dir() == 0 {
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
                     }
@@ -494,7 +494,7 @@ fn main() {
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
                     }
                 }
-                if inventory.get_selected() == 6 {
+                if p.get_selected() == 6 {
                     if p.get_dir() == 0 {
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
                     }
