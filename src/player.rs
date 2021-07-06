@@ -216,4 +216,9 @@ impl<'a> Player<'a> {
 	pub fn texture(&self) -> &Texture {
 		&self.texture
 	}
+
+	pub fn check_collision(&self, a: &Rect) -> bool {
+		let b = self.get_pos();
+    	!(a.bottom() < b.top() || a.top() > b.bottom() || a.right() < b.left() || a.left() > b.right())
+	}
 }

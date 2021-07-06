@@ -10,6 +10,8 @@ mod tile;
 mod inventory;
 mod population;
 
+mod ui;
+
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
@@ -37,15 +39,6 @@ const BG_H: u32 = 3000;
 const TITLE: &str = "Farnan's Farmers";
 pub const TILE_SIZE: u32 = 80; // Make this public so we can import it elsewhere
 
-
-fn check_collision(a: &Rect, b: &Rect) -> bool {
-    if a.bottom() < b.top() || a.top() > b.bottom() || a.right() < b.left() || a.left() > b.right()
-    {
-        false
-    } else {
-        true
-    }
-}
 
 fn main() {
     let sdl_cxt = sdl2::init().unwrap();
@@ -249,6 +242,12 @@ fn main() {
     crop_vec.get_mut(0).unwrap().grow();*/
     // TODO remove crop test ^
 
+
+    //let mut ui = ui::UI::new(&mut inventory);
+
+
+
+
     // variable for sleep menu
     let mut in_menu = false;
     'gameloop: loop {
@@ -359,11 +358,12 @@ fn main() {
         p.set_direction(player_vel);
 
         // Update player position
+
         // X
         p.update_pos_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
 
         for item in &item_vec {
-            if check_collision(&p.get_pos(), &item.pos()) { 
+            if p.check_collision(&item.pos()) { 
                 p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
                 if (item.tex_path() == "src/images/house.png") {
                     in_menu = true;
@@ -372,16 +372,11 @@ fn main() {
 
             } 
         }
-        /*if check_collision(&p.get_pos(), &farmhs.pos())
-            || check_collision(&p.get_pos(), &barn.pos())
-        {
-            p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-        }*/
 
         //Y
         p.update_pos_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
         for item in &item_vec {
-            if check_collision(&p.get_pos(), &item.pos()){
+            if p.check_collision(&item.pos()){
                 p.stay_still_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
                 if (item.tex_path() == "src/images/house.png") {
                     in_menu = true;
@@ -446,7 +441,8 @@ fn main() {
 
         // Draw inventory
         inventory.draw(&mut wincan);
-  
+        //ui.draw(&mut wincan);
+
         if in_menu {
             
             let sleep_box = texture_creator.load_texture("src/images/sleep.png").unwrap();
