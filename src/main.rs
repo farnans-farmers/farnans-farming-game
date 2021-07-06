@@ -451,7 +451,7 @@ fn main() {
                     }
                     if p.get_dir() == 2 {
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
-
+                    }
                     if p.get_dir() == 3{
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
                     }
@@ -480,7 +480,7 @@ fn main() {
                     if p.get_dir() == 2 {
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
                     }
-                    if p.get_dir() == 3{
+                    if p.get_dir() == 3 {
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
                     }
                 }
@@ -493,8 +493,8 @@ fn main() {
                     }
                     if p.get_dir() == 2 {
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
-
-                    if p.get_dir() == 3{
+                    }
+                    if p.get_dir() == 3 {
                         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
                     }
                 }
