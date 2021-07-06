@@ -81,6 +81,8 @@ impl<'a> Crop<'a> {
 			self.stage = (self.stage + 1).clamp(0, 3);
 			// Change src from sprite sheet
 			self.src.set_x(self.src.x() + (TILE_SIZE as i32));
+			// Plant requires more water after growing
+			self.watered = false;
 		}
 	}
 

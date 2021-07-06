@@ -339,11 +339,24 @@ fn main() {
 
         if in_menu {
             if keystate.contains(&Keycode::Y) {
-                println!("Yes");
-                // for c in 0..crop_vec.len() {
-                //     crop_vec[c].grow();
-                // }
-                // Call grow() on all valid plants
+                //Player has selected yes
+
+                //Cut to black and then fade into night scene
+                let mut i = 0;
+                while i < 254 {
+                    wincan.copy(&texture_creator
+                        .load_texture("src/images/sleeping_screen.png")
+                        .unwrap(), None, None);
+                    wincan.set_draw_color(Color::RGBA(0, 0, 0, 255 - i));
+                    wincan.fill_rect(r);
+                    wincan.present();
+                    thread::sleep(Duration::from_millis(1));
+                    i = i + 2;
+                }
+
+                //The fading code is ripped out of the method because I wanted
+                // the growing to happen while the player could not see the screen.
+
                 for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
                     for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
                         let mut _c = pop.get_crop_with_index_mut(_x as u32, _y as u32);
@@ -355,10 +368,25 @@ fn main() {
                         }
                     }
                 }
+
+                // fade to white because the sun is coming up
+                i = 0;
+                while i < 254 {
+                    wincan.copy(&texture_creator
+                        .load_texture("src/images/sleeping_screen.png")
+                        .unwrap(), None, None);
+                    wincan.set_draw_color(Color::RGBA(255, 255, 255, i));
+                    wincan.fill_rect(r);
+                    wincan.present();
+                    thread::sleep(Duration::from_millis(1));
+                    i = i + 2;
+                }
+
                 in_menu = false;
+
             }
             if keystate.contains(&Keycode::N) {
-                println!("No");
+                //Player has chosen not to sleep
                 in_menu = false;
             }
         } else {
