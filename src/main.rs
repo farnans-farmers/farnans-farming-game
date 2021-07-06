@@ -114,6 +114,7 @@ fn main() {
 
     let mut menu_location = 0;
 
+
     let mut p = player::Player::new(
         Rect::new(
             (BG_W / 2 - PLAYER_WIDTH / 2) as i32,
@@ -522,7 +523,6 @@ fn main() {
         // Draw inventory
         p.draw(&mut wincan,player_cam_pos);
         //ui.draw(&mut wincan);
-
 
         if in_menu {
             let sleep_box = texture_creator
