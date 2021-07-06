@@ -373,9 +373,10 @@ fn main() {
                     }
                 }
                 in_menu = false;
+
             }
             if keystate.contains(&Keycode::N) {
-                println!("No");
+                //Player has chosen not to sleep
                 in_menu = false;
             }
         } else {
