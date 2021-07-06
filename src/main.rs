@@ -10,7 +10,6 @@ mod tile;
 mod inventory;
 mod population;
 
-mod ui;
 
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
