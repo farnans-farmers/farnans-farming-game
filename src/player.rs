@@ -1,4 +1,4 @@
-//! Module containing the Player struct and its 
+//! Module containing the Player struct and its
 //! associated functions
 
 use std::time::{Duration, Instant};
@@ -45,10 +45,10 @@ pub struct Player<'a> {
 
 // TODO implement player animation
 impl<'a> Player<'a> {
-	/// Creates a new `Player` instance. 
-	/// 
+	/// Creates a new `Player` instance.
+	///
 	/// # Arguments
-	/// * `pos` - Position of the player. 
+	/// * `pos` - Position of the player.
 	/// * `texture` - Sprite sheet texture
 	pub fn new(pos: Rect, texture: Texture<'a>) -> Player {
 		// Derive the number of frames from the size of the texture.
@@ -196,6 +196,17 @@ impl<'a> Player<'a> {
         };
 
 	}
+
+	pub fn get_dir(&self) -> i32 {
+		let k = match self.dir {
+			Direction::Down => 0,
+			Direction::Left => 1,
+			Direction::Right => 2,
+			Direction::Up => 3,
+		};
+		k
+	}
+
 	/// Get `src` of player
 	pub fn src(&mut self) -> Rect {
 		let k = match self.dir {
