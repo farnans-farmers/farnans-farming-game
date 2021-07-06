@@ -95,7 +95,7 @@ fn main() {
                         TILE_SIZE,
                     ),
                     texture_creator
-                        .load_texture("src/images/grass.png")
+                        .load_texture("src/images/Background_Tileset.png")
                         .unwrap(),
                 ),
                 crop::Crop::new(
@@ -195,6 +195,11 @@ fn main() {
                             results[6].parse::<crop::CropType>().unwrap(),
                         ),
                     );
+                // If crop is present, set tile as tilled
+                if results[6].parse::<std::string::String>().unwrap().to_owned() != "None" {
+                    let _tile = pop.getTileWithIndex_mut(_x as u32, _y as u32);
+                    _tile.set_tilled(true);
+                }
             }
         }
     }
@@ -365,7 +370,7 @@ fn main() {
                     for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
                         let mut _c = pop.getCropWithIndex_mut(_x as u32, _y as u32);
                         match _c.GetCropType() {
-                            "None" => {},
+                            "None" => {}
                             _ => {
                                 _c.grow();
                             }
@@ -508,7 +513,7 @@ fn main() {
                     TILE_SIZE,
                 );
                 wincan
-                    .copy(croptile.tile.texture(), None, cur_tile)
+                    .copy(croptile.tile.texture(), croptile.tile.src(), cur_tile)
                     .unwrap();
             }
         }

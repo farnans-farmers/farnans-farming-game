@@ -16,6 +16,8 @@ pub fn use_tool(x: i32, y: i32, mut pop: &mut population::Population, tool: i32)
 				_c.SetCropType("None");
 				_c.setStage(0);
 				_c.set_water(false);
+				let mut _t = pop.getTileWithIndex_mut(x as u32, y as u32);
+				_t.set_tilled(false);
 			}
 		}
 		// Hoe

@@ -1,16 +1,21 @@
 use sdl2::rect::Rect;
 use sdl2::render::Texture;
 
+use crate::TILE_SIZE;
+
 pub struct Tile<'a> {
     pos: Rect,
+    src: Rect,
     texture: Texture<'a>,
     tilled: bool,
 }
 
 impl<'a> Tile<'a> {
     pub fn new(pos: Rect, texture: Texture<'a>) -> Tile {
+        let src = Rect::new(0, 0, TILE_SIZE, TILE_SIZE);
         Tile {
             pos,
+            src,
             texture,
             tilled: false,
         }
@@ -36,6 +41,10 @@ impl<'a> Tile<'a> {
         self.pos
     }
 
+    pub fn src(&self) -> Rect {
+        self.src
+    }
+
     pub fn texture(&self) -> &Texture {
         &self.texture
     }
@@ -46,6 +55,10 @@ impl<'a> Tile<'a> {
 
     pub fn set_tilled(&mut self, till: bool) {
         self.tilled = till;
+        if till {
+            self.src = Rect::new(TILE_SIZE as i32, TILE_SIZE as i32, TILE_SIZE, TILE_SIZE);
+        } else {
+            self.src = Rect::new(0, 0, TILE_SIZE, TILE_SIZE);
+        }
     }
-
 }
