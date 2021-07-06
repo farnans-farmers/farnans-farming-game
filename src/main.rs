@@ -152,7 +152,7 @@ fn main() {
             } else if (results[0] == "crop") {
                 let _x = results[1].parse::<i32>().unwrap();
                 let _y = results[2].parse::<i32>().unwrap();
-                pop.getVec_mut()
+                pop.get_vec_mut()
                     .get_mut(_x as usize)
                     .unwrap()
                     .get_mut(_y as usize)
@@ -276,22 +276,22 @@ fn main() {
 
                     for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
                         for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
-                            let _c = pop.getCropWithIndex(_x as u32, _y as u32);
-                            match _c.GetCropType() {
+                            let _c = pop.get_crop_with_index(_x as u32, _y as u32);
+                            match _c.get_crop_type() {
                                 "None" => {}
                                 _ => {
                                     let output = "crop;".to_owned()
-                                        + &(_c.getX() / TILE_SIZE as i32).to_string()
+                                        + &(_c.get_x() / TILE_SIZE as i32).to_string()
                                         + ";"
-                                        + &(_c.getY() / TILE_SIZE as i32).to_string()
+                                        + &(_c.get_y() / TILE_SIZE as i32).to_string()
                                         + ";"
-                                        + &_c.getStage().to_string()
+                                        + &_c.get_stage().to_string()
                                         + ";"
-                                        + &_c.getTex_path()
+                                        + &_c.get_tex_path()
                                         + ";"
-                                        + &_c.getWatered().to_string()
+                                        + &_c.get_watered().to_string()
                                         + ";"
-                                        + &_c.GetCropType()
+                                        + &_c.get_crop_type()
                                         + "\n";
                                     match file.write_all(output.as_ref()) {
                                         Err(why) => panic!("couldn't write to foo.txt: {}", why),
@@ -344,8 +344,8 @@ fn main() {
                 // Call grow() on all valid plants
                 for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
                     for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
-                        let mut _c = pop.getCropWithIndex_mut(_x as u32, _y as u32);
-                        match _c.GetCropType() {
+                        let mut _c = pop.get_crop_with_index_mut(_x as u32, _y as u32);
+                        match _c.get_crop_type() {
                             "None" => {},
                             _ => {
                                 _c.grow();
@@ -496,8 +496,8 @@ fn main() {
         // Draw crops
         for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
             for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
-                let _c = pop.getCropWithIndex(_x as u32, _y as u32);
-                match _c.GetCropType() {
+                let _c = pop.get_crop_with_index(_x as u32, _y as u32);
+                match _c.get_crop_type() {
                     "None" => {}
                     _ => {
                         wincan = _c.print_crop(cur_bg.x(), cur_bg.y(), wincan);

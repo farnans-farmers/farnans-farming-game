@@ -45,8 +45,8 @@ impl<'a> Population<'a> {
 
     }
 
-    pub fn getVec_mut(&mut self) -> &mut Vec<Vec<CropTile<'a>>> {
-        &mut self.CropTile_Vec
+    pub fn get_vec_mut(&mut self) -> &mut Vec<Vec<Crop_Tile<'a>>> {
+        &mut self.crop_tile_vec
     }
 
     //Lends out Tile struct at given x, y map coordinates
@@ -61,8 +61,8 @@ impl<'a> Population<'a> {
         &self.crop_tile_vec[x as usize][y as usize].tile
     }
 
-    pub fn getTileWithIndex_mut(&mut self, x: u32, y: u32) -> &mut Tile<'a> {
-        &mut self.CropTile_Vec[x as usize][y as usize].tile
+    pub fn get_tile_with_index_mut(&mut self, x: u32, y: u32) -> &mut Tile<'a> {
+        &mut self.crop_tile_vec[x as usize][y as usize].tile
     }
 
     //Lends out Crop struct at given x, y map coordinates
@@ -77,6 +77,9 @@ impl<'a> Population<'a> {
         &self.crop_tile_vec[x as usize][y as usize].crop
     }
 
+    pub fn get_crop_with_index_mut(&mut self, x: u32, y: u32) -> &mut Crop<'a> {
+        &mut self.crop_tile_vec[x as usize][y as usize].crop
+    }
 
     pub fn update_all_plants(&self) {
 
@@ -88,8 +91,7 @@ impl<'a> Population<'a> {
 
     pub fn destroy_plant(&self) {
 
+    }
 
-    pub fn plantSeed(&self) {}
 
-    pub fn destroyPlant(&self) {}
 }
