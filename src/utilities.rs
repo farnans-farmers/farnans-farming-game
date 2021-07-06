@@ -12,15 +12,23 @@ pub fn use_tool(x: i32, y: i32, mut pop: &mut population::Population, tool: i32)
 			if pop.getCropWithIndex(x as u32, y as u32).getStage() == 3 {
 				// TODO add to inventory
 				// Set tile's crop to "None" type to hide it
-				pop.getCropWithIndex_mut(x as u32, y as u32)
-					.SetCropType("None");
+				let mut _c = pop.getCropWithIndex_mut(x as u32, y as u32);
+				_c.SetCropType("None");
+				_c.setStage(0);
+				_c.set_water(false);
 			}
 		}
 		// Hoe
 		1 => {
-			// If tile is empty and not tilled, set as tilled dirt
-			pop.getTileWithIndex_mut(x as u32, y as u32)
-				.set_tilled(true);
+			// If tile is empty, set as tilled dirt
+			if pop
+				.getCropWithIndex(x as u32, y as u32)
+				.GetCropType()
+				.to_owned() == "None"
+			{
+				let mut _tile = pop.getTileWithIndex_mut(x as u32, y as u32);
+				_tile.set_tilled(true);
+			}
 		}
 		// Watering can
 		2 => {
