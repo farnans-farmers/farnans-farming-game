@@ -177,7 +177,7 @@ fn main() {
                     );
                 // If crop is present, set tile as tilled
                 if results[6].parse::<std::string::String>().unwrap().to_owned() != "None" {
-                    let _tile = pop.getTileWithIndex_mut(_x as u32, _y as u32);
+                    let _tile = pop.get_tile_with_index_mut(_x as u32, _y as u32);
                     _tile.set_tilled(true);
                 }
             }
@@ -523,7 +523,7 @@ fn main() {
                 );
 
                 wincan
-                    .copy(croptile.tile.texture(), croptile.tile.src(), cur_tile)
+                    .copy(crop_tile.tile.texture(), crop_tile.tile.src(), cur_tile)
                     .unwrap();
 
             }
