@@ -394,7 +394,15 @@ fn main() {
             }
 
             if keystate.contains(&Keycode::C) {
+                // TESTS
+                // Harvest [21, 22]
                 // utilities::use_tool(21, 22, &mut pop, 0);
+                // Till [21,22]
+                // utilities::use_tool(21, 22, &mut pop, 1);
+                // Plant [21, 22]
+                // utilities::use_tool(21, 22, &mut pop, 3);
+                // Water [21, 22]
+                // utilities::use_tool(21, 22, &mut pop, 2);
             }
 
             if keystate.contains(&Keycode::Num1) {
