@@ -392,7 +392,7 @@ fn main() {
                 //     println!("Click!");
                 // }
                 // if keystate.contains(&Keycode::C) {
-                if event_pump.mouse_state().left() {
+                if event_pump.mouse_state().left() || keystate.contains(&Keycode::C) {
                     let offset: (i32, i32) = {
                         match p.get_dir() {
                             // Down
@@ -596,7 +596,8 @@ fn main() {
                                 }
                             }
                             // Set tile watered to false
-                            pop.get_tile_with_index_mut(_x as u32, _y as u32).set_water(false);
+                            pop.get_tile_with_index_mut(_x as u32, _y as u32)
+                                .set_water(false);
                         }
                     }
 
