@@ -246,7 +246,7 @@ fn main() {
     crop_vec.get_mut(0).unwrap().grow();*/
     // TODO remove crop test ^
 
-
+    let mut store = store::Store::new(24);
 
     // variable for sleep menu
     let mut in_menu = false;
