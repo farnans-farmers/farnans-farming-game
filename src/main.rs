@@ -14,6 +14,7 @@ mod store;
 
 
 use anim::Animation;
+use item::Item;
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
@@ -46,6 +47,12 @@ enum Menu {
     Sleep,
     ToMarket,
     Shop,
+}
+
+#[derive(Copy, Clone)]
+enum Area {
+    Home,
+    Market,
 }
 
 
@@ -256,6 +263,15 @@ fn main() {
 
     let mut store = store::Store::new(24);
 
+    let mut in_area = Area::Home;
+    // Things that might be used every frame but should only be loaded once:
+    let bg_tiles_tex = texture_creator.load_texture("src/images/Background_Tileset.png").unwrap();
+    // TODO(branden): move this someplace reasonable
+    let market_house = {
+        let pos = Rect::new(2000, 2000, 533, 408);
+        let texture = texture_creator.load_texture("src/images/Farmhouse.png").unwrap();
+        Item::new(pos, texture, "src/images/Farmhouse.png".into(), true)
+    };
     // variable for sleep menu
     let mut in_menu: Option<Menu> = None;
     'gameloop: loop {
@@ -576,7 +592,9 @@ fn main() {
                         wincan.present();
                         thread::sleep(Duration::from_millis(15));
                     }
-                    // TODO: implement going to market
+                    // Do the actual going.
+                    // TODO(branden): change player position.
+                    in_area = Area::Market;
                     // Gone to market.
                     in_menu = None;
                 } else if keystate.contains(&Keycode::N) {
@@ -609,36 +627,43 @@ fn main() {
         let player_vel = p.set_speed((x_deltav_f, y_deltav_f));
         p.set_direction(player_vel);
 
-        // Update player position
+        // Update player position. Varies per area for collision detection.
+        match in_area {
+            Area::Home => {
+                // X
+                p.update_pos_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
+                for item in &item_vec {
+                    if p.check_collision(&item.pos()) {
+                        p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
+                        if item.tex_path() == "src/images/house.png" {
+                            in_menu = Some(Menu::Sleep);
+                        } else if item.tex_path() == "src/images/go_market.png" {
+                            in_menu = Some(Menu::ToMarket);
+                        } else if item.tex_path() == "src/images/Barn.png" {
+                            in_menu = Some(Menu::Shop);
+                        }
+                    }
+                }
 
-        // X
-        p.update_pos_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-
-        for item in &item_vec {
-            if p.check_collision(&item.pos()) {
-                p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-                if item.tex_path() == "src/images/house.png" {
-                    in_menu = Some(Menu::Sleep);
-                } else if item.tex_path() == "src/images/go_market.png" {
-                    in_menu = Some(Menu::ToMarket);
-                } else if item.tex_path() == "src/images/Barn.png" {
-                    in_menu = Some(Menu::Shop);
+                //Y
+                p.update_pos_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
+                for item in &item_vec {
+                    if p.check_collision(&item.pos()){
+                        p.stay_still_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
+                        if item.tex_path() == "src/images/house.png" {
+                            in_menu = Some(Menu::Sleep);
+                        } else if item.tex_path() == "src/images/go_market.png" {
+                            in_menu = Some(Menu::ToMarket);
+                        } else if item.tex_path() == "src/images/Barn.png" {
+                            in_menu = Some(Menu::Shop);
+                        }
+                    }
                 }
             }
-        }
-
-        //Y
-        p.update_pos_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-        for item in &item_vec {
-            if p.check_collision(&item.pos()){
-                p.stay_still_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-                if item.tex_path() == "src/images/house.png" {
-                    in_menu = Some(Menu::Sleep);
-                } else if item.tex_path() == "src/images/go_market.png" {
-                    in_menu = Some(Menu::ToMarket);
-                } else if item.tex_path() == "src/images/Barn.png" {
-                    in_menu = Some(Menu::Shop);
-                }
+            Area::Market => {
+                // TODO: check collisions for market items
+                p.update_pos_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
+                p.update_pos_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
             }
         }
 
@@ -664,58 +689,71 @@ fn main() {
         wincan.clear();
 
         // Draw tiles
-        for crop_tile in pop.get_vec().iter().flatten() {
-            let x_pos = crop_tile.tile.x() - cur_bg.x();
-            let y_pos = crop_tile.tile.y() - cur_bg.y();
-
-            //Don't bother drawing any tiles that are off screen
-            if x_pos > -(TILE_SIZE as i32)
-                && x_pos < (CAM_W as i32)
-                && y_pos > -(TILE_SIZE as i32)
-                && y_pos < (CAM_H as i32)
-            {
-                let cur_tile = Rect::new(
-                    crop_tile.tile.x() - cur_bg.x(),
-                    crop_tile.tile.y() - cur_bg.y(),
-                    TILE_SIZE,
-                    TILE_SIZE,
-                );
-
-                wincan
-                    .copy(crop_tile.tile.texture(), crop_tile.tile.src(), cur_tile)
-
-                    .unwrap();
-
-            }
-        }
-
-        // Drawing item
-        for item in &item_vec {
-            wincan = item.print_item(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
-        }
-
-        // TODO crops will probably be stored with the tile grid
-        // eventually. Change this to loop over that structure then
-        // for c in crop_vec.iter() {
-        //     wincan = c.print_crop(cur_bg.x(), cur_bg.y(), wincan);
-        // }
-
-        // Draw crops
-        for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
-            for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
-                let _c = pop.get_crop_with_index(_x as u32, _y as u32);
-                match _c.get_crop_type() {
-                    "None" => {}
-                    _ => {
-                        wincan = _c.print_crop(cur_bg.x(), cur_bg.y(), wincan);
+        match in_area {
+            Area::Home => {
+                for crop_tile in pop.get_vec().iter().flatten() {
+                    let x_pos = crop_tile.tile.x() - cur_bg.x();
+                    let y_pos = crop_tile.tile.y() - cur_bg.y();
+        
+                    //Don't bother drawing any tiles that are off screen
+                    if x_pos > -(TILE_SIZE as i32)
+                        && x_pos < (CAM_W as i32)
+                        && y_pos > -(TILE_SIZE as i32)
+                        && y_pos < (CAM_H as i32)
+                    {
+                        let cur_tile = Rect::new(
+                            crop_tile.tile.x() - cur_bg.x(),
+                            crop_tile.tile.y() - cur_bg.y(),
+                            TILE_SIZE,
+                            TILE_SIZE,
+                        );
+        
+                        wincan
+                            .copy(crop_tile.tile.texture(), crop_tile.tile.src(), cur_tile)
+        
+                            .unwrap();
+        
+                    }
+                }
+        
+                // Drawing item
+                for item in &item_vec {
+                    wincan = item.print_item(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
+                }
+        
+                // TODO crops will probably be stored with the tile grid
+                // eventually. Change this to loop over that structure then
+                // for c in crop_vec.iter() {
+                //     wincan = c.print_crop(cur_bg.x(), cur_bg.y(), wincan);
+                // }
+        
+                // Draw crops
+                for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
+                    for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
+                        let _c = pop.get_crop_with_index(_x as u32, _y as u32);
+                        match _c.get_crop_type() {
+                            "None" => {}
+                            _ => {
+                                wincan = _c.print_crop(cur_bg.x(), cur_bg.y(), wincan);
+                            }
+                        }
                     }
                 }
             }
+            Area::Market => {
+                // TODO(branden): draw a full-size area with scrolling &c.
+                // Draw tiles. All tiles in the market are grass for now.
+                let tr = Rect::new(0, 0, TILE_SIZE, TILE_SIZE);
+                for x in 0..BG_W/TILE_SIZE + 1 {
+                    for y in 0..BG_H/TILE_SIZE + 1 {
+                        let dst = Rect::new((x*TILE_SIZE) as i32, (y*TILE_SIZE) as i32, TILE_SIZE, TILE_SIZE);
+                        wincan.copy(&bg_tiles_tex, tr, dst).unwrap();
+                    }
+                }
+                // Draw "market house".
+                wincan = market_house.print_item(cur_bg.x(), cur_bg.y(), CAM_W, CAM_H, wincan);
+            }
         }
-
-        // Draw player
-        //let src = p.src();
-        //wincan.copy(p.texture(), src, player_cam_pos).unwrap();
 
         // Draw inventory
         p.draw(&mut wincan,player_cam_pos);
