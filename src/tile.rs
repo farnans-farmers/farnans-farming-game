@@ -60,6 +60,16 @@ impl<'a> Tile<'a> {
         } else {
             self.src = Rect::new(0, 0, TILE_SIZE, TILE_SIZE);
         }
+    }
 
+    pub fn set_water(&mut self, water: bool) {
+        println!("In set_water");
+        if self.tilled() {
+            if water {
+                self.src = Rect::new(2 * TILE_SIZE as i32, TILE_SIZE as i32, TILE_SIZE, TILE_SIZE);
+            } else {
+                self.src = Rect::new(TILE_SIZE as i32, TILE_SIZE as i32, TILE_SIZE, TILE_SIZE);
+            }
+        }
     }
 }
