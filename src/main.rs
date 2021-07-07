@@ -13,6 +13,7 @@ mod store;
 
 
 
+use anim::Animation;
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
@@ -25,6 +26,7 @@ use sdl2::render::WindowCanvas;
 use std::collections::HashSet;
 use std::thread;
 use std::time::Duration;
+use std::time::Instant;
 
 use crate::player::{Direction, PLAYER_HEIGHT, PLAYER_WIDTH};
 use std::fs::File;
@@ -39,6 +41,12 @@ const BG_W: u32 = 3000;
 const BG_H: u32 = 3000;
 const TITLE: &str = "Farnan's Farmers";
 pub const TILE_SIZE: u32 = 80; // Make this public so we can import it elsewhere
+
+enum Menu {
+    Sleep,
+    ToMarket,
+    Shop,
+}
 
 
 fn main() {
@@ -249,9 +257,7 @@ fn main() {
     let mut store = store::Store::new(24);
 
     // variable for sleep menu
-    let mut in_menu = false;
-    let mut in_shop = false;
-
+    let mut in_menu: Option<Menu> = None;
     'gameloop: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -346,237 +352,257 @@ fn main() {
         let mut x_deltav_f: f32 = 0.0;
         let mut y_deltav_f: f32 = 0.0;
 
-        if in_menu {
-            if keystate.contains(&Keycode::Y) {
-                //Player has selected yes
-
-                //Cut to black and then fade into night scene
-                let mut i = 0;
-                while i < 254 {
-                    wincan.copy(&texture_creator
-                        .load_texture("src/images/sleeping_screen.png")
-                        .unwrap(), None, None);
-                    wincan.set_draw_color(Color::RGBA(0, 0, 0, 255 - i));
-                    wincan.fill_rect(r);
-                    wincan.present();
-                    thread::sleep(Duration::from_millis(1));
-                    i = i + 2;
+        match in_menu {
+            None => {
+                // Change directions using WASD
+                if keystate.contains(&Keycode::W) {
+                    y_deltav_f -= player::ACCEL_RATE;
+                }
+                if keystate.contains(&Keycode::A) {
+                    x_deltav_f -= player::ACCEL_RATE;
+                }
+                if keystate.contains(&Keycode::S) {
+                    y_deltav_f += player::ACCEL_RATE;
+                }
+                if keystate.contains(&Keycode::D) {
+                    x_deltav_f += player::ACCEL_RATE;
+                }
+                if keystate.contains(&Keycode::C) {
+                    if p.get_selected() == 0 {
+                        if p.get_dir() == 0 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 0);
+                        }
+                        if p.get_dir() == 1 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 0);
+                        }
+                        if p.get_dir() == 2 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 0);
+                        }
+                        if p.get_dir() == 3{
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 0);
+                        }
+                    }
+                    if p.get_selected() == 1 {
+                        if p.get_dir() == 0 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
+                        }
+                        if p.get_dir() == 1 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
+                        }
+                        if p.get_dir() == 2 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
+                        }
+                        if p.get_dir() == 3{
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
+                        }
+                    }
+                    if p.get_selected() == 2 {
+                        if p.get_dir() == 0 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
+                        }
+                        if p.get_dir() == 1 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
+                        }
+                        if p.get_dir() == 2 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
+                        }
+                        if p.get_dir() == 3{
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
+                        }
+                    }
+                    if p.get_selected() == 3 {
+                        if p.get_dir() == 0 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
+                        }
+                        if p.get_dir() == 1 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
+                        }
+                        if p.get_dir() == 2 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
+                        }
+                        if p.get_dir() == 3{
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
+                        }
+                    }
+                    if p.get_selected() == 4 {
+                        if p.get_dir() == 0 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
+                        }
+                        if p.get_dir() == 1 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
+                        }
+                        if p.get_dir() == 2 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
+                        }
+                        if p.get_dir() == 3{
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
+                        }
+                    }
+                    if p.get_selected() == 5 {
+                        if p.get_dir() == 0 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
+                        }
+                        if p.get_dir() == 1 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
+                        }
+                        if p.get_dir() == 2 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
+                        }
+                        if p.get_dir() == 3 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
+                        }
+                    }
+                    if p.get_selected() == 6 {
+                        if p.get_dir() == 0 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
+                        }
+                        if p.get_dir() == 1 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
+                        }
+                        if p.get_dir() == 2 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
+                        }
+                        if p.get_dir() == 3 {
+                            utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
+                        }
+                    }
+                    // TESTS
+                    // Harvest [21, 22]
+                    // utilities::use_tool(21, 22, &mut pop, 0);
+                    // Till [21,22]
+                    // utilities::use_tool(21, 22, &mut pop, 1);
+                    // Plant [21, 22]
+                    // utilities::use_tool(21, 22, &mut pop, 3);
+                    // Water [21, 22]
+                    // utilities::use_tool(21, 22, &mut pop, 2);
                 }
 
-                //The fading code is ripped out of the method because I wanted
-                // the growing to happen while the player could not see the screen.
+                if keystate.contains(&Keycode::Num1) {
+                    p.set_selected(0);
+                }
+                if keystate.contains(&Keycode::Num2) {
+                    p.set_selected(1);
+                }
+                if keystate.contains(&Keycode::Num3) {
+                    p.set_selected(2);
+                }
+                if keystate.contains(&Keycode::Num4) {
+                    p.set_selected(3);
+                }
+                if keystate.contains(&Keycode::Num5) {
+                    p.set_selected(4);
+                }
+                if keystate.contains(&Keycode::Num6) {
+                    p.set_selected(5);
+                }
+                if keystate.contains(&Keycode::Num7) {
+                    p.set_selected(6);
+                }
+                if keystate.contains(&Keycode::Num8) {
+                    p.set_selected(7);
+                }
+                if keystate.contains(&Keycode::Num9) {
+                    p.set_selected(8);
+                }
+                if keystate.contains(&Keycode::Num0) {
+                    p.set_selected(9);
+                }
+            }
+            Some(Menu::Sleep) => {
+                if keystate.contains(&Keycode::Y) {
+                    //Player has selected yes
 
-                for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
-                    for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
-                        let mut _c = pop.get_crop_with_index_mut(_x as u32, _y as u32);
-                        match _c.get_crop_type() {
-                            "None" => {},
-                            _ => {
-                                _c.grow();
+                    //Cut to black and then fade into night scene
+                    let mut i = 0;
+                    while i < 254 {
+                        wincan.copy(&texture_creator
+                            .load_texture("src/images/sleeping_screen.png")
+                            .unwrap(), None, None);
+                        wincan.set_draw_color(Color::RGBA(0, 0, 0, 255 - i));
+                        wincan.fill_rect(r);
+                        wincan.present();
+                        thread::sleep(Duration::from_millis(1));
+                        i = i + 2;
+                    }
+
+                    //The fading code is ripped out of the method because I wanted
+                    // the growing to happen while the player could not see the screen.
+
+                    for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
+                        for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
+                            let mut _c = pop.get_crop_with_index_mut(_x as u32, _y as u32);
+                            match _c.get_crop_type() {
+                                "None" => {},
+                                _ => {
+                                    _c.grow();
+                                }
                             }
                         }
                     }
-                }
 
-                // fade to white because the sun is coming up
-                i = 0;
-                while i < 254 {
-                    wincan.copy(&texture_creator
-                        .load_texture("src/images/sleeping_screen.png")
-                        .unwrap(), None, None);
-                    wincan.set_draw_color(Color::RGBA(255, 255, 255, i));
-                    wincan.fill_rect(r);
-                    wincan.present();
-                    thread::sleep(Duration::from_millis(1));
-                    i = i + 2;
-                }
-
-                in_menu = false;
-
-            }
-            if keystate.contains(&Keycode::N) {
-                //Player has chosen not to sleep
-                in_menu = false;
-            }
-        } 
-
-        if in_shop {
-            if keystate.contains(&Keycode::Q) {
-                in_shop = false;
-            }
-            if keystate.contains(&Keycode::Up) {
-                store.navigate(-1);
-                thread::sleep(Duration::from_millis(80));
-            }
-            if keystate.contains(&Keycode::Down) {
-                store.navigate(1);
-                thread::sleep(Duration::from_millis(80));
-            }
-            if keystate.contains(&Keycode::Left) {
-                store.cycle(-1);
-                thread::sleep(Duration::from_millis(80));
-            }
-            if keystate.contains(&Keycode::Right) {
-                store.cycle(1);
-                thread::sleep(Duration::from_millis(80));
-            }
-        } 
-
-        else {
-            // Change directions using WASD
-            if keystate.contains(&Keycode::W) {
-                y_deltav_f -= player::ACCEL_RATE;
-            }
-            if keystate.contains(&Keycode::A) {
-                x_deltav_f -= player::ACCEL_RATE;
-            }
-            if keystate.contains(&Keycode::S) {
-                y_deltav_f += player::ACCEL_RATE;
-            }
-            if keystate.contains(&Keycode::D) {
-                x_deltav_f += player::ACCEL_RATE;
-            }
-
-            if keystate.contains(&Keycode::C) {
-                if p.get_selected() == 0 {
-                    if p.get_dir() == 0 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 0);
-                    }
-                    if p.get_dir() == 1 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 0);
-                    }
-                    if p.get_dir() == 2 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 0);
-                    }
-                    if p.get_dir() == 3{
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 0);
+                    // fade to white because the sun is coming up
+                    i = 0;
+                    while i < 254 {
+                        wincan.copy(&texture_creator
+                            .load_texture("src/images/sleeping_screen.png")
+                            .unwrap(), None, None);
+                        wincan.set_draw_color(Color::RGBA(255, 255, 255, i));
+                        wincan.fill_rect(r);
+                        wincan.present();
+                        thread::sleep(Duration::from_millis(1));
+                        i = i + 2;
                     }
 
-                }
-                if p.get_selected() == 1 {
-                    if p.get_dir() == 0 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
-                    }
-                    if p.get_dir() == 1 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
-                    }
-                    if p.get_dir() == 2 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
-                    }
-                    if p.get_dir() == 3{
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
-                    }
-                }
-                if p.get_selected() == 2 {
-                    if p.get_dir() == 0 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
-                    }
-                    if p.get_dir() == 1 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
-                    }
-                    if p.get_dir() == 2 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
-                    }
-                    if p.get_dir() == 3{
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
-                    }
-                }
-                if p.get_selected() == 3 {
-                    if p.get_dir() == 0 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
-                    }
-                    if p.get_dir() == 1 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
-                    }
-                    if p.get_dir() == 2 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
-                    }
-                    if p.get_dir() == 3{
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
-                    }
-                }
-                if p.get_selected() == 4 {
-                    if p.get_dir() == 0 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
-                    }
-                    if p.get_dir() == 1 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
-                    }
-                    if p.get_dir() == 2 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
-                    }
-                    if p.get_dir() == 3{
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
-                    }
-                }
-                if p.get_selected() == 5 {
-                    if p.get_dir() == 0 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
-                    }
-                    if p.get_dir() == 1 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
-                    }
-                    if p.get_dir() == 2 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
-                    }
-                    if p.get_dir() == 3 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
-                    }
-                }
-                if p.get_selected() == 6 {
-                    if p.get_dir() == 0 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
-                    }
-                    if p.get_dir() == 1 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
-                    }
-                    if p.get_dir() == 2 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
-                    }
-                    if p.get_dir() == 3 {
-                        utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
-                    }
-                }
-                // TESTS
-                // Harvest [21, 22]
-                // utilities::use_tool(21, 22, &mut pop, 0);
-                // Till [21,22]
-                // utilities::use_tool(21, 22, &mut pop, 1);
-                // Plant [21, 22]
-                // utilities::use_tool(21, 22, &mut pop, 3);
-                // Water [21, 22]
-                // utilities::use_tool(21, 22, &mut pop, 2);
-            }
+                    in_menu = None;
 
-            if keystate.contains(&Keycode::Num1) {
-                p.set_selected(0);
+                }
+                if keystate.contains(&Keycode::N) {
+                    //Player has chosen not to sleep
+                    in_menu = None;
+                }
             }
-            if keystate.contains(&Keycode::Num2) {
-                p.set_selected(1);
+            Some(Menu::ToMarket) => {
+                if keystate.contains(&Keycode::Y) {
+                    // Go to market. First fade to white.
+                    let alphas: Vec<u8> = (0..=255).collect();
+                    let dt = Duration::from_secs_f64(2.0/(alphas.len() as f64));
+                    let mut blank = Animation::new(alphas, dt, Instant::now());
+                    blank.set_freezing();
+                    while blank.current_index() < 255 {
+                        let tex = texture_creator.load_texture("src/images/traveling_screen.png").unwrap();
+                        wincan.copy(&tex, None, None).unwrap();
+                        wincan.set_draw_color(Color::RGBA(255, 255, 255, *blank.tick()));
+                        wincan.fill_rect(r).unwrap();
+                        wincan.present();
+                        thread::sleep(Duration::from_millis(15));
+                    }
+                    // TODO: implement going to market
+                    // Gone to market.
+                    in_menu = None;
+                } else if keystate.contains(&Keycode::N) {
+                    in_menu = None;
+                }
             }
-            if keystate.contains(&Keycode::Num3) {
-                p.set_selected(2);
-            }
-            if keystate.contains(&Keycode::Num4) {
-                p.set_selected(3);
-            }
-            if keystate.contains(&Keycode::Num5) {
-                p.set_selected(4);
-            }
-            if keystate.contains(&Keycode::Num6) {
-                p.set_selected(5);
-            }
-            if keystate.contains(&Keycode::Num7) {
-                p.set_selected(6);
-            }
-            if keystate.contains(&Keycode::Num8) {
-                p.set_selected(7);
-            }
-            if keystate.contains(&Keycode::Num9) {
-                p.set_selected(8);
-            }
-            if keystate.contains(&Keycode::Num0) {
-                p.set_selected(9);
+            Some(Menu::Shop) => {
+                if keystate.contains(&Keycode::Q) {
+                    in_menu = None;
+                }
+                if keystate.contains(&Keycode::Up) {
+                    store.navigate(-1);
+                    thread::sleep(Duration::from_millis(80));
+                }
+                if keystate.contains(&Keycode::Down) {
+                    store.navigate(1);
+                    thread::sleep(Duration::from_millis(80));
+                }
+                if keystate.contains(&Keycode::Left) {
+                    store.cycle(-1);
+                    thread::sleep(Duration::from_millis(80));
+                }
+                if keystate.contains(&Keycode::Right) {
+                    store.cycle(1);
+                    thread::sleep(Duration::from_millis(80));
+                }
             }
         }
 
@@ -591,13 +617,13 @@ fn main() {
         for item in &item_vec {
             if p.check_collision(&item.pos()) {
                 p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-                if (item.tex_path() == "src/images/house.png") {
-                    in_menu = true;
+                if item.tex_path() == "src/images/house.png" {
+                    in_menu = Some(Menu::Sleep);
+                } else if item.tex_path() == "src/images/go_market.png" {
+                    in_menu = Some(Menu::ToMarket);
+                } else if item.tex_path() == "src/images/Barn.png" {
+                    in_menu = Some(Menu::Shop);
                 }
-                if (item.tex_path() == "src/images/Barn.png") {
-                    in_shop = true;
-                }
-
             }
         }
 
@@ -606,11 +632,12 @@ fn main() {
         for item in &item_vec {
             if p.check_collision(&item.pos()){
                 p.stay_still_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-                if (item.tex_path() == "src/images/house.png") {
-                    in_menu = true;
-                }
-                if (item.tex_path() == "src/images/Barn.png") {
-                    in_shop = true;
+                if item.tex_path() == "src/images/house.png" {
+                    in_menu = Some(Menu::Sleep);
+                } else if item.tex_path() == "src/images/go_market.png" {
+                    in_menu = Some(Menu::ToMarket);
+                } else if item.tex_path() == "src/images/Barn.png" {
+                    in_menu = Some(Menu::Shop);
                 }
             }
         }
@@ -694,17 +721,27 @@ fn main() {
         p.draw(&mut wincan,player_cam_pos);
         //ui.draw(&mut wincan);
 
-        if in_menu {
-            let sleep_box = texture_creator
-                .load_texture("src/images/sleep.png")
-                .unwrap();
-            wincan
-                .copy(&sleep_box, None, Rect::new(400, 400, 600, 180))
-                .unwrap();
-        }
-
-        if in_shop {
-            store.draw(&mut wincan);
+        match in_menu {
+            None => {}
+            Some(Menu::Sleep) => {
+                let sleep_box = texture_creator
+                    .load_texture("src/images/sleep.png")
+                    .unwrap();
+                wincan
+                    .copy(&sleep_box, None, Rect::new(400, 400, 600, 180))
+                    .unwrap();
+            }
+            Some(Menu::ToMarket) => {
+                let go_box = texture_creator
+                    .load_texture("src/images/market_menu.png")
+                    .unwrap();
+                wincan
+                    .copy(&go_box, None, Rect::new(400, 400, 600, 180))
+                    .unwrap()
+            }
+            Some(Menu::Shop) => {
+                store.draw(&mut wincan);
+            }
         }
 
         wincan.present();

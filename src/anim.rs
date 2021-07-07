@@ -18,6 +18,7 @@ pub struct Animation<T> {
     frames: Vec<T>,
     dur: Duration,
     next_frame: Instant,
+    freezes: bool,
 }
 
 impl<T> Animation<T> {
@@ -32,12 +33,12 @@ impl<T> Animation<T> {
         if frame_length <= Duration::ZERO {
             panic!("frame duration must be positive")
         }
-        let now = Instant::now();
         Animation {
             k: 0,
             frames: frames,
             dur: frame_length,
             next_frame: base + frame_length,
+            freezes: false,
         }
     }
 
@@ -50,6 +51,13 @@ impl<T> Animation<T> {
         self
     }
 
+    /// Sets the animation as freezing, i.e. non-looping. This applies to both
+    /// framerate-independent and frame count modes. Returns self for chaining.
+    pub fn set_freezing(&mut self) -> &mut Animation<T> {
+        self.freezes = true;
+        self
+    }
+
     /// Computes the frame to use at the given time. Does nothing if
     /// when is earlier than the last tick.
     pub fn tick_at(&mut self, when: Instant) -> &T {
@@ -58,7 +66,12 @@ impl<T> Animation<T> {
         }
         let d = when.duration_since(self.next_frame).as_micros() as usize;
         let fp = self.dur.as_micros() as usize;
-        let adv = d / fp + 1;
+        let mut adv = d / fp + 1;
+        // If the animation freezes, then adv should be limited to the
+        // number of frames remaining.
+        if self.freezes && self.k + adv >= self.frames.len() {
+            adv = self.frames.len() - self.k - 1;
+        }
         let nk = (self.k + adv) % self.frames.len();
         self.k = nk as usize;
         let dt = adv * self.dur.as_micros() as usize;
@@ -74,6 +87,9 @@ impl<T> Animation<T> {
     /// Advances a number of frames regardless of time. The last frame time
     /// advances by the equivalent of n frames.
     pub fn advance(&mut self, n: usize) -> &T {
+        if self.freezes && self.k + n >= self.frames.len() {
+            return self.advance(self.frames.len() - self.k - 1);
+        }
         self.k += n;
         self.k %= self.frames.len();
         let dt = (n as u128) * self.dur.as_micros();
@@ -262,6 +278,15 @@ mod tests {
 		}
 		assert_eq!(anim.current_index(), 0);
 	}
+
+    #[test]
+    fn freezing() {
+        let v = vec![1, 2, 3];
+        let mut anim = Animation::new(v, Duration::from_secs(1), Instant::now());
+        anim.set_freezing();
+        assert_eq!(*anim.advance(3), 3);
+        assert_eq!(*anim.next(), 3);
+    }
 
     #[test]
     #[should_panic]
