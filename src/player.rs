@@ -37,19 +37,20 @@ pub enum Direction {
 
 /// Player struct
 pub struct Player<'a> {
-    /// Rectangle to manage player position
-    pos: Rect,
-    /// Animation spritesheet
-    src: Vec<Animation<Rect>>,
-    /// Texture of sprite sheet
-    texture: Texture<'a>,
-    /// Direction the player is facing
-    dir: Direction,
-    /// Whether the player is moving
-    moving: bool,
-    /// Player's velocity vector
-    velocity: (f32, f32),
-    inventory: Inventory<'a>,
+	/// Rectangle to manage player position
+	pos: Rect,
+	/// Animation spritesheet
+	src: Vec<Animation<Rect>>,
+	/// Texture of sprite sheet
+	texture: Texture<'a>,
+	/// Direction the player is facing
+	dir: Direction,
+	/// Whether the player is moving
+	moving: bool,
+	/// Player's velocity vector
+	velocity: (f32,f32),
+
+	inventory: Inventory<'a>,
 }
 
 // TODO implement player animation
@@ -82,18 +83,7 @@ impl<'a> Player<'a> {
             anims.push(anim);
         }
 
-        let inventory_slots: Vec<Item> = (0..10)
-            .map(|x| {
-                Item::new(
-                    Rect::new(x * 32, 0, 32, 32),
-                    texture_creator
-                        .load_texture("src/images/itemMenu.png")
-                        .unwrap(),
-                    "src/images/itemMenu.png".parse().unwrap(),
-                    false,
-                )
-            })
-            .collect();
+    	let inventory = Inventory::new(texture_creator);
 
         //Setting up crop vectors for inventory
         let mut carrot_vec: Vec < Crop <'a> > = Vec::new();
