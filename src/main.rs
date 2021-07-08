@@ -5,8 +5,10 @@ mod anim;
 mod crop;
 mod inventory;
 mod item;
+mod market_transition_menu;
 mod player;
 mod population;
+mod sleep_menu;
 mod store;
 mod tile;
 mod utilities;
@@ -42,14 +44,14 @@ const BG_H: u32 = 3000;
 const TITLE: &str = "Farnan's Farmers";
 pub const TILE_SIZE: u32 = 80; // Make this public so we can import it elsewhere
 
-enum Menu {
+pub enum Menu {
     Sleep,
     ToMarket,
     Shop,
 }
 
 #[derive(Copy, Clone)]
-enum Area {
+pub enum Area {
     Home,
     Market,
 }
@@ -141,19 +143,23 @@ fn main() {
         &texture_creator,
     );
 
-    let mut item_vec = Vec::new();
+    let mut home_item_vec = Vec::new();
+    let mut market_item_vec = Vec::new();
     let mut crop_vec: Vec<crop::Crop> = Vec::new();
 
     //Loading items and crops into the game
+    //This parenthesis shows all for the home screen, but we load market stuff into the vector below.
     {
-        let mut file = File::open("src/foo.txt").expect("Can't open save file");
-        let mut contents = String::new();
-        file.read_to_string(&mut contents).expect("Can't read file");
-        print!("{}", contents);
-        for line in contents.lines() {
+        let mut home_file = File::open("src/home_data.txt").expect("Can't open save home_file");
+        let mut home_contents = String::new();
+        home_file
+            .read_to_string(&mut home_contents)
+            .expect("Can't read home_file");
+        print!("{}", home_contents);
+        for line in home_contents.lines() {
             let results: Vec<&str> = line.split(";").collect();
             if (results[0] == "item") {
-                item_vec.push(item::Item::new(
+                home_item_vec.push(item::Item::new(
                     Rect::new(
                         results[1].parse::<i32>().unwrap(),
                         results[2].parse::<i32>().unwrap(),
@@ -202,65 +208,29 @@ fn main() {
         }
     }
 
-    /*    let barn = item::Item::new(
-        Rect::new(200, 200, 400, 320),
-        texture_creator.load_texture("src/images/Barn.png").unwrap(),
-        true,
-    );*/
-
-    /*    let farmhs = item::Item::new(
-        Rect::new(2000, 2000, 400, 320),
-        texture_creator
-            .load_texture("src/images/house.png")
-            .unwrap(),
-        true,
-    );*/
-
-    // TODO testing crop render with placeholder; remove later
-    /*    let mut test_crops: Vec<crop::Crop> = vec![
-        crop::Crop::new(
-            crop::CropType::Carrot,
-            Rect::new(
-                0 * TILE_SIZE as i32,
-                0 * TILE_SIZE as i32,
-                TILE_SIZE,
-                TILE_SIZE,
-            ),
-            texture_creator
-                .load_texture("src/images/CropPlaceholder.png")
-                .unwrap(),
-        ),
-        crop::Crop::new(
-            crop::CropType::Corn,
-            Rect::new(
-                1 * TILE_SIZE as i32,
-                0 * TILE_SIZE as i32,
-                TILE_SIZE,
-                TILE_SIZE,
-            ),
-            texture_creator
-                .load_texture("src/images/CropPlaceholder.png")
-                .unwrap(),
-        ),
-        crop::Crop::new(
-            crop::CropType::Potato,
-            Rect::new(
-                0 * TILE_SIZE as i32,
-                1 * TILE_SIZE as i32,
-                TILE_SIZE,
-                TILE_SIZE,
-            ),
-            texture_creator
-                .load_texture("src/images/CropPlaceholder.png")
-                .unwrap(),
-        ),
-    ];*/
-
-    // crop 2 should grow, crop 0 should not
-    /*    crop_vec.get_mut(2).unwrap().set_water(true);
-    crop_vec.get_mut(2).unwrap().grow();
-    crop_vec.get_mut(0).unwrap().grow();*/
-    // TODO remove crop test ^
+    //Load Market vector
+    let mut market_file = File::open("src/market_data.txt").expect("Can't open save market_file");
+    let mut market_contents = String::new();
+    market_file
+        .read_to_string(&mut market_contents)
+        .expect("Can't read market_file");
+    print!("{}", market_contents);
+    for line in market_contents.lines() {
+        let results: Vec<&str> = line.split(";").collect();
+        if (results[0] == "item") {
+            market_item_vec.push(item::Item::new(
+                Rect::new(
+                    results[1].parse::<i32>().unwrap(),
+                    results[2].parse::<i32>().unwrap(),
+                    results[3].parse::<u32>().unwrap(),
+                    results[4].parse::<u32>().unwrap(),
+                ),
+                texture_creator.load_texture(results[5]).unwrap(),
+                results[5].parse().unwrap(),
+                results[6].parse::<bool>().unwrap(),
+            ));
+        }
+    }
 
     let mut store = store::Store::new(24);
 
@@ -269,15 +239,22 @@ fn main() {
     let bg_tiles_tex = texture_creator
         .load_texture("src/images/Background_Tileset.png")
         .unwrap();
+
     // TODO(branden): move this someplace reasonable
     let market_house = {
         let pos = Rect::new(2000, 2000, 533, 408);
         let texture = texture_creator
-            .load_texture("src/images/Farmhouse.png")
+            .load_texture("src/images/marketstallPlaceholder.png")
             .unwrap();
-        Item::new(pos, texture, "src/images/Farmhouse.png".into(), true)
+        Item::new(
+            pos,
+            texture,
+            "src/images/marketstallPlaceholder.png".into(),
+            true,
+        )
     };
-    // variable for sleep menu
+
+    // enum used to pause the game while any menu is up.
     let mut in_menu: Option<Menu> = None;
     'gameloop: loop {
         for event in event_pump.poll_iter() {
@@ -288,11 +265,11 @@ fn main() {
                     ..
                 } => {
                     //Iterates through item vector and crop vector saving their positions into a txt file
-                    let mut file = match File::create("src/foo.txt") {
-                        Err(why) => panic!("couldn't create foo.txt: {}", why),
-                        Ok(file) => file,
+                    let mut file_to_save = match File::create("src/home_data.txt") {
+                        Err(why) => panic!("couldn't create home_data.txt: {}", why),
+                        Ok(file_to_save) => file_to_save,
                     };
-                    for item in item_vec {
+                    for item in home_item_vec {
                         let mut output = "item;".to_owned()
                             + &item.x().to_string()
                             + ";"
@@ -306,9 +283,9 @@ fn main() {
                             + ";"
                             + &item.collision().to_string()
                             + "\n";
-                        match file.write_all(output.as_ref()) {
-                            Err(why) => panic!("couldn't write to foo.txt: {}", why),
-                            Ok(_) => println!("successfully wrote item to foo.txt"),
+                        match file_to_save.write_all(output.as_ref()) {
+                            Err(why) => panic!("couldn't write to home_data.txt: {}", why),
+                            Ok(_) => println!("successfully wrote item to home_data.txt"),
                         }
                     }
 
@@ -331,33 +308,18 @@ fn main() {
                                         + ";"
                                         + &_c.get_crop_type()
                                         + "\n";
-                                    match file.write_all(output.as_ref()) {
-                                        Err(why) => panic!("couldn't write to foo.txt: {}", why),
-                                        Ok(_) => println!("successfully wrote crop to foo.txt"),
+                                    match file_to_save.write_all(output.as_ref()) {
+                                        Err(why) => {
+                                            panic!("couldn't write to home_data.txt: {}", why)
+                                        }
+                                        Ok(_) => {
+                                            println!("successfully wrote crop to home_data.txt")
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                    // for crop in crop_vec {
-                    //     let mut output = "crop;".to_owned()
-                    //         + &(crop.getX() / TILE_SIZE as i32).to_string()
-                    //         + ";"
-                    //         + &(crop.getY() / TILE_SIZE as i32).to_string()
-                    //         + ";"
-                    //         + &crop.getStage().to_string()
-                    //         + ";"
-                    //         + &crop.getTex_path()
-                    //         + ";"
-                    //         + &crop.getWatered().to_string()
-                    //         + ";"
-                    //         + &crop.GetCropType()
-                    //         + "\n";
-                    //     match file.write_all(output.as_ref()) {
-                    //         Err(why) => panic!("couldn't write to foo.txt: {}", why),
-                    //         Ok(_) => println!("successfully wrote crop to foo.txt"),
-                    //     }
-                    // }
                     break 'gameloop;
                 }
                 _ => {}
@@ -388,10 +350,6 @@ fn main() {
                 if keystate.contains(&Keycode::D) {
                     x_deltav_f += player::ACCEL_RATE;
                 }
-                // if event_pump.mouse_state().left() {
-                //     println!("Click!");
-                // }
-                // if keystate.contains(&Keycode::C) {
                 if event_pump.mouse_state().left() || keystate.contains(&Keycode::C) {
                     let offset: (i32, i32) = {
                         match p.get_dir() {
@@ -414,120 +372,6 @@ fn main() {
                             .clamp(0, ((BG_H / TILE_SIZE) as i32) + 1),
                     );
                     utilities::use_tool(coordinates.0, coordinates.1, &mut pop, p.get_selected());
-                    // utilities::use_tool(
-                    //     ((p.x() + TILE_SIZE as i32 / 2) / TILE_SIZE as i32) + offset.0,
-                    //     ((p.y() + TILE_SIZE as i32) / TILE_SIZE as i32) + offset.1,
-                    //     &mut pop,
-                    //     p.get_selected(),
-                    // );
-                    // if p.get_selected() == 0 {
-                    //     if p.get_dir() == 0 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 0);
-                    //     }
-                    //     if p.get_dir() == 1 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 0);
-                    //     }
-                    //     if p.get_dir() == 2 {
-                    //         println!("Facing right");
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32) + 1, (p.y() / TILE_SIZE as i32) + 1, &mut pop, 0);
-                    //     }
-                    //     if p.get_dir() == 3{
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 0);
-                    //     }
-                    // }
-                    // if p.get_selected() == 1 {
-                    //     if p.get_dir() == 0 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
-                    //     }
-                    //     if p.get_dir() == 1 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
-                    //     }
-                    //     if p.get_dir() == 2 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
-                    //     }
-                    //     if p.get_dir() == 3{
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 1);
-                    //     }
-                    // }
-                    // if p.get_selected() == 2 {
-                    //     if p.get_dir() == 0 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
-                    //     }
-                    //     if p.get_dir() == 1 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
-                    //     }
-                    //     if p.get_dir() == 2 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
-                    //     }
-                    //     if p.get_dir() == 3{
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 2);
-                    //     }
-                    // }
-                    // if p.get_selected() == 3 {
-                    //     if p.get_dir() == 0 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
-                    //     }
-                    //     if p.get_dir() == 1 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
-                    //     }
-                    //     if p.get_dir() == 2 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
-                    //     }
-                    //     if p.get_dir() == 3{
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 3);
-                    //     }
-                    // }
-                    // if p.get_selected() == 4 {
-                    //     if p.get_dir() == 0 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
-                    //     }
-                    //     if p.get_dir() == 1 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
-                    //     }
-                    //     if p.get_dir() == 2 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
-                    //     }
-                    //     if p.get_dir() == 3{
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 4);
-                    //     }
-                    // }
-                    // if p.get_selected() == 5 {
-                    //     if p.get_dir() == 0 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
-                    //     }
-                    //     if p.get_dir() == 1 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
-                    //     }
-                    //     if p.get_dir() == 2 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
-                    //     }
-                    //     if p.get_dir() == 3 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 5);
-                    //     }
-                    // }
-                    // if p.get_selected() == 6 {
-                    //     if p.get_dir() == 0 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
-                    //     }
-                    //     if p.get_dir() == 1 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
-                    //     }
-                    //     if p.get_dir() == 2 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
-                    //     }
-                    //     if p.get_dir() == 3 {
-                    //         utilities::use_tool((p.x() / TILE_SIZE as i32), (p.y() / TILE_SIZE as i32) + 1, &mut pop, 6);
-                    //     }
-                    // }
-                    // TESTS
-                    // Harvest [21, 22]
-                    // utilities::use_tool(21, 22, &mut pop, 0);
-                    // Till [21,22]
-                    // utilities::use_tool(21, 22, &mut pop, 1);
-                    // Plant [21, 22]
-                    // utilities::use_tool(21, 22, &mut pop, 3);
-                    // Water [21, 22]
-                    // utilities::use_tool(21, 22, &mut pop, 2);
                 }
 
                 if keystate.contains(&Keycode::Num1) {
@@ -561,95 +405,20 @@ fn main() {
                     p.set_selected(9);
                 }
             }
+            //I know having 3 seperate methods isn't really 'modular' but the code has already been written for each and they all require different things so... this is it
             Some(Menu::Sleep) => {
-                if keystate.contains(&Keycode::Y) {
-                    //Player has selected yes
-
-                    //Cut to black and then fade into night scene
-                    let mut i = 0;
-                    while i < 254 {
-                        wincan.copy(
-                            &texture_creator
-                                .load_texture("src/images/sleeping_screen.png")
-                                .unwrap(),
-                            None,
-                            None,
-                        );
-                        wincan.set_draw_color(Color::RGBA(0, 0, 0, 255 - i));
-                        wincan.fill_rect(r);
-                        wincan.present();
-                        thread::sleep(Duration::from_millis(1));
-                        i = i + 2;
-                    }
-
-                    //The fading code is ripped out of the method because I wanted
-                    // the growing to happen while the player could not see the screen.
-
-                    // Grow crops
-                    for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
-                        for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
-                            let mut _c = pop.get_crop_with_index_mut(_x as u32, _y as u32);
-                            match _c.get_crop_type() {
-                                "None" => {}
-                                _ => {
-                                    _c.grow();
-                                }
-                            }
-                            // Set tile watered to false
-                            pop.get_tile_with_index_mut(_x as u32, _y as u32)
-                                .set_water(false);
-                        }
-                    }
-
-                    // fade to white because the sun is coming up
-                    i = 0;
-                    while i < 254 {
-                        wincan.copy(
-                            &texture_creator
-                                .load_texture("src/images/sleeping_screen.png")
-                                .unwrap(),
-                            None,
-                            None,
-                        );
-                        wincan.set_draw_color(Color::RGBA(255, 255, 255, i));
-                        wincan.fill_rect(r);
-                        wincan.present();
-                        thread::sleep(Duration::from_millis(1));
-                        i = i + 2;
-                    }
-
-                    in_menu = None;
-                }
-                if keystate.contains(&Keycode::N) {
-                    //Player has chosen not to sleep
-                    in_menu = None;
-                }
+                in_menu = sleep_menu::start_sleep_menu(in_menu, &mut wincan, keystate, &mut pop, r);
             }
             Some(Menu::ToMarket) => {
-                if keystate.contains(&Keycode::Y) {
-                    // Go to market. First fade to white.
-                    let alphas: Vec<u8> = (0..=255).collect();
-                    let dt = Duration::from_secs_f64(2.0 / (alphas.len() as f64));
-                    let mut blank = Animation::new(alphas, dt, Instant::now());
-                    blank.set_freezing();
-                    while blank.current_index() < 255 {
-                        let tex = texture_creator
-                            .load_texture("src/images/traveling_screen.png")
-                            .unwrap();
-                        wincan.copy(&tex, None, None).unwrap();
-                        wincan.set_draw_color(Color::RGBA(255, 255, 255, *blank.tick()));
-                        wincan.fill_rect(r).unwrap();
-                        wincan.present();
-                        thread::sleep(Duration::from_millis(15));
-                    }
-                    // Do the actual going.
-                    // TODO(branden): change player position.
-                    in_area = Area::Market;
-                    // Gone to market.
-                    in_menu = None;
-                } else if keystate.contains(&Keycode::N) {
-                    in_menu = None;
-                }
+                let menu_and_area_tup = market_transition_menu::start_market_transition_menu(
+                    in_menu,
+                    &mut wincan,
+                    keystate,
+                    r,
+                    Some(in_area),
+                );
+                in_menu = menu_and_area_tup.0;
+                in_area = menu_and_area_tup.1;
             }
             Some(Menu::Shop) => {
                 if keystate.contains(&Keycode::Q) {
@@ -682,7 +451,7 @@ fn main() {
             Area::Home => {
                 // X
                 p.update_pos_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-                for item in &item_vec {
+                for item in &home_item_vec {
                     if p.check_collision(&item.pos()) {
                         p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
                         if item.tex_path() == "src/images/house.png" {
@@ -697,7 +466,7 @@ fn main() {
 
                 //Y
                 p.update_pos_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-                for item in &item_vec {
+                for item in &home_item_vec {
                     if p.check_collision(&item.pos()) {
                         p.stay_still_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
                         if item.tex_path() == "src/images/house.png" {
@@ -711,9 +480,26 @@ fn main() {
                 }
             }
             Area::Market => {
-                // TODO: check collisions for market items
                 p.update_pos_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
+                for item in &market_item_vec {
+                    if p.check_collision(&item.pos()) {
+                        p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
+                        if item.tex_path() == "src/images/marketstallPlaceholder.png" {
+                            in_menu = Some(Menu::Shop);
+                        }
+                    }
+                }
+
+                //Y
                 p.update_pos_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
+                for item in &market_item_vec {
+                    if p.check_collision(&item.pos()) {
+                        p.stay_still_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
+                        if item.tex_path() == "src/images/marketstallPlaceholder.png" {
+                            in_menu = Some(Menu::Shop);
+                        }
+                    }
+                }
             }
         }
 
@@ -762,14 +548,10 @@ fn main() {
                     }
                 }
                 // Drawing item
-                for item in &item_vec {
+                for item in &home_item_vec {
                     wincan = item.print_item(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
                 }
-                // TODO crops will probably be stored with the tile grid
-                // eventually. Change this to loop over that structure then
-                // for c in crop_vec.iter() {
-                //     wincan = c.print_crop(cur_bg.x(), cur_bg.y(), wincan);
-                // }
+
                 // Draw crops
                 for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
                     for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
@@ -784,22 +566,33 @@ fn main() {
                 }
             }
             Area::Market => {
-                // TODO(branden): draw a full-size area with scrolling &c.
-                // Draw tiles. All tiles in the market are grass for now.
-                let tr = Rect::new(0, 0, TILE_SIZE, TILE_SIZE);
-                for x in 0..BG_W / TILE_SIZE + 1 {
-                    for y in 0..BG_H / TILE_SIZE + 1 {
-                        let dst = Rect::new(
-                            (x * TILE_SIZE) as i32,
-                            (y * TILE_SIZE) as i32,
+                let grass_texture = texture_creator
+                    .load_texture("src/images/Background_Tileset.png")
+                    .unwrap();
+                for crop_tile in pop.get_vec().iter().flatten() {
+                    let x_pos = crop_tile.tile.x() - cur_bg.x();
+                    let y_pos = crop_tile.tile.y() - cur_bg.y();
+                    //Don't bother drawing any tiles that are off screen
+                    if x_pos > -(TILE_SIZE as i32)
+                        && x_pos < (CAM_W as i32)
+                        && y_pos > -(TILE_SIZE as i32)
+                        && y_pos < (CAM_H as i32)
+                    {
+                        let cur_tile = Rect::new(
+                            crop_tile.tile.x() - cur_bg.x(),
+                            crop_tile.tile.y() - cur_bg.y(),
                             TILE_SIZE,
                             TILE_SIZE,
                         );
-                        wincan.copy(&bg_tiles_tex, tr, dst).unwrap();
+                        wincan
+                            .copy(&grass_texture, crop_tile.tile.src(), cur_tile)
+                            .unwrap();
                     }
                 }
-                // Draw "market house".
-                wincan = market_house.print_item(cur_bg.x(), cur_bg.y(), CAM_W, CAM_H, wincan);
+                // Drawing item
+                for item in &market_item_vec {
+                    wincan = item.print_item(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
+                }
             }
         }
 
