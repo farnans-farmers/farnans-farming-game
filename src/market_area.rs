@@ -1,1 +1,0 @@
-// This module contains all functionality and data for the shop area
