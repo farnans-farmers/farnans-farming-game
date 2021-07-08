@@ -13,6 +13,7 @@ mod utilities;
 mod home_area;
 mod market_area;
 mod sleep_menu;
+mod market_transition_menu;
 
 use anim::Animation;
 use item::Item;
@@ -52,7 +53,7 @@ pub enum Menu {
 }
 
 #[derive(Copy, Clone)]
-enum Area {
+pub enum Area {
     Home,
     Market,
 }
@@ -367,34 +368,14 @@ fn main() {
                     p.set_selected(9);
                 }
             }
+            //I know having 3 seperate methods isn't really 'modular' but the code has already been written for each and they all require different things so... this is it
             Some(Menu::Sleep) => {
                 in_menu = sleep_menu::start_sleep_menu(in_menu, &mut wincan, keystate, &mut pop, r);
             }
             Some(Menu::ToMarket) => {
-                if keystate.contains(&Keycode::Y) {
-                    // Go to market. First fade to white.
-                    let alphas: Vec<u8> = (0..=255).collect();
-                    let dt = Duration::from_secs_f64(2.0 / (alphas.len() as f64));
-                    let mut blank = Animation::new(alphas, dt, Instant::now());
-                    blank.set_freezing();
-                    while blank.current_index() < 255 {
-                        let tex = texture_creator
-                            .load_texture("src/images/traveling_screen.png")
-                            .unwrap();
-                        wincan.copy(&tex, None, None).unwrap();
-                        wincan.set_draw_color(Color::RGBA(255, 255, 255, *blank.tick()));
-                        wincan.fill_rect(r).unwrap();
-                        wincan.present();
-                        thread::sleep(Duration::from_millis(15));
-                    }
-                    // Do the actual going.
-                    // TODO(branden): change player position.
-                    in_area = Area::Market;
-                    // Gone to market.
-                    in_menu = None;
-                } else if keystate.contains(&Keycode::N) {
-                    in_menu = None;
-                }
+                let menu_and_area_tup = market_transition_menu::start_market_transition_menu(in_menu, &mut wincan, keystate, r, Some(in_area));
+                in_menu = menu_and_area_tup.0;
+                in_area = menu_and_area_tup.1;
             }
             Some(Menu::Shop) => {
                 if keystate.contains(&Keycode::Q) {
