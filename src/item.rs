@@ -9,7 +9,6 @@ pub struct Item<'a> {
 }
 
 impl<'a> Item<'a> {
-
     pub fn new(pos: Rect, texture: Texture<'a>, tex_path: String, collision: bool) -> Item {
         Item {
             pos,
@@ -47,7 +46,9 @@ impl<'a> Item<'a> {
         self.collision
     }
 
-    pub fn tex_path(&self) -> &String { &self.tex_path }
+    pub fn tex_path(&self) -> &String {
+        &self.tex_path
+    }
 
     /*
         Takes ownership of a WindowCanvas, checks if the item needs to be printed, and prints it if it does.
@@ -60,18 +61,23 @@ impl<'a> Item<'a> {
         Return:
             The updated WindowCanvas
     */
-    pub fn print_item(&self, x: i32, y: i32, w: u32, h: u32, mut win: WindowCanvas) -> WindowCanvas {
+    pub fn print_item(
+        &self,
+        x: i32,
+        y: i32,
+        w: u32,
+        h: u32,
+        mut win: WindowCanvas,
+    ) -> WindowCanvas {
         let testx = self.x() - x;
         let testy = self.y() - y;
         // Draw barn
-        if testx > -(self.width() as i32) && testx < w as i32 &&
-            testy > -(self.height() as i32) && testy < h as i32 {
-            let barn_sub_set = Rect::new(
-                self.x() - x,
-                self.y() - y,
-                self.width(),
-                self.height(),
-            );
+        if testx > -(self.width() as i32)
+            && testx < w as i32
+            && testy > -(self.height() as i32)
+            && testy < h as i32
+        {
+            let barn_sub_set = Rect::new(self.x() - x, self.y() - y, self.width(), self.height());
             win.copy(self.texture(), None, barn_sub_set).unwrap();
             return win;
         }
@@ -81,5 +87,4 @@ impl<'a> Item<'a> {
     pub fn check_for_collision(&self, x: i32, y: i32, w: i32, h: i32) -> bool {
         true
     }
-
 }

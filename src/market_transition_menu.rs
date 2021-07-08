@@ -1,10 +1,9 @@
-use crate::BG_W;
-use crate::BG_H;
-use crate::TILE_SIZE;
-use crate::Menu;
-use crate::Area;
 use crate::Animation;
-
+use crate::Area;
+use crate::Menu;
+use crate::BG_H;
+use crate::BG_W;
+use crate::TILE_SIZE;
 
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
@@ -22,8 +21,13 @@ use std::time::Duration;
 use std::time::Instant;
 //use anim::Animation;
 
-
-pub fn start_market_transition_menu(mut in_menu: Option<Menu>, wincan: &mut WindowCanvas, keystate: HashSet<Keycode>, r: Rect, mut in_area: Option<Area>) -> (Option<Menu>, Area) {
+pub fn start_market_transition_menu(
+    mut in_menu: Option<Menu>,
+    wincan: &mut WindowCanvas,
+    keystate: HashSet<Keycode>,
+    r: Rect,
+    mut in_area: Option<Area>,
+) -> (Option<Menu>, Area) {
     let texture_creator = wincan.texture_creator();
     if keystate.contains(&Keycode::Y) {
         //let texture_creator = wincan.texture_creator();
@@ -49,9 +53,8 @@ pub fn start_market_transition_menu(mut in_menu: Option<Menu>, wincan: &mut Wind
     } else if keystate.contains(&Keycode::N) {
         in_menu = None;
         return (in_menu, Area::Home);
-    } else{
+    } else {
         //allows menu to stay on screen until either y or n is chosen
         return (in_menu, Area::Home);
     }
-    
 }

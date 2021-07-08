@@ -1,10 +1,9 @@
 // Module for sleeping menu and code.
-use crate::BG_W;
-use crate::BG_H;
-use crate::TILE_SIZE;
-use crate::Menu;
 use crate::population::Population;
-
+use crate::Menu;
+use crate::BG_H;
+use crate::BG_W;
+use crate::TILE_SIZE;
 
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
@@ -21,7 +20,13 @@ use std::thread;
 use std::time::Duration;
 use std::time::Instant;
 
-pub fn start_sleep_menu(mut in_menu: Option<Menu>, wincan: &mut WindowCanvas, keystate: HashSet<Keycode>, pop: &mut Population, r: Rect) -> Option<Menu> {
+pub fn start_sleep_menu(
+    mut in_menu: Option<Menu>,
+    wincan: &mut WindowCanvas,
+    keystate: HashSet<Keycode>,
+    pop: &mut Population,
+    r: Rect,
+) -> Option<Menu> {
     let texture_creator = wincan.texture_creator();
     if keystate.contains(&Keycode::Y) {
         //Player has selected yes
@@ -81,13 +86,11 @@ pub fn start_sleep_menu(mut in_menu: Option<Menu>, wincan: &mut WindowCanvas, ke
 
         in_menu = None;
         return in_menu;
-    }
-    else if keystate.contains(&Keycode::N) {
+    } else if keystate.contains(&Keycode::N) {
         //Player has chosen not to sleep
         in_menu = None;
         return in_menu;
-    }
-    else{
+    } else {
         return in_menu;
     }
 }

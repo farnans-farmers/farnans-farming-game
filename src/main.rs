@@ -5,15 +5,13 @@ mod anim;
 mod crop;
 mod inventory;
 mod item;
+mod market_transition_menu;
 mod player;
 mod population;
+mod sleep_menu;
 mod store;
 mod tile;
 mod utilities;
-mod home_area;
-mod market_area;
-mod sleep_menu;
-mod market_transition_menu;
 
 use anim::Animation;
 use item::Item;
@@ -154,7 +152,9 @@ fn main() {
     {
         let mut home_file = File::open("src/home_data.txt").expect("Can't open save home_file");
         let mut home_contents = String::new();
-        home_file.read_to_string(&mut home_contents).expect("Can't read home_file");
+        home_file
+            .read_to_string(&mut home_contents)
+            .expect("Can't read home_file");
         print!("{}", home_contents);
         for line in home_contents.lines() {
             let results: Vec<&str> = line.split(";").collect();
@@ -211,7 +211,9 @@ fn main() {
     //Load Market vector
     let mut market_file = File::open("src/market_data.txt").expect("Can't open save market_file");
     let mut market_contents = String::new();
-    market_file.read_to_string(&mut market_contents).expect("Can't read market_file");
+    market_file
+        .read_to_string(&mut market_contents)
+        .expect("Can't read market_file");
     print!("{}", market_contents);
     for line in market_contents.lines() {
         let results: Vec<&str> = line.split(";").collect();
@@ -244,7 +246,12 @@ fn main() {
         let texture = texture_creator
             .load_texture("src/images/marketstallPlaceholder.png")
             .unwrap();
-        Item::new(pos, texture, "src/images/marketstallPlaceholder.png".into(), true)
+        Item::new(
+            pos,
+            texture,
+            "src/images/marketstallPlaceholder.png".into(),
+            true,
+        )
     };
 
     // enum used to pause the game while any menu is up.
@@ -302,8 +309,12 @@ fn main() {
                                         + &_c.get_crop_type()
                                         + "\n";
                                     match file_to_save.write_all(output.as_ref()) {
-                                        Err(why) => panic!("couldn't write to home_data.txt: {}", why),
-                                        Ok(_) => println!("successfully wrote crop to home_data.txt"),
+                                        Err(why) => {
+                                            panic!("couldn't write to home_data.txt: {}", why)
+                                        }
+                                        Ok(_) => {
+                                            println!("successfully wrote crop to home_data.txt")
+                                        }
                                     }
                                 }
                             }
@@ -399,7 +410,13 @@ fn main() {
                 in_menu = sleep_menu::start_sleep_menu(in_menu, &mut wincan, keystate, &mut pop, r);
             }
             Some(Menu::ToMarket) => {
-                let menu_and_area_tup = market_transition_menu::start_market_transition_menu(in_menu, &mut wincan, keystate, r, Some(in_area));
+                let menu_and_area_tup = market_transition_menu::start_market_transition_menu(
+                    in_menu,
+                    &mut wincan,
+                    keystate,
+                    r,
+                    Some(in_area),
+                );
                 in_menu = menu_and_area_tup.0;
                 in_area = menu_and_area_tup.1;
             }
@@ -550,8 +567,8 @@ fn main() {
             }
             Area::Market => {
                 let grass_texture = texture_creator
-                .load_texture("src/images/Background_Tileset.png")
-                .unwrap();
+                    .load_texture("src/images/Background_Tileset.png")
+                    .unwrap();
                 for crop_tile in pop.get_vec().iter().flatten() {
                     let x_pos = crop_tile.tile.x() - cur_bg.x();
                     let y_pos = crop_tile.tile.y() - cur_bg.y();

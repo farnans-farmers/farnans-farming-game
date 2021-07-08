@@ -10,15 +10,9 @@ pub struct Crop_Tile<'a> {
     pub crop: Crop<'a>,
 }
 
-
 impl<'a> Crop_Tile<'a> {
-
     pub fn new(tile: Tile<'a>, crop: Crop<'a>) -> Crop_Tile<'a> {
-        Crop_Tile {
-            tile,
-            crop,
-        }
-
+        Crop_Tile { tile, crop }
     }
 
     pub fn setCrop(&mut self, c: Crop<'a>) {
@@ -27,22 +21,17 @@ impl<'a> Crop_Tile<'a> {
 }
 
 pub struct Population<'a> {
-
-    crop_tile_vec: Vec< Vec < Crop_Tile<'a> > >,
+    crop_tile_vec: Vec<Vec<Crop_Tile<'a>>>,
 }
 
 impl<'a> Population<'a> {
-
     pub fn new(crop_tile_vec: Vec<Vec<Crop_Tile<'a>>>) -> Population {
-        Population {
-            crop_tile_vec,
-        }
+        Population { crop_tile_vec }
     }
 
     //Lends out the whole vector
-    pub fn get_vec(&self) -> &Vec< Vec < Crop_Tile > > {
+    pub fn get_vec(&self) -> &Vec<Vec<Crop_Tile>> {
         &self.crop_tile_vec
-
     }
 
     pub fn get_vec_mut(&mut self) -> &mut Vec<Vec<Crop_Tile<'a>>> {
@@ -52,8 +41,7 @@ impl<'a> Population<'a> {
     //Lends out Tile struct at given x, y map coordinates
 
     pub fn get_tile(&self, x: i32, y: i32) -> &Tile {
-        &self.crop_tile_vec[(x/TILE_SIZE as i32) as usize][(y/TILE_SIZE as i32) as usize].tile
-
+        &self.crop_tile_vec[(x / TILE_SIZE as i32) as usize][(y / TILE_SIZE as i32) as usize].tile
     }
 
     //Lends out Tile struct at given x, y index
@@ -68,8 +56,7 @@ impl<'a> Population<'a> {
     //Lends out Crop struct at given x, y map coordinates
 
     pub fn get_crop(&self, x: i32, y: i32) -> &Crop {
-        &self.crop_tile_vec[(x/TILE_SIZE as i32) as usize][(y/TILE_SIZE as i32) as usize].crop
-
+        &self.crop_tile_vec[(x / TILE_SIZE as i32) as usize][(y / TILE_SIZE as i32) as usize].crop
     }
 
     //Lends out Crop struct at given x, y index
@@ -81,19 +68,9 @@ impl<'a> Population<'a> {
         &mut self.crop_tile_vec[x as usize][y as usize].crop
     }
 
-    pub fn update_all_plants(&self) {
+    pub fn update_all_plants(&self) {}
 
-    }
+    pub fn plant_seed(&self) {}
 
-    pub fn plant_seed(&self) {
-
-    }
-
-    pub fn destroy_plant(&self) {
-
-    }
-
-
-
+    pub fn destroy_plant(&self) {}
 }
-
