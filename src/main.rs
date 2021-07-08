@@ -145,19 +145,21 @@ fn main() {
         &texture_creator,
     );
 
-    let mut item_vec = Vec::new();
+    let mut home_item_vec = Vec::new();
+    let mut market_item_vec = Vec::new();
     let mut crop_vec: Vec<crop::Crop> = Vec::new();
 
     //Loading items and crops into the game
+    //This parenthesis shows all for the home screen, but we load market stuff into the vector below.
     {
-        let mut file = File::open("src/foo.txt").expect("Can't open save file");
-        let mut contents = String::new();
-        file.read_to_string(&mut contents).expect("Can't read file");
-        print!("{}", contents);
-        for line in contents.lines() {
+        let mut home_file = File::open("src/home_data.txt").expect("Can't open save home_file");
+        let mut home_contents = String::new();
+        home_file.read_to_string(&mut home_contents).expect("Can't read home_file");
+        print!("{}", home_contents);
+        for line in home_contents.lines() {
             let results: Vec<&str> = line.split(";").collect();
             if (results[0] == "item") {
-                item_vec.push(item::Item::new(
+                home_item_vec.push(item::Item::new(
                     Rect::new(
                         results[1].parse::<i32>().unwrap(),
                         results[2].parse::<i32>().unwrap(),
@@ -206,6 +208,28 @@ fn main() {
         }
     }
 
+    //Load Market vector
+    let mut market_file = File::open("src/market_data.txt").expect("Can't open save market_file");
+    let mut market_contents = String::new();
+    market_file.read_to_string(&mut market_contents).expect("Can't read market_file");
+    print!("{}", market_contents);
+    for line in market_contents.lines() {
+        let results: Vec<&str> = line.split(";").collect();
+        if (results[0] == "item") {
+            market_item_vec.push(item::Item::new(
+                Rect::new(
+                    results[1].parse::<i32>().unwrap(),
+                    results[2].parse::<i32>().unwrap(),
+                    results[3].parse::<u32>().unwrap(),
+                    results[4].parse::<u32>().unwrap(),
+                ),
+                texture_creator.load_texture(results[5]).unwrap(),
+                results[5].parse().unwrap(),
+                results[6].parse::<bool>().unwrap(),
+            ));
+        }
+    }
+
     let mut store = store::Store::new(24);
 
     let mut in_area = Area::Home;
@@ -213,15 +237,17 @@ fn main() {
     let bg_tiles_tex = texture_creator
         .load_texture("src/images/Background_Tileset.png")
         .unwrap();
+
     // TODO(branden): move this someplace reasonable
     let market_house = {
         let pos = Rect::new(2000, 2000, 533, 408);
         let texture = texture_creator
-            .load_texture("src/images/Farmhouse.png")
+            .load_texture("src/images/marketstallPlaceholder.png")
             .unwrap();
-        Item::new(pos, texture, "src/images/Farmhouse.png".into(), true)
+        Item::new(pos, texture, "src/images/marketstallPlaceholder.png".into(), true)
     };
-    // variable for sleep menu
+
+    // enum used to pause the game while any menu is up.
     let mut in_menu: Option<Menu> = None;
     'gameloop: loop {
         for event in event_pump.poll_iter() {
@@ -232,11 +258,11 @@ fn main() {
                     ..
                 } => {
                     //Iterates through item vector and crop vector saving their positions into a txt file
-                    let mut file = match File::create("src/foo.txt") {
-                        Err(why) => panic!("couldn't create foo.txt: {}", why),
-                        Ok(file) => file,
+                    let mut file_to_save = match File::create("src/home_data.txt") {
+                        Err(why) => panic!("couldn't create home_data.txt: {}", why),
+                        Ok(file_to_save) => file_to_save,
                     };
-                    for item in item_vec {
+                    for item in home_item_vec {
                         let mut output = "item;".to_owned()
                             + &item.x().to_string()
                             + ";"
@@ -250,9 +276,9 @@ fn main() {
                             + ";"
                             + &item.collision().to_string()
                             + "\n";
-                        match file.write_all(output.as_ref()) {
-                            Err(why) => panic!("couldn't write to foo.txt: {}", why),
-                            Ok(_) => println!("successfully wrote item to foo.txt"),
+                        match file_to_save.write_all(output.as_ref()) {
+                            Err(why) => panic!("couldn't write to home_data.txt: {}", why),
+                            Ok(_) => println!("successfully wrote item to home_data.txt"),
                         }
                     }
 
@@ -275,9 +301,9 @@ fn main() {
                                         + ";"
                                         + &_c.get_crop_type()
                                         + "\n";
-                                    match file.write_all(output.as_ref()) {
-                                        Err(why) => panic!("couldn't write to foo.txt: {}", why),
-                                        Ok(_) => println!("successfully wrote crop to foo.txt"),
+                                    match file_to_save.write_all(output.as_ref()) {
+                                        Err(why) => panic!("couldn't write to home_data.txt: {}", why),
+                                        Ok(_) => println!("successfully wrote crop to home_data.txt"),
                                     }
                                 }
                             }
@@ -408,7 +434,7 @@ fn main() {
             Area::Home => {
                 // X
                 p.update_pos_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-                for item in &item_vec {
+                for item in &home_item_vec {
                     if p.check_collision(&item.pos()) {
                         p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
                         if item.tex_path() == "src/images/house.png" {
@@ -423,7 +449,7 @@ fn main() {
 
                 //Y
                 p.update_pos_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-                for item in &item_vec {
+                for item in &home_item_vec {
                     if p.check_collision(&item.pos()) {
                         p.stay_still_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
                         if item.tex_path() == "src/images/house.png" {
@@ -437,9 +463,26 @@ fn main() {
                 }
             }
             Area::Market => {
-                // TODO: check collisions for market items
                 p.update_pos_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
+                for item in &market_item_vec {
+                    if p.check_collision(&item.pos()) {
+                        p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
+                        if item.tex_path() == "src/images/marketstallPlaceholder.png" {
+                            in_menu = Some(Menu::Shop);
+                        }
+                    }
+                }
+
+                //Y
                 p.update_pos_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
+                for item in &market_item_vec {
+                    if p.check_collision(&item.pos()) {
+                        p.stay_still_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
+                        if item.tex_path() == "src/images/marketstallPlaceholder.png" {
+                            in_menu = Some(Menu::Shop);
+                        }
+                    }
+                }
             }
         }
 
@@ -488,7 +531,7 @@ fn main() {
                     }
                 }
                 // Drawing item
-                for item in &item_vec {
+                for item in &home_item_vec {
                     wincan = item.print_item(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
                 }
 
@@ -506,22 +549,33 @@ fn main() {
                 }
             }
             Area::Market => {
-                // TODO(branden): draw a full-size area with scrolling &c.
-                // Draw tiles. All tiles in the market are grass for now.
-                let tr = Rect::new(0, 0, TILE_SIZE, TILE_SIZE);
-                for x in 0..BG_W / TILE_SIZE + 1 {
-                    for y in 0..BG_H / TILE_SIZE + 1 {
-                        let dst = Rect::new(
-                            (x * TILE_SIZE) as i32,
-                            (y * TILE_SIZE) as i32,
+                let grass_texture = texture_creator
+                .load_texture("src/images/Background_Tileset.png")
+                .unwrap();
+                for crop_tile in pop.get_vec().iter().flatten() {
+                    let x_pos = crop_tile.tile.x() - cur_bg.x();
+                    let y_pos = crop_tile.tile.y() - cur_bg.y();
+                    //Don't bother drawing any tiles that are off screen
+                    if x_pos > -(TILE_SIZE as i32)
+                        && x_pos < (CAM_W as i32)
+                        && y_pos > -(TILE_SIZE as i32)
+                        && y_pos < (CAM_H as i32)
+                    {
+                        let cur_tile = Rect::new(
+                            crop_tile.tile.x() - cur_bg.x(),
+                            crop_tile.tile.y() - cur_bg.y(),
                             TILE_SIZE,
                             TILE_SIZE,
                         );
-                        wincan.copy(&bg_tiles_tex, tr, dst).unwrap();
+                        wincan
+                            .copy(&grass_texture, crop_tile.tile.src(), cur_tile)
+                            .unwrap();
                     }
                 }
-                // Draw "market house".
-                wincan = market_house.print_item(cur_bg.x(), cur_bg.y(), CAM_W, CAM_H, wincan);
+                // Drawing item
+                for item in &market_item_vec {
+                    wincan = item.print_item(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
+                }
             }
         }
 
