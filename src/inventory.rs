@@ -117,10 +117,46 @@ impl<'a> Inventory<'a> {
                 )
                 .unwrap();
 
-            x = x + 1;
+                ).unwrap();
+
+            self.draw_numbers(wincan,  x, 2*x);
+            x = x+1;
+        }
+
+    }
+    pub fn draw_numbers(&self, wincan: &mut WindowCanvas, inventory_slot: i32, mut value: i32){
+        let NUMBER_SIZE = 20;
+
+
+        let texture_creator = wincan.texture_creator();
+        let values_texture = texture_creator.load_texture("src/images/outlined_numbers.png").unwrap();
+        let mut digit_place = 1;
+        let total_digits = value.to_string().len() as i32;
+        //((value as f32).log10() as i32) + 1;
+        loop {
+            let mut digit = value % 10;
+            value /= 10;
+            //INVENTORY_X_POS+(inventory_slot*(ITEM_BOX_SIZE+BORDER_SIZE))-(digit_place-total_digits)*NUMBER_SIZE,
+            wincan.copy(
+                &values_texture, 
+                Rect::new(20*digit, 0, 20, 20), 
+                Rect::new(
+                    INVENTORY_X_POS+((inventory_slot+1)*(ITEM_BOX_SIZE+BORDER_SIZE))-digit_place*NUMBER_SIZE,
+                    INVENTORY_Y_POS+ITEM_BOX_SIZE-NUMBER_SIZE, 
+                    NUMBER_SIZE as u32, 
+                    NUMBER_SIZE as u32
+                    )
+                );
+            digit_place += 1;
+
+            if (value == 0) {
+                break;
+            }
+
         }
     }
-    pub fn set_selected(&mut self, _selected: i32) {
+
+    pub fn set_selected(&mut self,_selected: i32){
         self.selected = _selected
     }
 
