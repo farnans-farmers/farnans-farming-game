@@ -56,6 +56,11 @@ pub enum Area {
     Market,
 }
 
+
+pub trait inventory_item_trait {
+    fn get_value(&self);
+}
+
 fn main() {
     let sdl_cxt = sdl2::init().unwrap();
     let video_subsys = sdl_cxt.video().unwrap();

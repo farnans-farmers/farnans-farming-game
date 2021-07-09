@@ -4,7 +4,7 @@ use sdl2::render::WindowCanvas;
 
 use crate::item::Item;
 use crate::crop::Crop;
-use crate::{TILE_SIZE, crop};
+use crate::inventory_item_trait;
 
 use sdl2::render::TextureCreator;
 use sdl2::video::WindowContext;
@@ -20,16 +20,23 @@ static BORDER_SIZE: i32 = 4;
 static SELECTED_SIZE: i32 = 2;
 
 struct Inventory_Item<'a>{
-    item: Item<'a>,
-    amount: i32
+    item: Vec<Item<'a>>,
+    is_tool: bool
 }
 
 impl<'a> Inventory_Item<'a>{
-    pub fn new(item: Item<'a>) -> Inventory_Item{
+    pub fn new(item: Vec<Item<'a>>, is_tool: bool) -> Inventory_Item{
         Inventory_Item{
             item,
-            amount: 0
+            is_tool
         }
+    }
+
+    pub fn get_len(&self) -> i32{
+        self.item.len() as i32
+    }
+    pub fn pop_item(&self){
+        println!("TODO");
     }
 }
 
@@ -50,12 +57,15 @@ impl<'a> Inventory<'a> {
         let inventory_slots: Vec<Inventory_Item> = (0..10)
             .map(|x| {
                 Inventory_Item::new(
-                    Item::new(
-                        Rect::new(x*32 , 0 , 32, 32),
-                        texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
-                        "src/images/itemMenu.png".parse().unwrap(),
-                        false,
-                    )
+                    vec![
+                        Item::new(
+                            Rect::new(x*32 , 0 , 32, 32),
+                            texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
+                            "src/images/itemMenu.png".parse().unwrap(),
+                            false,
+                        )
+                    ],
+                    x<3
                 )
             })
             .collect();
@@ -107,7 +117,7 @@ impl<'a> Inventory<'a> {
 
         let mut x = 0;
         for inventory in &self.inventory_slots{
-            wincan.copy(inventory.item.texture(), inventory.item.pos(),
+            wincan.copy(inventory.item[0].texture(), inventory.item[0].pos(),
 
                  Rect::new(
                     INVENTORY_X_POS+(x*(ITEM_BOX_SIZE+BORDER_SIZE)),
@@ -118,8 +128,10 @@ impl<'a> Inventory<'a> {
                 .unwrap();
 
                 ).unwrap();
+            if !inventory.is_tool{
+                self.draw_numbers(wincan,  x, inventory.get_len());
+            }
 
-            self.draw_numbers(wincan,  x, 2*x);
             x = x+1;
         }
 
@@ -130,13 +142,12 @@ impl<'a> Inventory<'a> {
 
         let texture_creator = wincan.texture_creator();
         let values_texture = texture_creator.load_texture("src/images/outlined_numbers.png").unwrap();
-        let mut digit_place = 1;
-        let total_digits = value.to_string().len() as i32;
-        //((value as f32).log10() as i32) + 1;
+        let mut digit_place = 1; 
+        // Do-While loop in rust
         loop {
             let mut digit = value % 10;
             value /= 10;
-            //INVENTORY_X_POS+(inventory_slot*(ITEM_BOX_SIZE+BORDER_SIZE))-(digit_place-total_digits)*NUMBER_SIZE,
+
             wincan.copy(
                 &values_texture, 
                 Rect::new(20*digit, 0, 20, 20), 
@@ -149,6 +160,7 @@ impl<'a> Inventory<'a> {
                 );
             digit_place += 1;
 
+            // While
             if (value == 0) {
                 break;
             }

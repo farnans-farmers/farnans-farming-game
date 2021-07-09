@@ -1,6 +1,8 @@
 use sdl2::rect::Rect;
 use sdl2::render::{Texture, WindowCanvas};
 
+use crate::inventory_item_trait;
+
 pub struct Item<'a> {
     pos: Rect,
     texture: Texture<'a>,
@@ -86,5 +88,11 @@ impl<'a> Item<'a> {
 
     pub fn check_for_collision(&self, x: i32, y: i32, w: i32, h: i32) -> bool {
         true
+    }
+}
+
+impl inventory_item_trait for Item{
+    fn get_value(&self){
+        return 1;
     }
 }

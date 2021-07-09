@@ -2,10 +2,14 @@
 use sdl2::rect::Rect;
 use sdl2::render::{Texture, WindowCanvas};
 
+use crate::inventory_item_trait;
+
 // Import constant from main
 use crate::{CAM_H, CAM_W, TILE_SIZE};
 use std::str::FromStr;
 use std::string::ParseError;
+
+use rand::Rng;
 
 /// Crop type enum
 pub enum CropType {
@@ -34,7 +38,12 @@ pub struct Crop<'a> {
 
     tex_path: String,
 
-    t: CropType,
+	t: CropType,
+
+	/// Example to show sorting
+	/// I'm not sure how this will be implemented further on
+	/// May need to make seperate seed class?
+	some_internal_genetic_value: i32
 }
 // TODO add crop genetics
 
@@ -64,17 +73,22 @@ impl<'a> Crop<'a> {
             CropType::Lettuce => (stage as u32 * TILE_SIZE, TILE_SIZE * 3),
         };
 
-        let src = Rect::new(x as i32, y as i32, TILE_SIZE, TILE_SIZE);
-        Crop {
-            pos,
-            stage,
-            src,
-            texture,
-            watered,
-            tex_path,
-            t,
-        }
-    }
+		let src = Rect::new(x as i32, y as i32, TILE_SIZE, TILE_SIZE);
+
+		let mut rng = rand::thread_rng();
+
+
+		Crop {
+			pos,
+			stage,
+			src,
+			texture,
+			watered,
+			tex_path,
+			t,
+			some_internal_genetic_value: rng.gen_range(0..100)
+		}
+	}
 
     /// Sets a crop's `watered` variable to `w`
     pub fn set_water(&mut self, w: bool) {
@@ -210,6 +224,15 @@ impl<'a> Crop<'a> {
 
         self.src = Rect::new(x as i32, y as i32, TILE_SIZE, TILE_SIZE);
     }
+}
+
+impl inventory_item_trait for Crop{
+	/// Sort inventory so that you take the best item from the inventory
+	/// This can be a combination of factors
+	/// i.e. 2*speed + resistance
+	fn get_value(&self){
+		return self.some_internal_genetic_value;
+	}
 }
 
 impl FromStr for CropType {
