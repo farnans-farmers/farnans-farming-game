@@ -233,6 +233,12 @@ impl inventory_item_trait for Crop<'_>{
 	fn get_value(&self) -> i32{
 		self.some_internal_genetic_value
 	}
+    fn texture(&self) -> &Texture{
+        &self.texture
+    }
+    fn pos(&self) -> Rect{
+		self.pos
+    }
 }
 
 impl FromStr for CropType {

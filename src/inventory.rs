@@ -20,7 +20,7 @@ static BORDER_SIZE: i32 = 4;
 static SELECTED_SIZE: i32 = 2;
 
 struct Inventory_Item<'a>{
-    item: Vec<Item<'a>>,
+    item: Vec<Box<dyn inventory_item_trait + 'a>>,
     is_tool: bool
 }
 
@@ -36,10 +36,13 @@ impl<'a> Inventory_Item<'a>{
         self.item.len() as i32
     }
     pub fn add_item(&mut self,item: Item<'a>){
-        self.item.push(item);
+        self.item.push( Box::new(item));
     }
     pub fn pop_item(&self){
         println!("TODO");
+    }
+    pub fn get_item(&self, index: i32) -> &Box<dyn inventory_item_trait + 'a>{
+        &(self.item[index as usize])
     }
 }
 
@@ -149,7 +152,8 @@ impl<'a> Inventory<'a> {
                 x = x + 1;
                 continue;
             }
-            wincan.copy(inventory.item[0].texture(), inventory.item[0].pos(),
+            //wincan.copy((*inventory.item[0]).texture(), (*inventory.item[0]).pos(),
+            wincan.copy(inventory.get_item(0).texture(), inventory.get_item(0).pos(),
 
                  Rect::new(
                     INVENTORY_X_POS+(x*(ITEM_BOX_SIZE+BORDER_SIZE)),

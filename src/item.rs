@@ -95,4 +95,10 @@ impl inventory_item_trait for Item<'_>{
     fn get_value(&self) -> i32{
         1
     }
+    fn texture(&self) -> &Texture{
+        &self.texture
+    }
+    fn pos(&self) -> Rect {
+        self.pos
+    }
 }
