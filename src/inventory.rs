@@ -20,29 +20,43 @@ static BORDER_SIZE: i32 = 4;
 static SELECTED_SIZE: i32 = 2;
 
 struct Inventory_Item<'a>{
-    item: Vec<Box<dyn inventory_item_trait + 'a>>,
+    items: Vec<Box<dyn inventory_item_trait + 'a>>,
     is_tool: bool
 }
 
 impl<'a> Inventory_Item<'a>{
     pub fn new(is_tool: bool) -> Inventory_Item<'a>{
         Inventory_Item{
-            item: Vec::new(),
+            items: Vec::new(),
             is_tool
         }
     }
 
     pub fn get_len(&self) -> i32{
-        self.item.len() as i32
+        self.items.len() as i32
     }
-    pub fn add_item(&mut self,item: Item<'a>){
-        self.item.push( Box::new(item));
+    
+    /// Insert item into sorted vector
+    /// Right now its just insertion sort
+    /// Might change to a more efficient insertion if there is time
+    pub fn add_item(&mut self,new_item: Item<'a>){
+        let mut i = 0;
+        let mut insert_pos = self.get_len() as usize;
+        for item in &self.items{
+            if item.get_value() < new_item.get_value(){
+                insert_pos = i;
+                break;
+            }
+            println!("{} = {}",i,item.get_string());
+            i = i + 1;
+        }
+        self.items.insert(insert_pos,Box::new(new_item));
     }
     pub fn pop_item(&self){
         println!("TODO");
     }
     pub fn get_item(&self, index: i32) -> &Box<dyn inventory_item_trait + 'a>{
-        &(self.item[index as usize])
+        &(self.items[index as usize])
     }
 }
 
@@ -86,7 +100,43 @@ impl<'a> Inventory<'a> {
                 )
             );
 
-/*
+            inventory_slots[5].add_item(
+                Item::new(
+                    Rect::new(5*32 , 0 , 32, 32),
+                    texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
+                    "src/images/itemMenu.png".parse().unwrap(),
+                    false,
+                )
+            );
+            inventory_slots[5].add_item(
+                Item::new(
+                    Rect::new(5*32 , 0 , 32, 32),
+                    texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
+                    "src/images/itemMenu.png".parse().unwrap(),
+                    false,
+                )
+            );
+
+            inventory_slots[5].add_item(
+                Item::new(
+                    Rect::new(5*32 , 0 , 32, 32),
+                    texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
+                    "src/images/itemMenu.png".parse().unwrap(),
+                    false,
+                )
+            );
+
+
+        for item in &inventory_slots[5].items{
+            println!("SORT {}",item.get_string());
+        }
+        println!("\n\n");
+                for item in &inventory_slots[5].items{
+            println!("SORT {}",item.get_string());
+        }
+
+
+        /*
         let mut x = 0;
         for (i,inventory) in inventory_slots.iter().enumerate(){
             inventory.add_item(
@@ -152,7 +202,6 @@ impl<'a> Inventory<'a> {
                 x = x + 1;
                 continue;
             }
-            //wincan.copy((*inventory.item[0]).texture(), (*inventory.item[0]).pos(),
             wincan.copy(inventory.get_item(0).texture(), inventory.get_item(0).pos(),
 
                  Rect::new(

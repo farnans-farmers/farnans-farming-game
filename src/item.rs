@@ -2,21 +2,28 @@ use sdl2::rect::Rect;
 use sdl2::render::{Texture, WindowCanvas};
 
 use crate::inventory_item_trait;
+use rand::Rng;
 
 pub struct Item<'a> {
     pos: Rect,
     texture: Texture<'a>,
     tex_path: String,
     collision: bool,
+    some_internal_genetic_value: i32,
 }
 
 impl<'a> Item<'a> {
     pub fn new(pos: Rect, texture: Texture<'a>, tex_path: String, collision: bool) -> Item {
+
+        let mut rng = rand::thread_rng();
+
+
         Item {
             pos,
             texture,
             tex_path,
             collision,
+            some_internal_genetic_value: rng.gen_range(0,100)
         }
     }
 
@@ -93,7 +100,7 @@ impl<'a> Item<'a> {
 
 impl inventory_item_trait for Item<'_>{
     fn get_value(&self) -> i32{
-        1
+        self.some_internal_genetic_value
     }
     fn texture(&self) -> &Texture{
         &self.texture
