@@ -86,7 +86,7 @@ impl<'a> Crop<'a> {
 			watered,
 			tex_path,
 			t,
-			some_internal_genetic_value: rng.gen_range(0..100)
+			some_internal_genetic_value: rng.gen_range(0,100)
 		}
 	}
 
@@ -226,12 +226,12 @@ impl<'a> Crop<'a> {
     }
 }
 
-impl inventory_item_trait for Crop{
+impl inventory_item_trait for Crop<'_>{
 	/// Sort inventory so that you take the best item from the inventory
 	/// This can be a combination of factors
 	/// i.e. 2*speed + resistance
-	fn get_value(&self){
-		return self.some_internal_genetic_value;
+	fn get_value(&self) -> i32{
+		self.some_internal_genetic_value
 	}
 }
 

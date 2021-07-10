@@ -91,8 +91,8 @@ impl<'a> Item<'a> {
     }
 }
 
-impl inventory_item_trait for Item{
-    fn get_value(&self){
-        return 1;
+impl inventory_item_trait for Item<'_>{
+    fn get_value(&self) -> i32{
+        1
     }
 }

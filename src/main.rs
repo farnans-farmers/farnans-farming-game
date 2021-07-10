@@ -58,7 +58,7 @@ pub enum Area {
 
 
 pub trait inventory_item_trait {
-    fn get_value(&self);
+    fn get_value(&self) -> i32;
 }
 
 fn main() {

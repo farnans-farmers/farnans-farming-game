@@ -25,15 +25,18 @@ struct Inventory_Item<'a>{
 }
 
 impl<'a> Inventory_Item<'a>{
-    pub fn new(item: Vec<Item<'a>>, is_tool: bool) -> Inventory_Item{
+    pub fn new(is_tool: bool) -> Inventory_Item<'a>{
         Inventory_Item{
-            item,
+            item: Vec::new(),
             is_tool
         }
     }
 
     pub fn get_len(&self) -> i32{
         self.item.len() as i32
+    }
+    pub fn add_item(&mut self,item: Item<'a>){
+        self.item.push(item);
     }
     pub fn pop_item(&self){
         println!("TODO");
@@ -54,21 +57,46 @@ impl<'a> Inventory<'a> {
     pub fn new(texture_creator: &'a TextureCreator<WindowContext>) -> Inventory<'a> {
 
 
-        let inventory_slots: Vec<Inventory_Item> = (0..10)
+        let mut inventory_slots: Vec<Inventory_Item> = (0..10)
             .map(|x| {
                 Inventory_Item::new(
-                    vec![
-                        Item::new(
-                            Rect::new(x*32 , 0 , 32, 32),
-                            texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
-                            "src/images/itemMenu.png".parse().unwrap(),
-                            false,
-                        )
-                    ],
                     x<3
                 )
             })
             .collect();
+
+            inventory_slots[5].add_item(
+                Item::new(
+                    Rect::new(5*32 , 0 , 32, 32),
+                    texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
+                    "src/images/itemMenu.png".parse().unwrap(),
+                    false,
+                )
+            );
+
+            inventory_slots[5].add_item(
+                Item::new(
+                    Rect::new(5*32 , 0 , 32, 32),
+                    texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
+                    "src/images/itemMenu.png".parse().unwrap(),
+                    false,
+                )
+            );
+
+/*
+        let mut x = 0;
+        for (i,inventory) in inventory_slots.iter().enumerate(){
+            inventory.add_item(
+                Item::new(
+                    Rect::new(x*32 , 0 , 32, 32),
+                    texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
+                    "src/images/itemMenu.png".parse().unwrap(),
+                    false,
+                )
+            );
+            x = x + 1;
+        }
+        */
 
         let temp_select = 0;
         let squares: Vec<Rect> = (0..10)
@@ -117,6 +145,10 @@ impl<'a> Inventory<'a> {
 
         let mut x = 0;
         for inventory in &self.inventory_slots{
+            if inventory.get_len() == 0{
+                x = x + 1;
+                continue;
+            }
             wincan.copy(inventory.item[0].texture(), inventory.item[0].pos(),
 
                  Rect::new(
@@ -132,7 +164,7 @@ impl<'a> Inventory<'a> {
                 self.draw_numbers(wincan,  x, inventory.get_len());
             }
 
-            x = x+1;
+            x = x + 1;
         }
 
     }
@@ -145,7 +177,7 @@ impl<'a> Inventory<'a> {
         let mut digit_place = 1; 
         // Do-While loop in rust
         loop {
-            let mut digit = value % 10;
+            let digit = value % 10;
             value /= 10;
 
             wincan.copy(
