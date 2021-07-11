@@ -3,6 +3,7 @@ use sdl2::rect::Rect;
 use sdl2::render::{Texture, WindowCanvas};
 
 use crate::inventory_item_trait;
+use crate::population::Population;
 
 // Import constant from main
 use crate::{CAM_H, CAM_W, TILE_SIZE};
@@ -12,6 +13,7 @@ use std::string::ParseError;
 use rand::Rng;
 
 /// Crop type enum
+#[derive(Copy, Clone)]
 pub enum CropType {
     None,
     Carrot,
@@ -224,6 +226,18 @@ impl<'a> Crop<'a> {
 
         self.src = Rect::new(x as i32, y as i32, TILE_SIZE, TILE_SIZE);
     }
+    pub fn set_crop_type_enum(&mut self, new_crop_type: CropType){
+        self.t = new_crop_type;
+        let (x, y) = match self.t {
+            CropType::None => (0, 0),
+            CropType::Carrot => (self.stage as u32 * TILE_SIZE, 0),
+            CropType::Corn => (self.stage as u32 * TILE_SIZE, TILE_SIZE),
+            CropType::Potato => (self.stage as u32 * TILE_SIZE, TILE_SIZE * 2),
+            CropType::Lettuce => (self.stage as u32 * TILE_SIZE, TILE_SIZE * 3),
+        };
+
+        self.src = Rect::new(x as i32, y as i32, TILE_SIZE, TILE_SIZE);
+    }
 }
 
 impl inventory_item_trait for Crop<'_>{
@@ -238,6 +252,25 @@ impl inventory_item_trait for Crop<'_>{
     }
     fn pos(&self) -> Rect{
 		self.pos
+    }    
+    fn inventory_input(&self, square:(i32, i32), pop: &mut Population){
+        println!("CROP");
+        let (x,y) = square;
+        // Not sure what order the seeds will be in in the
+            // inventory, but planting will look something like this
+            if pop.get_tile_with_index(x as u32, y as u32).tilled()
+                && pop
+                    .get_crop_with_index(x as u32, y as u32)
+                    .get_crop_type()
+                    .to_owned()
+                    == "None"
+            {
+                // TODO check to see if we have any seeds
+                let mut _c = pop.get_crop_with_index_mut(x as u32, y as u32);
+                _c.set_crop_type_enum(self.t);
+                _c.set_stage(0);
+                _c.set_water(false);
+            }
     }
 }
 

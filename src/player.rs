@@ -13,6 +13,7 @@ use sdl2::video::WindowContext;
 
 use crate::anim::Animation;
 use crate::inventory::Inventory;
+use crate::population::Population;
 use crate::item::Item;
 use crate::crop::{Crop, CropType};
 use crate::{crop, TILE_SIZE};
@@ -150,6 +151,10 @@ impl<'a> Player<'a> {
 
     pub fn get_selected(&self) -> i32 {
         self.inventory.get_selected()
+    }
+
+    pub fn use_inventory(&self, square:(i32, i32), mut pop: &mut Population){
+        self.inventory.use_inventory(square,pop)
     }
 
     pub fn draw(&mut self, wincan: &mut WindowCanvas, player_cam_pos: Rect) {

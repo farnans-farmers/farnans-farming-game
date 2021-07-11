@@ -11,7 +11,6 @@ mod population;
 mod sleep_menu;
 mod store;
 mod tile;
-mod utilities;
 mod tool;
 
 use anim::Animation;
@@ -63,7 +62,7 @@ pub trait inventory_item_trait {
     fn texture(&self) -> &Texture;
     fn pos(&self) -> Rect;    
     fn get_string(&self) -> String { self.get_value().to_string()} //For testing
-    //fn input(&self) //TODO replace utilities file with this
+    fn inventory_input(&self, square:(i32, i32), pop: &mut population::Population); //TODO replace utilities file with this
 }
 
 fn main() {
@@ -381,7 +380,8 @@ fn main() {
                         (((p.y() + TILE_SIZE as i32) / TILE_SIZE as i32) + offset.1)
                             .clamp(0, ((BG_H / TILE_SIZE) as i32) + 1),
                     );
-                    utilities::use_tool(coordinates.0, coordinates.1, &mut pop, p.get_selected(), &mut p);
+
+                    p.use_inventory(coordinates, &mut pop);
                 }
 
                 if keystate.contains(&Keycode::Num1) {

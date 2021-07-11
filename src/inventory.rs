@@ -2,9 +2,9 @@ use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 
-use crate::item::Item;
 use crate::crop::Crop;
 use crate::tool::Tool;
+use crate::population::Population;
 use crate::inventory_item_trait;
 
 use sdl2::render::TextureCreator;
@@ -80,20 +80,7 @@ impl<'a> Inventory<'a> {
                 Inventory_Item::new(
                     x<3
                 )
-            })
-            .collect();
-            /*
-            for x in 0..3{
-                inventory_slots[x].add_item(
-                Item::new(
-                    Rect::new((x as i32)*32 , 0 , 32, 32),
-                    texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
-                    "src/images/itemMenu.png".parse().unwrap(),
-                    false,
-                )
-            );
-            }
-            */
+            }).collect();
 
             inventory_slots[0].add_item(
                 Box::new(
@@ -124,6 +111,8 @@ impl<'a> Inventory<'a> {
                     )
                 )
             );
+
+            //TODO this is just to add seeds into inventory until harvesting is implemented
 
             inventory_slots[3].add_item(
                 Box::new(
@@ -212,22 +201,6 @@ impl<'a> Inventory<'a> {
                 for item in &inventory_slots[5].items{
             println!("SORT {}",item.get_string());
         }
-
-
-        /*
-        let mut x = 0;
-        for (i,inventory) in inventory_slots.iter().enumerate(){
-            inventory.add_item(
-                Item::new(
-                    Rect::new(x*32 , 0 , 32, 32),
-                    texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
-                    "src/images/itemMenu.png".parse().unwrap(),
-                    false,
-                )
-            );
-            x = x + 1;
-        }
-        */
 
         let temp_select = 0;
         let squares: Vec<Rect> = (0..10)
@@ -338,35 +311,7 @@ impl<'a> Inventory<'a> {
         self.selected
     }
 
-    pub fn get_carrot_seed(&mut self, index: i32) -> Option<Crop<'a>> {
-        if index < self.carrot_seeds.len() as i32 {
-            Some(self.carrot_seeds.remove(index as usize))
-        } else {
-            None
-        }
-    }
-
-    pub fn get_corn_seed(&mut self, index: i32) -> Option<Crop<'a>> {
-        if index < self.corn_seeds.len() as i32 {
-            Some(self.corn_seeds.remove(index as usize))
-        } else {
-            None
-        }
-    }
-
-    pub fn get_potato_seed(&mut self, index: i32) -> Option<Crop<'a>> {
-        if index < self.potato_seeds.len() as i32 {
-            Some(self.potato_seeds.remove(index as usize))
-        } else {
-            None
-        }
-    }
-
-    pub fn get_lettuce_seed(&mut self, index: i32) -> Option<Crop<'a>> {
-        if index < self.lettuce_seeds.len() as i32 {
-            Some(self.lettuce_seeds.remove(index as usize))
-        } else {
-            None
-        }
+    pub fn use_inventory(&self,square:(i32, i32), mut pop: &mut Population){
+        self.inventory_slots[self.selected as usize].get_item(0).inventory_input(square,pop);
     }
 }
