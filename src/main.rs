@@ -12,6 +12,7 @@ mod sleep_menu;
 mod store;
 mod tile;
 mod utilities;
+mod tool;
 
 use anim::Animation;
 use item::Item;
@@ -62,6 +63,7 @@ pub trait inventory_item_trait {
     fn texture(&self) -> &Texture;
     fn pos(&self) -> Rect;    
     fn get_string(&self) -> String { self.get_value().to_string()} //For testing
+    //fn input(&self) //TODO replace utilities file with this
 }
 
 fn main() {

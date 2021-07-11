@@ -4,6 +4,7 @@ use sdl2::render::WindowCanvas;
 
 use crate::item::Item;
 use crate::crop::Crop;
+use crate::tool::Tool;
 use crate::inventory_item_trait;
 
 use sdl2::render::TextureCreator;
@@ -39,7 +40,7 @@ impl<'a> Inventory_Item<'a>{
     /// Insert item into sorted vector
     /// Right now its just insertion sort
     /// Might change to a more efficient insertion if there is time
-    pub fn add_item(&mut self,new_item: Item<'a>){
+    pub fn add_item(&mut self,new_item: Box<dyn inventory_item_trait + 'a>){
         let mut i = 0;
         let mut insert_pos = self.get_len() as usize;
         for item in &self.items{
@@ -50,7 +51,7 @@ impl<'a> Inventory_Item<'a>{
             println!("{} = {}",i,item.get_string());
             i = i + 1;
         }
-        self.items.insert(insert_pos,Box::new(new_item));
+        self.items.insert(insert_pos,new_item);
     }
     pub fn pop_item(&self){
         println!("TODO");
@@ -81,48 +82,101 @@ impl<'a> Inventory<'a> {
                 )
             })
             .collect();
-
-            inventory_slots[5].add_item(
+            /*
+            for x in 0..3{
+                inventory_slots[x].add_item(
                 Item::new(
-                    Rect::new(5*32 , 0 , 32, 32),
+                    Rect::new((x as i32)*32 , 0 , 32, 32),
                     texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
                     "src/images/itemMenu.png".parse().unwrap(),
                     false,
                 )
             );
+            }
+            */
 
-            inventory_slots[5].add_item(
-                Item::new(
-                    Rect::new(5*32 , 0 , 32, 32),
-                    texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
-                    "src/images/itemMenu.png".parse().unwrap(),
-                    false,
+            inventory_slots[0].add_item(
+                Box::new(
+                    Tool::new(
+                        Rect::new(0*32 , 0 , 32, 32),
+                        texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
+                        crate::tool::tool_type::hand
+                    )
+                )
+            );
+
+            inventory_slots[1].add_item(
+                Box::new(
+                    Tool::new(
+                        Rect::new(1*32 , 0 , 32, 32),
+                        texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
+                        crate::tool::tool_type::hoe
+                    )
+                )
+            );
+
+            inventory_slots[2].add_item(
+                Box::new(
+                    Tool::new(
+                        Rect::new(2*32 , 0 , 32, 32),
+                        texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
+                        crate::tool::tool_type::watering_can
+                    )
                 )
             );
 
             inventory_slots[5].add_item(
-                Item::new(
-                    Rect::new(5*32 , 0 , 32, 32),
-                    texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
-                    "src/images/itemMenu.png".parse().unwrap(),
-                    false,
-                )
-            );
-            inventory_slots[5].add_item(
-                Item::new(
-                    Rect::new(5*32 , 0 , 32, 32),
-                    texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
-                    "src/images/itemMenu.png".parse().unwrap(),
-                    false,
+                Box::new(
+                    Item::new(
+                        Rect::new(5*32 , 0 , 32, 32),
+                        texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
+                        "src/images/itemMenu.png".parse().unwrap(),
+                        false,
+                    )
                 )
             );
 
             inventory_slots[5].add_item(
-                Item::new(
-                    Rect::new(5*32 , 0 , 32, 32),
-                    texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
-                    "src/images/itemMenu.png".parse().unwrap(),
-                    false,
+                Box::new(
+                    Item::new(
+                        Rect::new(5*32 , 0 , 32, 32),
+                        texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
+                        "src/images/itemMenu.png".parse().unwrap(),
+                        false,
+                    )
+                )
+            );
+
+            inventory_slots[5].add_item(
+                Box::new(
+                    Item::new(
+                        Rect::new(5*32 , 0 , 32, 32),
+                        texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
+                        "src/images/itemMenu.png".parse().unwrap(),
+                        false,
+                    )
+                )
+            );
+
+            inventory_slots[5].add_item(
+                Box::new(
+                    Item::new(
+                        Rect::new(5*32 , 0 , 32, 32),
+                        texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
+                        "src/images/itemMenu.png".parse().unwrap(),
+                        false,
+                    )
+                )
+            );
+
+            inventory_slots[5].add_item(
+                Box::new(
+                    Item::new(
+                        Rect::new(5*32 , 0 , 32, 32),
+                        texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
+                        "src/images/itemMenu.png".parse().unwrap(),
+                        false,
+                    )
                 )
             );
 
@@ -210,9 +264,8 @@ impl<'a> Inventory<'a> {
                     ITEM_BOX_SIZE as u32,
                     ITEM_BOX_SIZE as u32
                 )
-                .unwrap();
+            ).unwrap();
 
-                ).unwrap();
             if !inventory.is_tool{
                 self.draw_numbers(wincan,  x, inventory.get_len());
             }
