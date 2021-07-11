@@ -82,10 +82,6 @@ pub struct Inventory<'a> {
     inventory_slots: Vec<Inventory_Item<'a>>,
     selected: i32,
     squares: Vec<Rect>,
-    carrot_seeds: Vec<Crop<'a>>,
-    corn_seeds: Vec<Crop<'a>>,
-    potato_seeds: Vec<Crop<'a>>,
-    lettuce_seeds: Vec<Crop<'a>>,
 }
 
 /// Takes in texture_creator in order to load tools into the tool slots
@@ -149,10 +145,6 @@ impl<'a> Inventory<'a> {
             inventory_slots,
             selected: temp_select,
             squares,
-            carrot_seeds,
-            corn_seeds,
-            potato_seeds,
-            lettuce_seeds,
         }
     }
 
