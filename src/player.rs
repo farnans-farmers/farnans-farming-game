@@ -14,6 +14,8 @@ use sdl2::video::WindowContext;
 use crate::anim::Animation;
 use crate::inventory::Inventory;
 use crate::item::Item;
+use crate::crop::{Crop, CropType};
+use crate::{crop, TILE_SIZE};
 
 // Player sprites are 54x90 px.
 pub const PLAYER_WIDTH: u32 = 54;
@@ -93,7 +95,63 @@ impl<'a> Player<'a> {
             })
             .collect();
 
-        let inventory = Inventory::new(inventory_slots);
+        //Setting up crop vectors for inventory
+        let mut carrot_vec: Vec < Crop <'a> > = Vec::new();
+        let mut corn_vec: Vec < Crop <'a> > = Vec::new();
+        let mut potato_vec: Vec < Crop <'a> > = Vec::new();
+        let mut lettuce_vec: Vec < Crop <'a> > = Vec::new();
+        let mut default_crop_pos = Rect::new(
+            0,
+            0,
+            TILE_SIZE,
+            TILE_SIZE,
+        );
+        let crop_tex = texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap();
+
+        //Pushing some default seeds into the vectors
+        //THIS CAN BE REMOVED ONCE THE PLAYER CAN GET SEEDS FROM THE STORE
+        for i in 0..3 {
+            carrot_vec.push(crop::Crop::new(
+                default_crop_pos.clone(),
+                0,
+                texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap(),
+                false,
+                "src/images/Crop_Tileset.png".to_string(),
+                CropType::Carrot,
+            ));
+            corn_vec.push(crop::Crop::new(
+                default_crop_pos.clone(),
+                0,
+                texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap(),
+                false,
+                "src/images/Crop_Tileset.png".to_string(),
+                CropType::Corn,
+            ));
+            potato_vec.push(crop::Crop::new(
+                default_crop_pos.clone(),
+                0,
+                texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap(),
+                false,
+                "src/images/Crop_Tileset.png".to_string(),
+                CropType::Potato,
+            ));
+            lettuce_vec.push(crop::Crop::new(
+                default_crop_pos.clone(),
+                0,
+                texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap(),
+                false,
+                "src/images/Crop_Tileset.png".to_string(),
+                CropType::Lettuce,
+            ));
+        }
+
+        let inventory = Inventory::new(
+            inventory_slots,
+            carrot_vec,
+            corn_vec,
+            potato_vec,
+            lettuce_vec,
+        );
 
         Player {
             pos,
@@ -287,5 +345,9 @@ impl<'a> Player<'a> {
             || a.top() > b.bottom()
             || a.right() < b.left()
             || a.left() > b.right())
+    }
+
+    pub fn get_inventory(&mut self) -> &mut Inventory<'a>{
+        &mut self.inventory
     }
 }
