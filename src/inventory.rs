@@ -21,12 +21,19 @@ static ITEM_BOX_SIZE: i32 = 64;
 static BORDER_SIZE: i32 = 4;
 static SELECTED_SIZE: i32 = 2;
 
+
+/// Individual inventory slot. This takes in an inventory trait object(crop or tool)
+/// Inventory slots are sorted, so you have the "best" seed at the bottom of the queue
+/// This is done so that seed can have different genetics, but still have one inventory slot
+/// The vectors are sorted by their value: a number that is determined in the crop class
 struct Inventory_Item<'a>{
     items: Vec<Box<dyn inventory_item_trait + 'a>>,
     is_tool: bool
 }
 
 impl<'a> Inventory_Item<'a>{
+    /// Takes in is_tool: used to differentiate tools from crops
+    /// and initializes vector of inventory_item_trait
     pub fn new(is_tool: bool) -> Inventory_Item<'a>{
         Inventory_Item{
             items: Vec::new(),
@@ -49,11 +56,13 @@ impl<'a> Inventory_Item<'a>{
                 insert_pos = i;
                 break;
             }
-            println!("{} = {}",i,item.get_string());
             i = i + 1;
         }
         self.items.insert(insert_pos,new_item);
     }
+
+    /// TODO still need to implement using/planting crops
+    /// This will pop the highest sorted item at index 0
     pub fn pop_item(&self){
         println!("TODO");
     }
@@ -65,6 +74,10 @@ impl<'a> Inventory_Item<'a>{
     }
 }
 
+
+/// Inventory class that has a vector of inventory slots
+/// Also keeps track of the current selected inventory slot
+/// squares is used to draw the inventory slot. It is kept here so that it doesn't have to be initialized each time you want to draw
 pub struct Inventory<'a> {
     inventory_slots: Vec<Inventory_Item<'a>>,
     selected: i32,
@@ -75,10 +88,11 @@ pub struct Inventory<'a> {
     lettuce_seeds: Vec<Crop<'a>>,
 }
 
+/// Takes in texture_creator in order to load tools into the tool slots
 impl<'a> Inventory<'a> {
     pub fn new(texture_creator: &'a TextureCreator<WindowContext>) -> Inventory<'a> {
 
-
+        /// Initializes inventory slots and sets tool slots to true
         let mut inventory_slots: Vec<Inventory_Item> = (0..10)
             .map(|x| {
                 Inventory_Item::new(
@@ -86,6 +100,7 @@ impl<'a> Inventory<'a> {
                 )
             }).collect();
 
+            /// Add tool slots into the inventory
             inventory_slots[0].add_item(
                 Box::new(
                     Tool::new(
@@ -116,73 +131,9 @@ impl<'a> Inventory<'a> {
                 )
             );
 
-            //TODO this is just to add seeds into inventory until harvesting is implemented
-
-            inventory_slots[3].add_item(
-                Box::new(
-                    Crop::new_inventory_crop(
-                        0,
-                        texture_creator
-                            .load_texture("src/images/Crop_Tileset.png")
-                            .unwrap(),
-                        false,
-                        "src/images/Crop_Tileset.png".parse().unwrap(),
-                        crate::crop::CropType::Carrot,
-                    )
-                )
-            );
-
-            inventory_slots[4].add_item(
-                Box::new(
-                    Crop::new_inventory_crop(
-                        0,
-                        texture_creator
-                            .load_texture("src/images/Crop_Tileset.png")
-                            .unwrap(),
-                        false,
-                        "src/images/Crop_Tileset.png".parse().unwrap(),
-                        crate::crop::CropType::Corn,
-                    )
-                )
-            );
-
-            inventory_slots[5].add_item(
-                Box::new(
-                    Crop::new_inventory_crop(
-                        0,
-                        texture_creator
-                            .load_texture("src/images/Crop_Tileset.png")
-                            .unwrap(),
-                        false,
-                        "src/images/Crop_Tileset.png".parse().unwrap(),
-                        crate::crop::CropType::Potato,
-                    )
-                )
-            );
-
-            inventory_slots[6].add_item(
-                Box::new(
-                    Crop::new_inventory_crop(
-                        0,
-                        texture_creator
-                            .load_texture("src/images/Crop_Tileset.png")
-                            .unwrap(),
-                        false,
-                        "src/images/Crop_Tileset.png".parse().unwrap(),
-                        crate::crop::CropType::Lettuce,
-                    )
-                )
-            );
-
-        for item in &inventory_slots[5].items{
-            println!("SORT {}",item.get_string());
-        }
-        println!("\n\n");
-                for item in &inventory_slots[5].items{
-            println!("SORT {}",item.get_string());
-        }
-
         let temp_select = 0;
+
+        /// Initialize squares to be drawn
         let squares: Vec<Rect> = (0..10)
             .map(|x| {
                 Rect::new(
@@ -204,6 +155,8 @@ impl<'a> Inventory<'a> {
             lettuce_seeds,
         }
     }
+
+    /// Draw inventory slots onto the canvas 
     pub fn draw(&self,wincan: &mut WindowCanvas){
         wincan.set_draw_color(Color::RGBA(159,82,30,255));
 
@@ -228,13 +181,18 @@ impl<'a> Inventory<'a> {
         wincan.fill_rects(&self.squares[..]).expect("ERROR");
 
         let mut x = 0;
+
+        /// Draw each inventory slot
         for inventory in &self.inventory_slots{
+
+            /// Don't draw empty slots
             if inventory.get_len() == 0{
                 x = x + 1;
                 continue;
             }
-            let current_item = inventory.get_item(0).unwrap();//?
-            wincan.copy(current_item.texture(), current_item.pos(),
+
+            let current_item = inventory.get_item(0).unwrap();
+            wincan.copy(current_item.texture(), current_item.src(),
 
                  Rect::new(
                     INVENTORY_X_POS+(x*(ITEM_BOX_SIZE+BORDER_SIZE)),
@@ -244,6 +202,8 @@ impl<'a> Inventory<'a> {
                 )
             ).unwrap();
 
+            /// Dont draw tool slots
+            /// This is so that it isn't shown that there is (1) tool
             if !inventory.is_tool{
                 self.draw_numbers(wincan,  x, inventory.get_len());
             }
@@ -252,6 +212,8 @@ impl<'a> Inventory<'a> {
         }
 
     }
+
+    /// Draw length for inventory slot
     pub fn draw_numbers(&self, wincan: &mut WindowCanvas, inventory_slot: i32, mut value: i32){
         let NUMBER_SIZE = 20;
 
@@ -292,6 +254,8 @@ impl<'a> Inventory<'a> {
         self.selected
     }
 
+    /// Add item into the correct inventory slot
+    /// Right now the correct slot is hard coded
     pub fn add_item(&mut self, new_crop: Crop<'a>){
         let inventory_slot_index = match new_crop.get_crop_type_enum(){
             CropType::Carrot => 3,
@@ -308,6 +272,8 @@ impl<'a> Inventory<'a> {
             );
     }
 
+    /// Use the inventory slot for the correct function
+    /// For crops, this means planting the crop onto tilled soil
     pub fn use_inventory(&self,square:(i32, i32), mut pop: &mut Population) -> Option<CropType>{
         let current_item = self.inventory_slots[self.selected as usize].get_item(0);
         match current_item{

@@ -56,12 +56,15 @@ pub enum Area {
     Market,
 }
 
-
+/// Trait used for items that can exist inside of the inventory
 pub trait inventory_item_trait {
+    /// Return some determined value to sort the inventory 
     fn get_value(&self) -> i32;
+    // Get the texture
     fn texture(&self) -> &Texture;
-    fn pos(&self) -> Rect;    
-    fn get_string(&self) -> String { self.get_value().to_string()} //For testing
+    /// Get the pos
+    fn src(&self) -> Rect;
+    /// Perform the correct action for the inventory slot item 
     fn inventory_input(&self, square:(i32, i32), pop: &mut population::Population) -> Option<crop::CropType>;
 }
 
@@ -381,10 +384,14 @@ fn main() {
                             .clamp(0, ((BG_H / TILE_SIZE) as i32) + 1),
                     );
 
+                    /// Use inventory slot function
+                    /// Result is given when we want to add an item to the inventory
+                    /// This is done when a fully grown crop is hoed
                     let result = p.use_inventory(coordinates, &mut pop);
                     match result{
                         Some(x) => {
-                            let new_crop = crop::Crop::new_inventory_crop(
+                            let new_crop = crop::Crop::new(
+                                Rect::new(0,0,0,0),
                                 0,
                                 texture_creator
                                     .load_texture("src/images/Crop_Tileset.png")

@@ -50,7 +50,7 @@ pub struct Player<'a> {
 	moving: bool,
 	/// Player's velocity vector
 	velocity: (f32,f32),
-
+    /// Player's inventory
 	inventory: Inventory<'a>,
 }
 

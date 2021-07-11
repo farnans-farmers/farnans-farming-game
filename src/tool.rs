@@ -4,15 +4,18 @@ use crate::crop::CropType;
 use sdl2::render::Texture;
 use sdl2::rect::Rect;
 
+
+/// This class is for tool functionality
+/// Right now, just have 3 tools
+
 pub enum tool_type {
     hand,
     hoe,
     watering_can,
 }
 
-
 pub struct Tool<'a> {
-    pos: Rect,
+    src: Rect,
     texture: Texture<'a>,
     current_type: tool_type,
 }
@@ -25,12 +28,12 @@ impl<'a> Tool<'a> {
     /// * `pos` - Position of the player.
     /// * `texture` - Sprite sheet texture
     pub fn new(
-        pos: Rect,
+        src: Rect,
         texture: Texture<'a>,
         t: tool_type,
     ) -> Tool<'a> {
             Tool{
-                pos,
+                src,
                 texture,
                 current_type: t,
             }
@@ -45,8 +48,8 @@ impl inventory_item_trait for Tool<'_>{
     fn texture(&self) -> &Texture{
         &self.texture
     }
-    fn pos(&self) -> Rect {
-        self.pos
+    fn src(&self) -> Rect {
+        self.src
     }
     fn inventory_input(&self, square:(i32, i32), pop: &mut Population) -> Option<CropType>{
         println!("TOOL");
@@ -57,8 +60,6 @@ impl inventory_item_trait for Tool<'_>{
             tool_type::hand => {
                 // If tile has plant ready to harvest, harvest
                 if pop.get_crop_with_index(x as u32, y as u32).get_stage() == 3 {
-                    // TODO add to inventory
-                    // Set tile's crop to "None" type to hide it
                     let mut _c = pop.get_crop_with_index_mut(x as u32, y as u32);
                     let return_crop_type = _c.get_crop_type_enum();
                     _c.set_crop_type("None");
@@ -88,8 +89,6 @@ impl inventory_item_trait for Tool<'_>{
             }
             // Watering can
             tool_type::watering_can => {
-                // println!("Used watering can");
-                // If tyle has plant, call water()
                 if !pop.get_crop_with_index(x as u32, y as u32).get_watered() {
                     pop.get_crop_with_index_mut(x as u32, y as u32)
                         .set_water(true);
