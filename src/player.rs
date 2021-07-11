@@ -15,8 +15,8 @@ use crate::anim::Animation;
 use crate::inventory::Inventory;
 use crate::population::Population;
 use crate::item::Item;
-use crate::crop::{Crop, CropType};
-use crate::{crop, TILE_SIZE};
+use crate::crop::Crop;
+use crate::crop::CropType;
 
 // Player sprites are 54x90 px.
 pub const PLAYER_WIDTH: u32 = 54;
@@ -152,9 +152,16 @@ impl<'a> Player<'a> {
     pub fn get_selected(&self) -> i32 {
         self.inventory.get_selected()
     }
-
-    pub fn use_inventory(&self, square:(i32, i32), mut pop: &mut Population){
+    
+    pub fn use_inventory(&self, square:(i32, i32), mut pop: &mut Population) -> Option<CropType>{
         self.inventory.use_inventory(square,pop)
+        /*match return_crop{
+            Some(x) => Some(x),
+            None => (),
+        }*/
+    }
+    pub fn add_item(&mut self, new_crop: Crop<'a>){
+        self.inventory.add_item(new_crop);
     }
 
     pub fn draw(&mut self, wincan: &mut WindowCanvas, player_cam_pos: Rect) {

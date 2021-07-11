@@ -62,7 +62,7 @@ pub trait inventory_item_trait {
     fn texture(&self) -> &Texture;
     fn pos(&self) -> Rect;    
     fn get_string(&self) -> String { self.get_value().to_string()} //For testing
-    fn inventory_input(&self, square:(i32, i32), pop: &mut population::Population); //TODO replace utilities file with this
+    fn inventory_input(&self, square:(i32, i32), pop: &mut population::Population) -> Option<crop::CropType>;
 }
 
 fn main() {
@@ -381,7 +381,22 @@ fn main() {
                             .clamp(0, ((BG_H / TILE_SIZE) as i32) + 1),
                     );
 
-                    p.use_inventory(coordinates, &mut pop);
+                    let result = p.use_inventory(coordinates, &mut pop);
+                    match result{
+                        Some(x) => {
+                            let new_crop = crop::Crop::new_inventory_crop(
+                                0,
+                                texture_creator
+                                    .load_texture("src/images/Crop_Tileset.png")
+                                    .unwrap(),
+                                false,
+                                "src/images/Crop_Tileset.png".parse().unwrap(),
+                                x,
+                            );
+                            p.add_item(new_crop);
+                        },
+                        None => (),
+                    };
                 }
 
                 if keystate.contains(&Keycode::Num1) {

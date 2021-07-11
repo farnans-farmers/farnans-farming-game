@@ -3,6 +3,7 @@ use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 
 use crate::crop::Crop;
+use crate::crop::CropType;
 use crate::tool::Tool;
 use crate::population::Population;
 use crate::inventory_item_trait;
@@ -56,8 +57,11 @@ impl<'a> Inventory_Item<'a>{
     pub fn pop_item(&self){
         println!("TODO");
     }
-    pub fn get_item(&self, index: i32) -> &Box<dyn inventory_item_trait + 'a>{
-        &(self.items[index as usize])
+    pub fn get_item(&self, index: i32) -> Option<&Box<dyn inventory_item_trait + 'a>>{
+        if index >= self.get_len(){
+           return None;
+        }
+        Some(&(self.items[index as usize]))
     }
 }
 
@@ -116,13 +120,7 @@ impl<'a> Inventory<'a> {
 
             inventory_slots[3].add_item(
                 Box::new(
-                    Crop::new(
-                        Rect::new(
-                            (crate::TILE_SIZE as i32) * 0,
-                            (crate::TILE_SIZE as i32) * 0,
-                            crate::TILE_SIZE,
-                            crate::TILE_SIZE,
-                        ),
+                    Crop::new_inventory_crop(
                         0,
                         texture_creator
                             .load_texture("src/images/Crop_Tileset.png")
@@ -136,13 +134,7 @@ impl<'a> Inventory<'a> {
 
             inventory_slots[4].add_item(
                 Box::new(
-                    Crop::new(
-                        Rect::new(
-                            (crate::TILE_SIZE as i32) * 0,
-                            (crate::TILE_SIZE as i32) * 1,
-                            crate::TILE_SIZE,
-                            crate::TILE_SIZE,
-                        ),
+                    Crop::new_inventory_crop(
                         0,
                         texture_creator
                             .load_texture("src/images/Crop_Tileset.png")
@@ -156,13 +148,7 @@ impl<'a> Inventory<'a> {
 
             inventory_slots[5].add_item(
                 Box::new(
-                    Crop::new(
-                        Rect::new(
-                            (crate::TILE_SIZE as i32) * 0,
-                            (crate::TILE_SIZE as i32) * 2,
-                            crate::TILE_SIZE,
-                            crate::TILE_SIZE,
-                        ),
+                    Crop::new_inventory_crop(
                         0,
                         texture_creator
                             .load_texture("src/images/Crop_Tileset.png")
@@ -176,13 +162,7 @@ impl<'a> Inventory<'a> {
 
             inventory_slots[6].add_item(
                 Box::new(
-                    Crop::new(
-                        Rect::new(
-                            (crate::TILE_SIZE as i32) * 0,
-                            (crate::TILE_SIZE as i32) * 3,
-                            crate::TILE_SIZE,
-                            crate::TILE_SIZE,
-                        ),
+                    Crop::new_inventory_crop(
                         0,
                         texture_creator
                             .load_texture("src/images/Crop_Tileset.png")
@@ -253,7 +233,8 @@ impl<'a> Inventory<'a> {
                 x = x + 1;
                 continue;
             }
-            wincan.copy(inventory.get_item(0).texture(), inventory.get_item(0).pos(),
+            let current_item = inventory.get_item(0).unwrap();//?
+            wincan.copy(current_item.texture(), current_item.pos(),
 
                  Rect::new(
                     INVENTORY_X_POS+(x*(ITEM_BOX_SIZE+BORDER_SIZE)),
@@ -311,7 +292,27 @@ impl<'a> Inventory<'a> {
         self.selected
     }
 
-    pub fn use_inventory(&self,square:(i32, i32), mut pop: &mut Population){
-        self.inventory_slots[self.selected as usize].get_item(0).inventory_input(square,pop);
+    pub fn add_item(&mut self, new_crop: Crop<'a>){
+        let inventory_slot_index = match new_crop.get_crop_type_enum(){
+            CropType::Carrot => 3,
+            CropType::Corn => 4,
+            CropType::Potato => 5,
+            CropType::Lettuce => 6,
+            _ => 0,
+        };
+        println!("{}",inventory_slot_index);
+        self.inventory_slots[inventory_slot_index].add_item(
+                Box::new(
+                    new_crop
+                )
+            );
+    }
+
+    pub fn use_inventory(&self,square:(i32, i32), mut pop: &mut Population) -> Option<CropType>{
+        let current_item = self.inventory_slots[self.selected as usize].get_item(0);
+        match current_item{
+            Some(x) => x.inventory_input(square,pop),
+            None    => None,
+        }
     }
 }

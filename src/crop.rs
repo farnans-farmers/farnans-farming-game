@@ -92,6 +92,46 @@ impl<'a> Crop<'a> {
 		}
 	}
 
+    pub fn new_inventory_crop(
+        stage: u8,
+        texture: Texture<'a>,
+        watered: bool,
+        tex_path: String,
+        t: CropType,
+    ) -> Crop {
+        let (x, y) = match t {
+            CropType::None => (0, 0),
+            CropType::Carrot => (stage as u32 * TILE_SIZE, 0),
+            CropType::Corn => (stage as u32 * TILE_SIZE, TILE_SIZE),
+            CropType::Potato => (stage as u32 * TILE_SIZE, TILE_SIZE * 2),
+            CropType::Lettuce => (stage as u32 * TILE_SIZE, TILE_SIZE * 3),
+        };
+
+        let src = Rect::new(x as i32, y as i32, TILE_SIZE, TILE_SIZE);
+
+        let mut rng = rand::thread_rng();
+
+        let pos = Rect::new(
+                    0,
+                    y as i32,
+                    TILE_SIZE,
+                    TILE_SIZE,
+                );
+
+        Crop {
+            pos,
+            stage,
+            src,
+            texture,
+            watered,
+            tex_path,
+            t,
+            some_internal_genetic_value: rng.gen_range(0,100)
+        }
+    }
+
+
+
     /// Sets a crop's `watered` variable to `w`
     pub fn set_water(&mut self, w: bool) {
         self.watered = w;
@@ -206,6 +246,10 @@ impl<'a> Crop<'a> {
         }
     }
 
+    pub fn get_crop_type_enum(&self) -> CropType{
+        self.t
+    }
+
     pub fn set_crop_type(&mut self, string: &str) {
         match string {
             "None" => self.t = CropType::None,
@@ -253,24 +297,25 @@ impl inventory_item_trait for Crop<'_>{
     fn pos(&self) -> Rect{
 		self.pos
     }    
-    fn inventory_input(&self, square:(i32, i32), pop: &mut Population){
+    fn inventory_input(&self, square:(i32, i32), pop: &mut Population) -> Option<CropType>{
         println!("CROP");
         let (x,y) = square;
         // Not sure what order the seeds will be in in the
-            // inventory, but planting will look something like this
-            if pop.get_tile_with_index(x as u32, y as u32).tilled()
-                && pop
-                    .get_crop_with_index(x as u32, y as u32)
-                    .get_crop_type()
-                    .to_owned()
-                    == "None"
-            {
-                // TODO check to see if we have any seeds
-                let mut _c = pop.get_crop_with_index_mut(x as u32, y as u32);
-                _c.set_crop_type_enum(self.t);
-                _c.set_stage(0);
-                _c.set_water(false);
-            }
+        // inventory, but planting will look something like this
+        if pop.get_tile_with_index(x as u32, y as u32).tilled()
+            && pop
+                .get_crop_with_index(x as u32, y as u32)
+                .get_crop_type()
+                .to_owned()
+                == "None"
+        {
+            // TODO check to see if we have any seeds
+            let mut _c = pop.get_crop_with_index_mut(x as u32, y as u32);
+            _c.set_crop_type_enum(self.t);
+            _c.set_stage(0);
+            _c.set_water(false);
+        }
+        return None;
     }
 }
 
