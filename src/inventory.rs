@@ -125,61 +125,85 @@ impl<'a> Inventory<'a> {
                 )
             );
 
-            inventory_slots[5].add_item(
+            inventory_slots[3].add_item(
                 Box::new(
-                    Item::new(
-                        Rect::new(5*32 , 0 , 32, 32),
-                        texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
-                        "src/images/itemMenu.png".parse().unwrap(),
+                    Crop::new(
+                        Rect::new(
+                            (crate::TILE_SIZE as i32) * 0,
+                            (crate::TILE_SIZE as i32) * 0,
+                            crate::TILE_SIZE,
+                            crate::TILE_SIZE,
+                        ),
+                        0,
+                        texture_creator
+                            .load_texture("src/images/Crop_Tileset.png")
+                            .unwrap(),
                         false,
+                        "src/images/Crop_Tileset.png".parse().unwrap(),
+                        crate::crop::CropType::Carrot,
+                    )
+                )
+            );
+
+            inventory_slots[4].add_item(
+                Box::new(
+                    Crop::new(
+                        Rect::new(
+                            (crate::TILE_SIZE as i32) * 0,
+                            (crate::TILE_SIZE as i32) * 1,
+                            crate::TILE_SIZE,
+                            crate::TILE_SIZE,
+                        ),
+                        0,
+                        texture_creator
+                            .load_texture("src/images/Crop_Tileset.png")
+                            .unwrap(),
+                        false,
+                        "src/images/Crop_Tileset.png".parse().unwrap(),
+                        crate::crop::CropType::Corn,
                     )
                 )
             );
 
             inventory_slots[5].add_item(
                 Box::new(
-                    Item::new(
-                        Rect::new(5*32 , 0 , 32, 32),
-                        texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
-                        "src/images/itemMenu.png".parse().unwrap(),
+                    Crop::new(
+                        Rect::new(
+                            (crate::TILE_SIZE as i32) * 0,
+                            (crate::TILE_SIZE as i32) * 2,
+                            crate::TILE_SIZE,
+                            crate::TILE_SIZE,
+                        ),
+                        0,
+                        texture_creator
+                            .load_texture("src/images/Crop_Tileset.png")
+                            .unwrap(),
                         false,
+                        "src/images/Crop_Tileset.png".parse().unwrap(),
+                        crate::crop::CropType::Potato,
                     )
                 )
             );
 
-            inventory_slots[5].add_item(
+            inventory_slots[6].add_item(
                 Box::new(
-                    Item::new(
-                        Rect::new(5*32 , 0 , 32, 32),
-                        texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
-                        "src/images/itemMenu.png".parse().unwrap(),
+                    Crop::new(
+                        Rect::new(
+                            (crate::TILE_SIZE as i32) * 0,
+                            (crate::TILE_SIZE as i32) * 3,
+                            crate::TILE_SIZE,
+                            crate::TILE_SIZE,
+                        ),
+                        0,
+                        texture_creator
+                            .load_texture("src/images/Crop_Tileset.png")
+                            .unwrap(),
                         false,
+                        "src/images/Crop_Tileset.png".parse().unwrap(),
+                        crate::crop::CropType::Lettuce,
                     )
                 )
             );
-
-            inventory_slots[5].add_item(
-                Box::new(
-                    Item::new(
-                        Rect::new(5*32 , 0 , 32, 32),
-                        texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
-                        "src/images/itemMenu.png".parse().unwrap(),
-                        false,
-                    )
-                )
-            );
-
-            inventory_slots[5].add_item(
-                Box::new(
-                    Item::new(
-                        Rect::new(5*32 , 0 , 32, 32),
-                        texture_creator.load_texture("src/images/itemMenu.png").unwrap(),
-                        "src/images/itemMenu.png".parse().unwrap(),
-                        false,
-                    )
-                )
-            );
-
 
         for item in &inventory_slots[5].items{
             println!("SORT {}",item.get_string());
