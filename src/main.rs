@@ -390,17 +390,21 @@ fn main() {
                     let result = p.use_inventory(coordinates, &mut pop);
                     match result{
                         Some(x) => {
-                            let new_crop = crop::Crop::new(
-                                Rect::new(0,0,0,0),
-                                0,
-                                texture_creator
-                                    .load_texture("src/images/Crop_Tileset.png")
-                                    .unwrap(),
-                                false,
-                                "src/images/Crop_Tileset.png".parse().unwrap(),
-                                x,
-                            );
-                            p.add_item(new_crop);
+                            //Return multiple seeds from harvesting a plant
+                            //This may want to be determined on a plant's genes later
+                            for seeds_returned in 0..2{
+                                let new_crop = crop::Crop::new(
+                                    Rect::new(0,0,0,0),
+                                    0,
+                                    texture_creator
+                                        .load_texture("src/images/Crop_Tileset.png")
+                                        .unwrap(),
+                                    false,
+                                    "src/images/Crop_Tileset.png".parse().unwrap(),
+                                    x,
+                                );
+                                p.add_item(new_crop);
+                            }
                         },
                         None => (),
                     };

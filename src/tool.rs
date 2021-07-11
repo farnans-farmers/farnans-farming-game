@@ -52,7 +52,6 @@ impl inventory_item_trait for Tool<'_>{
         self.src
     }
     fn inventory_input(&self, square:(i32, i32), pop: &mut Population) -> Option<CropType>{
-        println!("TOOL");
         let (x,y) = square;
 
         match self.current_type {

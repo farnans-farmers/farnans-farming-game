@@ -260,7 +260,6 @@ impl inventory_item_trait for Crop<'_>{
 		self.src
     }    
     fn inventory_input(&self, square:(i32, i32), pop: &mut Population) -> Option<CropType>{
-        println!("CROP");
         let (x,y) = square;
         if pop.get_tile_with_index(x as u32, y as u32).tilled()
             && pop
@@ -273,6 +272,10 @@ impl inventory_item_trait for Crop<'_>{
             _c.set_crop_type_enum(self.t);
             _c.set_stage(0);
             _c.set_water(false);
+
+            /// Return none for right now to signal a crop was placed
+            /// TODO change this to something less weird
+            return Some(CropType::None);
         }
         return None;
     }

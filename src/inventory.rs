@@ -63,8 +63,8 @@ impl<'a> Inventory_Item<'a>{
 
     /// TODO still need to implement using/planting crops
     /// This will pop the highest sorted item at index 0
-    pub fn pop_item(&self){
-        println!("TODO");
+    pub fn pop_item(&mut self) -> Box<dyn inventory_item_trait + 'a> {
+        self.items.pop().unwrap()
     }
     pub fn get_item(&self, index: i32) -> Option<&Box<dyn inventory_item_trait + 'a>>{
         if index >= self.get_len(){
@@ -264,7 +264,6 @@ impl<'a> Inventory<'a> {
             CropType::Lettuce => 6,
             _ => 0,
         };
-        println!("{}",inventory_slot_index);
         self.inventory_slots[inventory_slot_index].add_item(
                 Box::new(
                     new_crop
@@ -274,10 +273,26 @@ impl<'a> Inventory<'a> {
 
     /// Use the inventory slot for the correct function
     /// For crops, this means planting the crop onto tilled soil
-    pub fn use_inventory(&self,square:(i32, i32), mut pop: &mut Population) -> Option<CropType>{
+    pub fn use_inventory(&mut self,square:(i32, i32), mut pop: &mut Population) -> Option<CropType>{
         let current_item = self.inventory_slots[self.selected as usize].get_item(0);
         match current_item{
-            Some(x) => x.inventory_input(square,pop),
+            Some(x) => {
+                let ret_val = x.inventory_input(square,pop);
+                
+                match ret_val{
+                    Some(y) => {
+                        if matches!(y,CropType::None){
+                            //TODO return this value rather than return the CropType
+                            self.inventory_slots[self.selected as usize].pop_item();
+                            return None;
+                        }
+                        else{
+                            ret_val
+                        }
+                    },
+                    None => None
+                }
+            },
             None    => None,
         }
     }

@@ -153,7 +153,7 @@ impl<'a> Player<'a> {
         self.inventory.get_selected()
     }
     
-    pub fn use_inventory(&self, square:(i32, i32), mut pop: &mut Population) -> Option<CropType>{
+    pub fn use_inventory(&mut self, square:(i32, i32), mut pop: &mut Population) -> Option<CropType>{
         self.inventory.use_inventory(square,pop)
         /*match return_crop{
             Some(x) => Some(x),
