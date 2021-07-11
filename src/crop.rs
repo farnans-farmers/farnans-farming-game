@@ -139,6 +139,10 @@ impl<'a> Crop<'a> {
         self.pos
     }
 
+    pub fn set_pos(&mut self, new_pos: Rect) {
+        self.pos = new_pos;
+    }
+
     /// Get a Crop's width
     pub fn get_width(&self) -> u32 {
         self.get_pos().width()

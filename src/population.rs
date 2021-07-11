@@ -25,7 +25,7 @@ pub struct Population<'a> {
 }
 
 impl<'a> Population<'a> {
-    pub fn new(crop_tile_vec: Vec<Vec<Crop_Tile<'a>>>) -> Population {
+    pub fn new(crop_tile_vec: Vec<Vec<Crop_Tile<'a>>>) -> Population<'a> {
         Population { crop_tile_vec }
     }
 
@@ -66,6 +66,11 @@ impl<'a> Population<'a> {
 
     pub fn get_crop_with_index_mut(&mut self, x: u32, y: u32) -> &mut Crop<'a> {
         &mut self.crop_tile_vec[x as usize][y as usize].crop
+    }
+
+    pub fn set_crop_with_index(&mut self, x: u32, y: u32, mut tar_crop: Crop<'a>) {
+        tar_crop.set_pos(self.crop_tile_vec[x as usize][y as usize].crop.get_pos());
+        self.crop_tile_vec[x as usize][y as usize].crop = tar_crop;
     }
 
     pub fn update_all_plants(&self) {}

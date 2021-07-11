@@ -371,7 +371,7 @@ fn main() {
                         (((p.y() + TILE_SIZE as i32) / TILE_SIZE as i32) + offset.1)
                             .clamp(0, ((BG_H / TILE_SIZE) as i32) + 1),
                     );
-                    utilities::use_tool(coordinates.0, coordinates.1, &mut pop, p.get_selected());
+                    utilities::use_tool(coordinates.0, coordinates.1, &mut pop, p.get_selected(), &mut p);
                 }
 
                 if keystate.contains(&Keycode::Num1) {

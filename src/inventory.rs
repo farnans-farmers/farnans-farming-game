@@ -3,6 +3,8 @@ use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 
 use crate::item::Item;
+use crate::crop::Crop;
+use crate::{TILE_SIZE, crop};
 
 static INVENTORY_X_POS: i32 = 295;
 static INVENTORY_Y_POS: i32 = 640;
@@ -15,10 +17,19 @@ pub struct Inventory<'a> {
     inventory_slots: Vec<Item<'a>>,
     selected: i32,
     squares: Vec<Rect>,
+    carrot_seeds: Vec<Crop<'a>>,
+    corn_seeds: Vec<Crop<'a>>,
+    potato_seeds: Vec<Crop<'a>>,
+    lettuce_seeds: Vec<Crop<'a>>,
 }
 
 impl<'a> Inventory<'a> {
-    pub fn new(inventory_slots: Vec<Item<'a>>) -> Inventory<'a> {
+    pub fn new(inventory_slots: Vec<Item<'a>>,
+               carrot_seeds: Vec<Crop<'a>>,
+               corn_seeds: Vec<Crop<'a>>,
+               potato_seeds: Vec<Crop<'a>>,
+               lettuce_seeds: Vec<Crop<'a>>) -> Inventory<'a> {
+
         let temp_select = 0;
         let squares: Vec<Rect> = (0..10)
             .map(|x| {
@@ -35,9 +46,13 @@ impl<'a> Inventory<'a> {
             inventory_slots,
             selected: temp_select,
             squares,
+            carrot_seeds,
+            corn_seeds,
+            potato_seeds,
+            lettuce_seeds,
         }
     }
-    pub fn draw(&self, wincan: &mut WindowCanvas) {
+    pub fn draw (&self, wincan: &mut WindowCanvas) {
         wincan.set_draw_color(Color::RGBA(159, 82, 30, 255));
         wincan
             .fill_rect(Rect::new(
@@ -86,5 +101,37 @@ impl<'a> Inventory<'a> {
 
     pub fn get_selected(&self) -> i32 {
         self.selected
+    }
+
+    pub fn get_carrot_seed(&mut self, index: i32) -> Option<Crop<'a>> {
+        if index < self.carrot_seeds.len() as i32 {
+            Some(self.carrot_seeds.remove(index as usize))
+        } else {
+            None
+        }
+    }
+
+    pub fn get_corn_seed(&mut self, index: i32) -> Option<Crop<'a>> {
+        if index < self.corn_seeds.len() as i32 {
+            Some(self.corn_seeds.remove(index as usize))
+        } else {
+            None
+        }
+    }
+
+    pub fn get_potato_seed(&mut self, index: i32) -> Option<Crop<'a>> {
+        if index < self.potato_seeds.len() as i32 {
+            Some(self.potato_seeds.remove(index as usize))
+        } else {
+            None
+        }
+    }
+
+    pub fn get_lettuce_seed(&mut self, index: i32) -> Option<Crop<'a>> {
+        if index < self.lettuce_seeds.len() as i32 {
+            Some(self.lettuce_seeds.remove(index as usize))
+        } else {
+            None
+        }
     }
 }
