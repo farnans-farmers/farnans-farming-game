@@ -11,7 +11,7 @@ mod population;
 mod sleep_menu;
 mod store;
 mod tile;
-mod utilities;
+mod tool;
 
 use anim::Animation;
 use item::Item;
@@ -54,6 +54,22 @@ pub enum Menu {
 pub enum Area {
     Home,
     Market,
+}
+
+/// Trait used for items that can exist inside of the inventory
+pub trait inventory_item_trait {
+    /// Return some determined value to sort the inventory
+    fn get_value(&self) -> i32;
+    // Get the texture
+    fn texture(&self) -> &Texture;
+    /// Get the pos
+    fn src(&self) -> Rect;
+    /// Perform the correct action for the inventory slot item
+    fn inventory_input(
+        &self,
+        square: (i32, i32),
+        pop: &mut population::Population,
+    ) -> Option<crop::CropType>;
 }
 
 fn main() {
@@ -371,7 +387,31 @@ fn main() {
                         (((p.y() + TILE_SIZE as i32) / TILE_SIZE as i32) + offset.1)
                             .clamp(0, ((BG_H / TILE_SIZE) as i32) + 1),
                     );
-                    utilities::use_tool(coordinates.0, coordinates.1, &mut pop, p.get_selected(), &mut p);
+
+                    /// Use inventory slot function
+                    /// Result is given when we want to add an item to the inventory
+                    /// This is done when a fully grown crop is hoed
+                    let result = p.use_inventory(coordinates, &mut pop);
+                    match result {
+                        Some(x) => {
+                            //Return multiple seeds from harvesting a plant
+                            //This may want to be determined on a plant's genes later
+                            for seeds_returned in 0..2 {
+                                let new_crop = crop::Crop::new(
+                                    Rect::new(0, 0, 0, 0),
+                                    0,
+                                    texture_creator
+                                        .load_texture("src/images/Crop_Tileset.png")
+                                        .unwrap(),
+                                    false,
+                                    "src/images/Crop_Tileset.png".parse().unwrap(),
+                                    x,
+                                );
+                                p.add_item(new_crop);
+                            }
+                        }
+                        None => (),
+                    };
                 }
 
                 if keystate.contains(&Keycode::Num1) {

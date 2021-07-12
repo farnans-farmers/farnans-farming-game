@@ -1,8 +1,10 @@
 item;200;200;400;320;src/images/Barn.png;true
 item;2000;2000;400;320;src/images/house.png;true
 item;2920;2000;80;160;src/images/go_market.png;true
-crop;19;23;1;src/images/Crop_Tileset.png;false;Lettuce
-crop;20;23;1;src/images/Crop_Tileset.png;false;Lettuce
-crop;21;23;1;src/images/Crop_Tileset.png;false;Lettuce
-crop;22;23;1;src/images/Crop_Tileset.png;false;Lettuce
-crop;23;23;1;src/images/Crop_Tileset.png;false;Lettuce
+crop;19;23;2;src/images/Crop_Tileset.png;true;Lettuce
+crop;20;21;0;src/images/Crop_Tileset.png;true;Carrot
+crop;20;23;2;src/images/Crop_Tileset.png;true;Lettuce
+crop;21;21;0;src/images/Crop_Tileset.png;true;Carrot
+crop;21;23;2;src/images/Crop_Tileset.png;true;Lettuce
+crop;22;23;2;src/images/Crop_Tileset.png;true;Lettuce
+crop;23;23;2;src/images/Crop_Tileset.png;true;Lettuce

@@ -2,12 +2,18 @@
 use sdl2::rect::Rect;
 use sdl2::render::{Texture, WindowCanvas};
 
+use crate::inventory_item_trait;
+use crate::population::Population;
+
 // Import constant from main
 use crate::{CAM_H, CAM_W, TILE_SIZE};
 use std::str::FromStr;
 use std::string::ParseError;
 
+use rand::Rng;
+
 /// Crop type enum
+#[derive(Copy, Clone)]
 pub enum CropType {
     None,
     Carrot,
@@ -35,6 +41,11 @@ pub struct Crop<'a> {
     tex_path: String,
 
     t: CropType,
+
+    /// Example to show sorting
+    /// I'm not sure how this will be implemented further on
+    /// May need to make seperate seed class?
+    some_internal_genetic_value: i32,
 }
 // TODO add crop genetics
 
@@ -65,6 +76,9 @@ impl<'a> Crop<'a> {
         };
 
         let src = Rect::new(x as i32, y as i32, TILE_SIZE, TILE_SIZE);
+
+        let mut rng = rand::thread_rng();
+
         Crop {
             pos,
             stage,
@@ -73,6 +87,7 @@ impl<'a> Crop<'a> {
             watered,
             tex_path,
             t,
+            some_internal_genetic_value: rng.gen_range(0, 100),
         }
     }
 
@@ -190,6 +205,10 @@ impl<'a> Crop<'a> {
         }
     }
 
+    pub fn get_crop_type_enum(&self) -> CropType {
+        self.t
+    }
+
     pub fn set_crop_type(&mut self, string: &str) {
         match string {
             "None" => self.t = CropType::None,
@@ -209,6 +228,54 @@ impl<'a> Crop<'a> {
         };
 
         self.src = Rect::new(x as i32, y as i32, TILE_SIZE, TILE_SIZE);
+    }
+
+    pub fn set_crop_type_enum(&mut self, new_crop_type: CropType) {
+        self.t = new_crop_type;
+        let (x, y) = match self.t {
+            CropType::None => (0, 0),
+            CropType::Carrot => (self.stage as u32 * TILE_SIZE, 0),
+            CropType::Corn => (self.stage as u32 * TILE_SIZE, TILE_SIZE),
+            CropType::Potato => (self.stage as u32 * TILE_SIZE, TILE_SIZE * 2),
+            CropType::Lettuce => (self.stage as u32 * TILE_SIZE, TILE_SIZE * 3),
+        };
+
+        self.src = Rect::new(x as i32, y as i32, TILE_SIZE, TILE_SIZE);
+    }
+}
+
+impl inventory_item_trait for Crop<'_> {
+    /// Sort inventory so that you take the best item from the inventory
+    /// This can be a combination of factors
+    /// i.e. 2*speed + resistance
+    fn get_value(&self) -> i32 {
+        self.some_internal_genetic_value
+    }
+    fn texture(&self) -> &Texture {
+        &self.texture
+    }
+    fn src(&self) -> Rect {
+        self.src
+    }
+    fn inventory_input(&self, square: (i32, i32), pop: &mut Population) -> Option<CropType> {
+        let (x, y) = square;
+        if pop.get_tile_with_index(x as u32, y as u32).tilled()
+            && pop
+                .get_crop_with_index(x as u32, y as u32)
+                .get_crop_type()
+                .to_owned()
+                == "None"
+        {
+            let mut _c = pop.get_crop_with_index_mut(x as u32, y as u32);
+            _c.set_crop_type_enum(self.t);
+            _c.set_stage(0);
+            _c.set_water(false);
+
+            /// Return none for right now to signal a crop was placed
+            /// TODO change this to something less weird
+            return Some(CropType::None);
+        }
+        return None;
     }
 }
 

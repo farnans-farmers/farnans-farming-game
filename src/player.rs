@@ -12,10 +12,11 @@ use sdl2::render::WindowCanvas;
 use sdl2::video::WindowContext;
 
 use crate::anim::Animation;
+use crate::crop::Crop;
+use crate::crop::CropType;
 use crate::inventory::Inventory;
 use crate::item::Item;
-use crate::crop::{Crop, CropType};
-use crate::{crop, TILE_SIZE};
+use crate::population::Population;
 
 // Player sprites are 54x90 px.
 pub const PLAYER_WIDTH: u32 = 54;
@@ -49,6 +50,7 @@ pub struct Player<'a> {
     moving: bool,
     /// Player's velocity vector
     velocity: (f32, f32),
+    /// Player's inventory
     inventory: Inventory<'a>,
 }
 
@@ -82,76 +84,7 @@ impl<'a> Player<'a> {
             anims.push(anim);
         }
 
-        let inventory_slots: Vec<Item> = (0..10)
-            .map(|x| {
-                Item::new(
-                    Rect::new(x * 32, 0, 32, 32),
-                    texture_creator
-                        .load_texture("src/images/itemMenu.png")
-                        .unwrap(),
-                    "src/images/itemMenu.png".parse().unwrap(),
-                    false,
-                )
-            })
-            .collect();
-
-        //Setting up crop vectors for inventory
-        let mut carrot_vec: Vec < Crop <'a> > = Vec::new();
-        let mut corn_vec: Vec < Crop <'a> > = Vec::new();
-        let mut potato_vec: Vec < Crop <'a> > = Vec::new();
-        let mut lettuce_vec: Vec < Crop <'a> > = Vec::new();
-        let mut default_crop_pos = Rect::new(
-            0,
-            0,
-            TILE_SIZE,
-            TILE_SIZE,
-        );
-        let crop_tex = texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap();
-
-        //Pushing some default seeds into the vectors
-        //THIS CAN BE REMOVED ONCE THE PLAYER CAN GET SEEDS FROM THE STORE
-        for i in 0..3 {
-            carrot_vec.push(crop::Crop::new(
-                default_crop_pos.clone(),
-                0,
-                texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap(),
-                false,
-                "src/images/Crop_Tileset.png".to_string(),
-                CropType::Carrot,
-            ));
-            corn_vec.push(crop::Crop::new(
-                default_crop_pos.clone(),
-                0,
-                texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap(),
-                false,
-                "src/images/Crop_Tileset.png".to_string(),
-                CropType::Corn,
-            ));
-            potato_vec.push(crop::Crop::new(
-                default_crop_pos.clone(),
-                0,
-                texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap(),
-                false,
-                "src/images/Crop_Tileset.png".to_string(),
-                CropType::Potato,
-            ));
-            lettuce_vec.push(crop::Crop::new(
-                default_crop_pos.clone(),
-                0,
-                texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap(),
-                false,
-                "src/images/Crop_Tileset.png".to_string(),
-                CropType::Lettuce,
-            ));
-        }
-
-        let inventory = Inventory::new(
-            inventory_slots,
-            carrot_vec,
-            corn_vec,
-            potato_vec,
-            lettuce_vec,
-        );
+        let inventory = Inventory::new(texture_creator);
 
         Player {
             pos,
@@ -218,6 +151,21 @@ impl<'a> Player<'a> {
 
     pub fn get_selected(&self) -> i32 {
         self.inventory.get_selected()
+    }
+
+    pub fn use_inventory(
+        &mut self,
+        square: (i32, i32),
+        mut pop: &mut Population,
+    ) -> Option<CropType> {
+        self.inventory.use_inventory(square, pop)
+        /*match return_crop{
+            Some(x) => Some(x),
+            None => (),
+        }*/
+    }
+    pub fn add_item(&mut self, new_crop: Crop<'a>) {
+        self.inventory.add_item(new_crop);
     }
 
     pub fn draw(&mut self, wincan: &mut WindowCanvas, player_cam_pos: Rect) {
@@ -347,7 +295,7 @@ impl<'a> Player<'a> {
             || a.left() > b.right())
     }
 
-    pub fn get_inventory(&mut self) -> &mut Inventory<'a>{
+    pub fn get_inventory(&mut self) -> &mut Inventory<'a> {
         &mut self.inventory
     }
 }
