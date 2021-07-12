@@ -61,6 +61,7 @@ pub fn start_sleep_menu(
                         _c.grow();
                     }
                 }
+                _c.set_water(false);
                 // Set tile watered to false
                 pop.get_tile_with_index_mut(_x as u32, _y as u32)
                     .set_water(false);

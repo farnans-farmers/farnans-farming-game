@@ -50,6 +50,19 @@ impl inventory_item_trait for Tool<'_> {
         match self.current_type {
             // Hand
             tool_type::hand => {
+                // TODO remove debugging that prints genes
+                if let Some(_i) = pop
+                    .get_crop_with_index(x as u32, y as u32)
+                    .get_gene(crate::genes::GeneType::GrowthRate)
+                {
+                    println!(
+                        "{}",
+                        pop.get_crop_with_index(x as u32, y as u32)
+                            .get_all_genes()
+                            .as_ref()
+                            .unwrap()
+                    )
+                }
                 // If tile has plant ready to harvest, harvest
                 if pop.get_crop_with_index(x as u32, y as u32).get_stage() == 3 {
                     let mut _c = pop.get_crop_with_index_mut(x as u32, y as u32);
@@ -84,6 +97,8 @@ impl inventory_item_trait for Tool<'_> {
                 if !pop.get_crop_with_index(x as u32, y as u32).get_watered() {
                     pop.get_crop_with_index_mut(x as u32, y as u32)
                         .set_water(true);
+                }
+                if pop.get_tile_with_index(x as u32, y as u32).tilled() {
                     pop.get_tile_with_index_mut(x as u32, y as u32)
                         .set_water(true);
                 }
