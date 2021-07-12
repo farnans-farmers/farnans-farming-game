@@ -12,11 +12,11 @@ use sdl2::render::WindowCanvas;
 use sdl2::video::WindowContext;
 
 use crate::anim::Animation;
-use crate::inventory::Inventory;
-use crate::population::Population;
-use crate::item::Item;
 use crate::crop::Crop;
 use crate::crop::CropType;
+use crate::inventory::Inventory;
+use crate::item::Item;
+use crate::population::Population;
 
 // Player sprites are 54x90 px.
 pub const PLAYER_WIDTH: u32 = 54;
@@ -38,20 +38,20 @@ pub enum Direction {
 
 /// Player struct
 pub struct Player<'a> {
-	/// Rectangle to manage player position
-	pos: Rect,
-	/// Animation spritesheet
-	src: Vec<Animation<Rect>>,
-	/// Texture of sprite sheet
-	texture: Texture<'a>,
-	/// Direction the player is facing
-	dir: Direction,
-	/// Whether the player is moving
-	moving: bool,
-	/// Player's velocity vector
-	velocity: (f32,f32),
+    /// Rectangle to manage player position
+    pos: Rect,
+    /// Animation spritesheet
+    src: Vec<Animation<Rect>>,
+    /// Texture of sprite sheet
+    texture: Texture<'a>,
+    /// Direction the player is facing
+    dir: Direction,
+    /// Whether the player is moving
+    moving: bool,
+    /// Player's velocity vector
+    velocity: (f32, f32),
     /// Player's inventory
-	inventory: Inventory<'a>,
+    inventory: Inventory<'a>,
 }
 
 // TODO implement player animation
@@ -84,7 +84,7 @@ impl<'a> Player<'a> {
             anims.push(anim);
         }
 
-    	let inventory = Inventory::new(texture_creator);
+        let inventory = Inventory::new(texture_creator);
 
         Player {
             pos,
@@ -152,15 +152,19 @@ impl<'a> Player<'a> {
     pub fn get_selected(&self) -> i32 {
         self.inventory.get_selected()
     }
-    
-    pub fn use_inventory(&mut self, square:(i32, i32), mut pop: &mut Population) -> Option<CropType>{
-        self.inventory.use_inventory(square,pop)
+
+    pub fn use_inventory(
+        &mut self,
+        square: (i32, i32),
+        mut pop: &mut Population,
+    ) -> Option<CropType> {
+        self.inventory.use_inventory(square, pop)
         /*match return_crop{
             Some(x) => Some(x),
             None => (),
         }*/
     }
-    pub fn add_item(&mut self, new_crop: Crop<'a>){
+    pub fn add_item(&mut self, new_crop: Crop<'a>) {
         self.inventory.add_item(new_crop);
     }
 
@@ -291,7 +295,7 @@ impl<'a> Player<'a> {
             || a.left() > b.right())
     }
 
-    pub fn get_inventory(&mut self) -> &mut Inventory<'a>{
+    pub fn get_inventory(&mut self) -> &mut Inventory<'a> {
         &mut self.inventory
     }
 }

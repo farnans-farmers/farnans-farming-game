@@ -1,9 +1,8 @@
+use crate::crop::CropType;
 use crate::inventory_item_trait;
 use crate::population::Population;
-use crate::crop::CropType;
-use sdl2::render::Texture;
 use sdl2::rect::Rect;
-
+use sdl2::render::Texture;
 
 /// This class is for tool functionality
 /// Right now, just have 3 tools
@@ -20,39 +19,33 @@ pub struct Tool<'a> {
     current_type: tool_type,
 }
 
-
 impl<'a> Tool<'a> {
     /// Creates a new `Player` instance.
     ///
     /// # Arguments
     /// * `pos` - Position of the player.
     /// * `texture` - Sprite sheet texture
-    pub fn new(
-        src: Rect,
-        texture: Texture<'a>,
-        t: tool_type,
-    ) -> Tool<'a> {
-            Tool{
-                src,
-                texture,
-                current_type: t,
-            }
+    pub fn new(src: Rect, texture: Texture<'a>, t: tool_type) -> Tool<'a> {
+        Tool {
+            src,
+            texture,
+            current_type: t,
         }
+    }
 }
 
-
-impl inventory_item_trait for Tool<'_>{
-    fn get_value(&self) -> i32{
+impl inventory_item_trait for Tool<'_> {
+    fn get_value(&self) -> i32 {
         1
     }
-    fn texture(&self) -> &Texture{
+    fn texture(&self) -> &Texture {
         &self.texture
     }
     fn src(&self) -> Rect {
         self.src
     }
-    fn inventory_input(&self, square:(i32, i32), pop: &mut Population) -> Option<CropType>{
-        let (x,y) = square;
+    fn inventory_input(&self, square: (i32, i32), pop: &mut Population) -> Option<CropType> {
+        let (x, y) = square;
 
         match self.current_type {
             // Hand
@@ -69,7 +62,7 @@ impl inventory_item_trait for Tool<'_>{
 
                     // I couldn't get cloning to work so I'm passing back the type
                     // TODO send back clone of crop or some other datastructure with genetic info
-                    return Some(return_crop_type)
+                    return Some(return_crop_type);
                 }
             }
             // Hoe
@@ -96,6 +89,6 @@ impl inventory_item_trait for Tool<'_>{
                 }
             }
         }
-        return None
+        return None;
     }
 }
