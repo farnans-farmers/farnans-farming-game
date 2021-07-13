@@ -247,7 +247,7 @@ impl<'a> Inventory<'a> {
     /// Add item into the correct inventory slot
     /// Right now the correct slot is hard coded
     pub fn add_item(&mut self, new_crop: Crop<'a>) {
-        if (new_crop.get_stage() == 3){
+        if (new_crop.get_stage() == 3) {
             let inventory_slot_index = match new_crop.get_crop_type_enum() {
                 CropType::Carrot => 4,
                 CropType::Corn => 6,
@@ -256,7 +256,7 @@ impl<'a> Inventory<'a> {
                 _ => 0,
             };
             self.inventory_slots[inventory_slot_index].add_item(Box::new(new_crop));
-        }else{
+        } else {
             let inventory_slot_index = match new_crop.get_crop_type_enum() {
                 CropType::Carrot => 3,
                 CropType::Corn => 5,
@@ -266,8 +266,6 @@ impl<'a> Inventory<'a> {
             };
             self.inventory_slots[inventory_slot_index].add_item(Box::new(new_crop));
         }
-
-        
     }
 
     /// Use the inventory slot for the correct function
