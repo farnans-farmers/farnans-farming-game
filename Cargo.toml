@@ -10,3 +10,7 @@ edition = "2018"
 version = "0.34"
 default-features = false
 features = ["ttf","image","mixer"]
+
+[dependencies]
+rand = "0.8.4"
+rand_distr = "0.4.1"

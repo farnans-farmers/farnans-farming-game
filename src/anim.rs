@@ -247,37 +247,43 @@ mod tests {
         }
     }
 
-	#[test]
-	fn reset_resets() {
+    #[test]
+    fn reset_resets() {
         let v = vec![1, 2, 3];
         let mut anim = Animation::new(v, Duration::from_secs(1), Instant::now());
-		assert_eq!(*anim.next(), 2);
-		assert_eq!(*anim.reset(Instant::now()).current(), 1);
-	}
+        assert_eq!(*anim.next(), 2);
+        assert_eq!(*anim.reset(Instant::now()).current(), 1);
+    }
 
-	#[test]
-	fn from_sheet_full() {
-		let bounds = Rect::new(0, 0, 3, 1);
-		let mut anim = Animation::from_sheet(&bounds, 0, 1, 1, Duration::from_secs(1), Instant::now());
-		let v = vec![Rect::new(0, 0, 1, 1), Rect::new(1, 0, 1, 1), Rect::new(2, 0, 1, 1)];
-		for r in v {
-			assert_eq!(r, *anim.current());
-			anim.next();
-		}
-		assert_eq!(anim.current_index(), 0);
-	}
+    #[test]
+    fn from_sheet_full() {
+        let bounds = Rect::new(0, 0, 3, 1);
+        let mut anim =
+            Animation::from_sheet(&bounds, 0, 1, 1, Duration::from_secs(1), Instant::now());
+        let v = vec![
+            Rect::new(0, 0, 1, 1),
+            Rect::new(1, 0, 1, 1),
+            Rect::new(2, 0, 1, 1),
+        ];
+        for r in v {
+            assert_eq!(r, *anim.current());
+            anim.next();
+        }
+        assert_eq!(anim.current_index(), 0);
+    }
 
-	#[test]
-	fn from_sheet_partial() {
-		let bounds = Rect::new(0, 0, 5, 1);
-		let mut anim = Animation::from_sheet(&bounds, 0, 2, 1, Duration::from_secs(1), Instant::now());
-		let v = vec![Rect::new(0, 0, 2, 1), Rect::new(2, 0, 2, 1)];
-		for r in v {
-			assert_eq!(r, *anim.current());
-			anim.next();
-		}
-		assert_eq!(anim.current_index(), 0);
-	}
+    #[test]
+    fn from_sheet_partial() {
+        let bounds = Rect::new(0, 0, 5, 1);
+        let mut anim =
+            Animation::from_sheet(&bounds, 0, 2, 1, Duration::from_secs(1), Instant::now());
+        let v = vec![Rect::new(0, 0, 2, 1), Rect::new(2, 0, 2, 1)];
+        for r in v {
+            assert_eq!(r, *anim.current());
+            anim.next();
+        }
+        assert_eq!(anim.current_index(), 0);
+    }
 
     #[test]
     fn freezing() {
