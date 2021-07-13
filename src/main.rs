@@ -144,6 +144,7 @@ fn main() {
                 .load_texture("src/images/Crop_Tileset.png")
                 .unwrap(),
             false,
+            crop::CropType::Lettuce,
             crop::CropType::Corn,
             Some(genes::Genes::new()),
         );
@@ -190,7 +191,7 @@ fn main() {
     let store_item_2 = Market_item::new(14, 11, 4, Rect::new(0, 160, 80, 80),CropType::Lettuce,);
     let store_item_3 = Market_item::new(21, 15, 6, Rect::new(0, 240, 80, 80),CropType::Potato,);
 
-    let mut market_items = vec![store_item_0, store_item_1, store_item_2, store_item_3];    
+    let mut market_items = vec![store_item_0, store_item_1, store_item_2, store_item_3];
 
     let mut store = store::Store::new(4, &mut market_items);
 
@@ -269,67 +270,69 @@ fn main() {
                     // Use inventory slot function
                     // Result is given when we want to add an item to the inventory
                     // This is done when a fully grown crop is used by the hand
-                   match in_area {
+                    match in_area {
                         Area::Home => {
-                    let result = p.use_inventory(coordinates, &mut pop);
-                    match result {
-                        Some((Some(t), Some(g))) => {
-                            // TODO add harvested crop to inventory using type and genes in `t` and `g`
-                            //Return multiple seeds from harvesting a plant
-                            //This may want to be determined on a plant's genes later
+                            let result = p.use_inventory(coordinates, &mut pop);
+                            match result {
+                                Some((Some(t), Some(g))) => {
+                                    // TODO add harvested crop to inventory using type and genes in `t` and `g`
+                                    //Return multiple seeds from harvesting a plant
+                                    //This may want to be determined on a plant's genes later
 
-                            let mut grown_crop = crop::Crop::new(Rect::new(0,0,0,0),3,texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap(), false, t, Some(g.clone()),);
-                            grown_crop.set_stage(3);
-                            p.add_item(grown_crop);
+                                    let mut grown_crop = crop::Crop::new(Rect::new(0, 0, 0, 0), 3, texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap(), false, t, Some(g.clone()), );
+                                    grown_crop.set_stage(3);
+                                    p.add_item(grown_crop);
 
-                            for _seeds_returned in 0..2 {
-                                let new_crop = crop::Crop::new(
-                                    Rect::new(0, 0, 0, 0),
-                                    0,
-                                    texture_creator
-                                        .load_texture("src/images/Crop_Tileset.png")
-                                        .unwrap(),
-                                    false,
-                                    t,
-                                    Some(g.clone()),
-                                    // TODO get genes via breeding
-                                );
-                                p.add_item(new_crop);
+                                    for _seeds_returned in 0..2 {
+                                        let new_crop = crop::Crop::new(
+                                            Rect::new(0, 0, 0, 0),
+                                            0,
+                                            texture_creator
+                                                .load_texture("src/images/Crop_Tileset.png")
+                                                .unwrap(),
+                                            false,
+                                            t,
+                                            Some(g.clone()),
+                                            // TODO get genes via breeding
+                                        );
+                                        p.add_item(new_crop);
+                                    }
+                                }
                             }
                         }
                         Area::Market => (),
                     }
-                }
 
-                if keystate.contains(&Keycode::Num1) {
-                    p.set_selected(0);
-                }
-                if keystate.contains(&Keycode::Num2) {
-                    p.set_selected(1);
-                }
-                if keystate.contains(&Keycode::Num3) {
-                    p.set_selected(2);
-                }
-                if keystate.contains(&Keycode::Num4) {
-                    p.set_selected(3);
-                }
-                if keystate.contains(&Keycode::Num5) {
-                    p.set_selected(4);
-                }
-                if keystate.contains(&Keycode::Num6) {
-                    p.set_selected(5);
-                }
-                if keystate.contains(&Keycode::Num7) {
-                    p.set_selected(6);
-                }
-                if keystate.contains(&Keycode::Num8) {
-                    p.set_selected(7);
-                }
-                if keystate.contains(&Keycode::Num9) {
-                    p.set_selected(8);
-                }
-                if keystate.contains(&Keycode::Num0) {
-                    p.set_selected(9);
+                    if keystate.contains(&Keycode::Num1) {
+                        p.set_selected(0);
+                    }
+                    if keystate.contains(&Keycode::Num2) {
+                        p.set_selected(1);
+                    }
+                    if keystate.contains(&Keycode::Num3) {
+                        p.set_selected(2);
+                    }
+                    if keystate.contains(&Keycode::Num4) {
+                        p.set_selected(3);
+                    }
+                    if keystate.contains(&Keycode::Num5) {
+                        p.set_selected(4);
+                    }
+                    if keystate.contains(&Keycode::Num6) {
+                        p.set_selected(5);
+                    }
+                    if keystate.contains(&Keycode::Num7) {
+                        p.set_selected(6);
+                    }
+                    if keystate.contains(&Keycode::Num8) {
+                        p.set_selected(7);
+                    }
+                    if keystate.contains(&Keycode::Num9) {
+                        p.set_selected(8);
+                    }
+                    if keystate.contains(&Keycode::Num0) {
+                        p.set_selected(9);
+                    }
                 }
             }
             //I know having 3 seperate methods isn't really 'modular' but the code has already been written for each and they all require different things so... this is it
