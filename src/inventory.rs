@@ -240,6 +240,7 @@ impl<'a> Inventory<'a> {
         self.selected = _selected
     }
 
+    #[allow(dead_code)]
     pub fn get_selected(&self) -> i32 {
         self.selected
     }

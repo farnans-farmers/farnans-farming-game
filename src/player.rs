@@ -107,21 +107,25 @@ impl<'a> Player<'a> {
     }
 
     /// Get left bound of player
+    #[allow(dead_code)]
     pub fn left(&self) -> i32 {
         self.pos.left()
     }
 
     /// Get right bound of player
+    #[allow(dead_code)]
     pub fn right(&self) -> i32 {
         self.pos.right()
     }
 
     /// Get top bound of player
+    #[allow(dead_code)]
     pub fn top(&self) -> i32 {
         self.pos.top()
     }
 
     /// Get bottom bound of player
+    #[allow(dead_code)]
     pub fn bottom(&self) -> i32 {
         self.pos.bottom()
     }
@@ -150,6 +154,7 @@ impl<'a> Player<'a> {
         self.inventory.set_selected(_selected);
     }
 
+    #[allow(dead_code)]
     pub fn get_selected(&self) -> i32 {
         self.inventory.get_selected()
     }
@@ -296,6 +301,7 @@ impl<'a> Player<'a> {
             || a.left() > b.right())
     }
 
+    #[allow(dead_code)]
     pub fn get_inventory(&mut self) -> &mut Inventory<'a> {
         &mut self.inventory
     }

@@ -44,6 +44,7 @@ pub struct Crop<'a> {
 
     genes: Option<genes::Genes>,
 
+    #[allow(dead_code)]
     pollinated: bool,
 }
 

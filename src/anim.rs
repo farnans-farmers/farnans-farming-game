@@ -86,6 +86,7 @@ impl<T> Animation<T> {
 
     /// Advances a number of frames regardless of time. The last frame time
     /// advances by the equivalent of n frames.
+    #[allow(dead_code)]
     fn advance(&mut self, n: usize) -> &T {
         if self.freezes && self.k + n >= self.frames.len() {
             return self.advance(self.frames.len() - self.k - 1);
@@ -99,6 +100,7 @@ impl<T> Animation<T> {
     }
 
     /// Moves to the next frame regardless of time.
+    #[allow(dead_code)]
     fn next(&mut self) -> &T {
         self.advance(1)
     }
