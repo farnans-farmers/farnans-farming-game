@@ -1,13 +1,14 @@
-use crate::{BG_W, TILE_SIZE, BG_H, tile, crop, population, item};
+use crate::{crop, item, population, tile, BG_H, BG_W, TILE_SIZE};
+use sdl2::image::LoadTexture;
 use sdl2::rect::Rect;
-use std::fs::File;
-use std::io::{Read, Write};
 use sdl2::render::{TextureCreator, WindowCanvas};
 use sdl2::video::WindowContext;
-use sdl2::image::LoadTexture;
+use std::fs::File;
+use std::io::{Read, Write};
 
-pub fn load_market<'a>(texture_creator: &'a TextureCreator<WindowContext>) -> (population::Population<'a>, Vec<item::Item<'a>>) {
-
+pub fn load_market<'a>(
+    texture_creator: &'a TextureCreator<WindowContext>,
+) -> (population::Population<'a>, Vec<item::Item<'a>>) {
     let mut tile_vec = Vec::new();
     for x in 0..((BG_W / TILE_SIZE) as i32) + 1 {
         let mut sub_vec = Vec::new();
@@ -72,8 +73,9 @@ pub fn load_market<'a>(texture_creator: &'a TextureCreator<WindowContext>) -> (p
     return (pop, market_item_vec);
 }
 
-pub fn load_home<'a>(texture_creator: &'a TextureCreator<WindowContext>) -> (population::Population<'a>, Vec<item::Item<'a>>) {
-
+pub fn load_home<'a>(
+    texture_creator: &'a TextureCreator<WindowContext>,
+) -> (population::Population<'a>, Vec<item::Item<'a>>) {
     let mut tile_vec = Vec::new();
     for x in 0..((BG_W / TILE_SIZE) as i32) + 1 {
         let mut sub_vec = Vec::new();
@@ -163,7 +165,6 @@ pub fn load_home<'a>(texture_creator: &'a TextureCreator<WindowContext>) -> (pop
         }
     }
     return (pop, home_item_vec);
-
 }
 
 // TODO try saving via serialization

@@ -9,11 +9,11 @@ mod item;
 mod market;
 mod player;
 mod population;
+mod save_load;
 mod sleep_menu;
 mod store;
 mod tile;
 mod tool;
-mod save_load;
 
 use anim::Animation;
 use item::Item;
@@ -161,7 +161,6 @@ fn main() {
 
     let mut crop_vec: Vec<crop::Crop> = Vec::new();
 
-
     let home_tup = save_load::load_home(&texture_creator);
     let mut pop = home_tup.0;
     let mut item_vec = home_tup.1;
@@ -245,31 +244,32 @@ fn main() {
                     // Result is given when we want to add an item to the inventory
                     // This is done when a fully grown crop is hoed
                     match in_area {
-                        Area::Home => {let result = p.use_inventory(coordinates, &mut pop);
-                        match result {
-                            Some((Some(t), Some(g))) => {
-                            // TODO add harvested crop to inventory using type and genes in `t` and `g`
-                            //Return multiple seeds from harvesting a plant
-                            //This may want to be determined on a plant's genes later
-                            for _seeds_returned in 0..2 {
-                            let new_crop = crop::Crop::new(
-                            Rect::new(0, 0, 0, 0),
-                            0,
-                            texture_creator
-                            .load_texture("src/images/Crop_Tileset.png")
-                            .unwrap(),
-                            false,
-                            t,
-                            Some(g.clone()),
-                            // TODO get genes via breeding
-                            );
-                            p.add_item(new_crop);
-                            }
-                            }
-                            _ => (),
-                        };
-                    }
-                        Area::Market => ()
+                        Area::Home => {
+                            let result = p.use_inventory(coordinates, &mut pop);
+                            match result {
+                                Some((Some(t), Some(g))) => {
+                                    // TODO add harvested crop to inventory using type and genes in `t` and `g`
+                                    //Return multiple seeds from harvesting a plant
+                                    //This may want to be determined on a plant's genes later
+                                    for _seeds_returned in 0..2 {
+                                        let new_crop = crop::Crop::new(
+                                            Rect::new(0, 0, 0, 0),
+                                            0,
+                                            texture_creator
+                                                .load_texture("src/images/Crop_Tileset.png")
+                                                .unwrap(),
+                                            false,
+                                            t,
+                                            Some(g.clone()),
+                                            // TODO get genes via breeding
+                                        );
+                                        p.add_item(new_crop);
+                                    }
+                                }
+                                _ => (),
+                            };
+                        }
+                        Area::Market => (),
                     }
                 }
 
@@ -395,18 +395,17 @@ fn main() {
         }
 
         // Determine part of background to draw
-        let cur_bg =
-            match in_area {
-                Area::Home => Rect::new(
-                    ((p.x() + ((p.width() / 2) as i32)) - ((CAM_W / 2) as i32))
+        let cur_bg = match in_area {
+            Area::Home => Rect::new(
+                ((p.x() + ((p.width() / 2) as i32)) - ((CAM_W / 2) as i32))
                     .clamp(0, (BG_W - CAM_W) as i32),
-                    ((p.y() + ((p.height() / 2) as i32)) - ((CAM_H / 2) as i32))
+                ((p.y() + ((p.height() / 2) as i32)) - ((CAM_H / 2) as i32))
                     .clamp(0, (BG_H - CAM_H) as i32),
-                    CAM_W,
-                    CAM_H,
-                ),
-                Area::Market => market::background_to_draw(&p)
-            };
+                CAM_W,
+                CAM_H,
+            ),
+            Area::Market => market::background_to_draw(&p),
+        };
 
         // Convert player map position to be camera-relative
         let player_cam_pos = Rect::new(
@@ -460,7 +459,7 @@ fn main() {
                     }
                 }
             }
-            Area::Market => wincan = market::draw_market(wincan, &m_pop, &cur_bg, &m_item_vec)
+            Area::Market => wincan = market::draw_market(wincan, &m_pop, &cur_bg, &m_item_vec),
         }
 
         // Draw inventory
