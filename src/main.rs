@@ -144,7 +144,6 @@ fn main() {
                 .load_texture("src/images/Crop_Tileset.png")
                 .unwrap(),
             false,
-            crop::CropType::Lettuce,
             crop::CropType::Corn,
             Some(genes::Genes::new()),
         );
