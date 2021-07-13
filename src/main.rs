@@ -6,13 +6,14 @@ mod crop;
 mod genes;
 mod inventory;
 mod item;
-mod market_transition_menu;
+mod market;
 mod player;
 mod population;
 mod sleep_menu;
 mod store;
 mod tile;
 mod tool;
+mod save_load;
 
 use anim::Animation;
 use item::Item;
@@ -48,6 +49,7 @@ pub const TILE_SIZE: u32 = 80; // Make this public so we can import it elsewhere
 pub enum Menu {
     Sleep,
     ToMarket,
+    ToHome,
     Shop,
 }
 
@@ -112,43 +114,6 @@ fn main() {
     let mut x_vel = 0;
     let mut y_vel = 0;
 
-    let mut tile_vec = Vec::new();
-    for x in 0..((BG_W / TILE_SIZE) as i32) + 1 {
-        let mut sub_vec = Vec::new();
-        for y in 0..((BG_H / TILE_SIZE) as i32) + 1 {
-            sub_vec.push(population::Crop_Tile::new(
-                tile::Tile::new(
-                    Rect::new(
-                        (TILE_SIZE as i32) * x,
-                        (TILE_SIZE as i32) * y,
-                        TILE_SIZE,
-                        TILE_SIZE,
-                    ),
-                    texture_creator
-                        .load_texture("src/images/Background_Tileset.png")
-                        .unwrap(),
-                ),
-                crop::Crop::new(
-                    Rect::new(
-                        (TILE_SIZE as i32) * x,
-                        (TILE_SIZE as i32) * y,
-                        TILE_SIZE,
-                        TILE_SIZE,
-                    ),
-                    0,
-                    texture_creator
-                        .load_texture("src/images/Crop_Tileset.png")
-                        .unwrap(),
-                    false,
-                    crop::CropType::None,
-                    None,
-                ),
-            ));
-        }
-        tile_vec.push(sub_vec);
-    }
-    let mut pop = population::Population::new(tile_vec);
-
     let mut menu_location = 0;
 
     let mut p = player::Player::new(
@@ -194,84 +159,16 @@ fn main() {
 
     // REMOVE LATER ^^
 
-    let mut home_item_vec = Vec::new();
-    let mut market_item_vec = Vec::new();
     let mut crop_vec: Vec<crop::Crop> = Vec::new();
 
-    //Loading items and crops into the game
-    //This parenthesis shows all for the home screen, but we load market stuff into the vector below.
-    {
-        let mut home_file = File::open("src/home_data.txt").expect("Can't open save home_file");
-        let mut home_contents = String::new();
-        home_file
-            .read_to_string(&mut home_contents)
-            .expect("Can't read home_file");
-        print!("{}", home_contents);
-        for line in home_contents.lines() {
-            let results: Vec<&str> = line.split(";").collect();
-            if (results[0] == "item") {
-                home_item_vec.push(item::Item::new(
-                    Rect::new(
-                        results[1].parse::<i32>().unwrap(),
-                        results[2].parse::<i32>().unwrap(),
-                        results[3].parse::<u32>().unwrap(),
-                        results[4].parse::<u32>().unwrap(),
-                    ),
-                    texture_creator.load_texture(results[5]).unwrap(),
-                    results[5].parse().unwrap(),
-                    results[6].parse::<bool>().unwrap(),
-                ));
-            } else if (results[0] == "crop") {
-                let _x = results[1].parse::<i32>().unwrap();
-                let _y = results[2].parse::<i32>().unwrap();
-                pop.get_vec_mut()
-                    .get_mut(_x as usize)
-                    .unwrap()
-                    .get_mut(_y as usize)
-                    .unwrap()
-                    .setCrop(crop::Crop::from_save_string(
-                        &results,
-                        texture_creator
-                            .load_texture("src/images/Crop_Tileset.png")
-                            .unwrap(),
-                    ));
-                // If crop is present, set tile as tilled
-                if results[5]
-                    .parse::<std::string::String>()
-                    .unwrap()
-                    .to_owned()
-                    != "None"
-                {
-                    let _tile = pop.get_tile_with_index_mut(_x as u32, _y as u32);
-                    _tile.set_tilled(true);
-                }
-            }
-        }
-    }
 
-    //Load Market vector
-    let mut market_file = File::open("src/market_data.txt").expect("Can't open save market_file");
-    let mut market_contents = String::new();
-    market_file
-        .read_to_string(&mut market_contents)
-        .expect("Can't read market_file");
-    print!("{}", market_contents);
-    for line in market_contents.lines() {
-        let results: Vec<&str> = line.split(";").collect();
-        if (results[0] == "item") {
-            market_item_vec.push(item::Item::new(
-                Rect::new(
-                    results[1].parse::<i32>().unwrap(),
-                    results[2].parse::<i32>().unwrap(),
-                    results[3].parse::<u32>().unwrap(),
-                    results[4].parse::<u32>().unwrap(),
-                ),
-                texture_creator.load_texture(results[5]).unwrap(),
-                results[5].parse().unwrap(),
-                results[6].parse::<bool>().unwrap(),
-            ));
-        }
-    }
+    let home_tup = save_load::load_home(&texture_creator);
+    let mut pop = home_tup.0;
+    let mut item_vec = home_tup.1;
+
+    let market_tup = save_load::load_market(&texture_creator);
+    let mut m_pop = market_tup.0;
+    let mut m_item_vec = market_tup.1;
 
     let mut store = store::Store::new(24);
 
@@ -280,20 +177,6 @@ fn main() {
     let bg_tiles_tex = texture_creator
         .load_texture("src/images/Background_Tileset.png")
         .unwrap();
-
-    // TODO(branden): move this someplace reasonable
-    let market_house = {
-        let pos = Rect::new(2000, 2000, 533, 408);
-        let texture = texture_creator
-            .load_texture("src/images/marketstallPlaceholder.png")
-            .unwrap();
-        Item::new(
-            pos,
-            texture,
-            "src/images/marketstallPlaceholder.png".into(),
-            true,
-        )
-    };
 
     // enum used to pause the game while any menu is up.
     let mut in_menu: Option<Menu> = None;
@@ -305,64 +188,7 @@ fn main() {
                     keycode: Some(Keycode::Escape),
                     ..
                 } => {
-                    // TODO try saving via serialization
-                    //Iterates through item vector and crop vector saving their positions into a txt file
-                    let mut file_to_save = match File::create("src/home_data.txt") {
-                        Err(why) => panic!("couldn't create home_data.txt: {}", why),
-                        Ok(file_to_save) => file_to_save,
-                    };
-                    for item in home_item_vec {
-                        let mut output = "item;".to_owned()
-                            + &item.x().to_string()
-                            + ";"
-                            + &item.y().to_string()
-                            + ";"
-                            + &item.width().to_string()
-                            + ";"
-                            + &item.height().to_string()
-                            + ";"
-                            + &item.tex_path()
-                            + ";"
-                            + &item.collision().to_string()
-                            + "\n";
-                        match file_to_save.write_all(output.as_ref()) {
-                            Err(why) => panic!("couldn't write to home_data.txt: {}", why),
-                            Ok(_) => println!("successfully wrote item to home_data.txt"),
-                        }
-                    }
-
-                    for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
-                        for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
-                            let _c = pop.get_crop_with_index(_x as u32, _y as u32);
-                            match _c.get_crop_type() {
-                                "None" => {}
-                                _ => {
-                                    // let output = "crop;".to_owned()
-                                    //     + &(_c.get_x() / TILE_SIZE as i32).to_string()
-                                    //     + ";"
-                                    //     + &(_c.get_y() / TILE_SIZE as i32).to_string()
-                                    //     + ";"
-                                    //     + &_c.get_stage().to_string()
-                                    //     + ";"
-                                    //     + &_c.get_tex_path()
-                                    //     + ";"
-                                    //     + &_c.get_watered().to_string()
-                                    //     + ";"
-                                    //     + &_c.get_crop_type()
-                                    //     + "\n";
-                                    let output = _c.to_save_string();
-                                    match file_to_save.write_all(output.as_ref()) {
-                                        Err(why) => {
-                                            panic!("couldn't write to home_data.txt: {}", why)
-                                        }
-                                        Ok(_) => {
-                                            println!("successfully wrote crop to home_data.txt")
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    save_load::save_home(pop, item_vec);
                     break 'gameloop;
                 }
                 _ => {}
@@ -418,29 +244,33 @@ fn main() {
                     // Use inventory slot function
                     // Result is given when we want to add an item to the inventory
                     // This is done when a fully grown crop is hoed
-                    let result = p.use_inventory(coordinates, &mut pop);
-                    match result {
-                        Some((Some(t), Some(g))) => {
+                    match in_area {
+                        Area::Home => {let result = p.use_inventory(coordinates, &mut pop);
+                        match result {
+                            Some((Some(t), Some(g))) => {
                             // TODO add harvested crop to inventory using type and genes in `t` and `g`
                             //Return multiple seeds from harvesting a plant
                             //This may want to be determined on a plant's genes later
                             for _seeds_returned in 0..2 {
-                                let new_crop = crop::Crop::new(
-                                    Rect::new(0, 0, 0, 0),
-                                    0,
-                                    texture_creator
-                                        .load_texture("src/images/Crop_Tileset.png")
-                                        .unwrap(),
-                                    false,
-                                    t,
-                                    Some(g.clone()),
-                                    // TODO get genes via breeding
-                                );
-                                p.add_item(new_crop);
+                            let new_crop = crop::Crop::new(
+                            Rect::new(0, 0, 0, 0),
+                            0,
+                            texture_creator
+                            .load_texture("src/images/Crop_Tileset.png")
+                            .unwrap(),
+                            false,
+                            t,
+                            Some(g.clone()),
+                            // TODO get genes via breeding
+                            );
+                            p.add_item(new_crop);
                             }
-                        }
-                        _ => (),
-                    };
+                            }
+                            _ => (),
+                        };
+                    }
+                        Area::Market => ()
+                    }
                 }
 
                 if keystate.contains(&Keycode::Num1) {
@@ -479,7 +309,18 @@ fn main() {
                 in_menu = sleep_menu::start_sleep_menu(in_menu, &mut wincan, keystate, &mut pop, r);
             }
             Some(Menu::ToMarket) => {
-                let menu_and_area_tup = market_transition_menu::start_market_transition_menu(
+                let menu_and_area_tup = market::start_market_transition_menu(
+                    in_menu,
+                    &mut wincan,
+                    keystate,
+                    r,
+                    Some(in_area),
+                );
+                in_menu = menu_and_area_tup.0;
+                in_area = menu_and_area_tup.1;
+            }
+            Some(Menu::ToHome) => {
+                let menu_and_area_tup = market::start_market_transition_menu(
                     in_menu,
                     &mut wincan,
                     keystate,
@@ -520,7 +361,7 @@ fn main() {
             Area::Home => {
                 // X
                 p.update_pos_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-                for item in &home_item_vec {
+                for item in &item_vec {
                     if p.check_collision(&item.pos()) {
                         p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
                         if item.tex_path() == "src/images/house.png" {
@@ -535,7 +376,7 @@ fn main() {
 
                 //Y
                 p.update_pos_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-                for item in &home_item_vec {
+                for item in &item_vec {
                     if p.check_collision(&item.pos()) {
                         p.stay_still_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
                         if item.tex_path() == "src/images/house.png" {
@@ -549,38 +390,23 @@ fn main() {
                 }
             }
             Area::Market => {
-                p.update_pos_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-                for item in &market_item_vec {
-                    if p.check_collision(&item.pos()) {
-                        p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-                        if item.tex_path() == "src/images/marketstallPlaceholder.png" {
-                            in_menu = Some(Menu::Shop);
-                        }
-                    }
-                }
-
-                //Y
-                p.update_pos_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-                for item in &market_item_vec {
-                    if p.check_collision(&item.pos()) {
-                        p.stay_still_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-                        if item.tex_path() == "src/images/marketstallPlaceholder.png" {
-                            in_menu = Some(Menu::Shop);
-                        }
-                    }
-                }
+                market::update_market_pos(&mut p, &m_item_vec, player_vel, &mut in_menu)
             }
         }
 
         // Determine part of background to draw
-        let cur_bg = Rect::new(
-            ((p.x() + ((p.width() / 2) as i32)) - ((CAM_W / 2) as i32))
-                .clamp(0, (BG_W - CAM_W) as i32),
-            ((p.y() + ((p.height() / 2) as i32)) - ((CAM_H / 2) as i32))
-                .clamp(0, (BG_H - CAM_H) as i32),
-            CAM_W,
-            CAM_H,
-        );
+        let cur_bg =
+            match in_area {
+                Area::Home => Rect::new(
+                    ((p.x() + ((p.width() / 2) as i32)) - ((CAM_W / 2) as i32))
+                    .clamp(0, (BG_W - CAM_W) as i32),
+                    ((p.y() + ((p.height() / 2) as i32)) - ((CAM_H / 2) as i32))
+                    .clamp(0, (BG_H - CAM_H) as i32),
+                    CAM_W,
+                    CAM_H,
+                ),
+                Area::Market => market::background_to_draw(&p)
+            };
 
         // Convert player map position to be camera-relative
         let player_cam_pos = Rect::new(
@@ -617,7 +443,7 @@ fn main() {
                     }
                 }
                 // Drawing item
-                for item in &home_item_vec {
+                for item in &item_vec {
                     wincan = item.print_item(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
                 }
 
@@ -634,35 +460,7 @@ fn main() {
                     }
                 }
             }
-            Area::Market => {
-                let grass_texture = texture_creator
-                    .load_texture("src/images/Background_Tileset.png")
-                    .unwrap();
-                for crop_tile in pop.get_vec().iter().flatten() {
-                    let x_pos = crop_tile.tile.x() - cur_bg.x();
-                    let y_pos = crop_tile.tile.y() - cur_bg.y();
-                    //Don't bother drawing any tiles that are off screen
-                    if x_pos > -(TILE_SIZE as i32)
-                        && x_pos < (CAM_W as i32)
-                        && y_pos > -(TILE_SIZE as i32)
-                        && y_pos < (CAM_H as i32)
-                    {
-                        let cur_tile = Rect::new(
-                            crop_tile.tile.x() - cur_bg.x(),
-                            crop_tile.tile.y() - cur_bg.y(),
-                            TILE_SIZE,
-                            TILE_SIZE,
-                        );
-                        wincan
-                            .copy(&grass_texture, crop_tile.tile.src(), cur_tile)
-                            .unwrap();
-                    }
-                }
-                // Drawing item
-                for item in &market_item_vec {
-                    wincan = item.print_item(cur_bg.x(), cur_bg.y, CAM_W, CAM_H, wincan);
-                }
-            }
+            Area::Market => wincan = market::draw_market(wincan, &m_pop, &cur_bg, &m_item_vec)
         }
 
         // Draw inventory
@@ -682,6 +480,14 @@ fn main() {
             Some(Menu::ToMarket) => {
                 let go_box = texture_creator
                     .load_texture("src/images/market_menu.png")
+                    .unwrap();
+                wincan
+                    .copy(&go_box, None, Rect::new(400, 400, 600, 180))
+                    .unwrap()
+            }
+            Some(Menu::ToHome) => {
+                let go_box = texture_creator
+                    .load_texture("src/images/go_home_menu.png")
                     .unwrap();
                 wincan
                     .copy(&go_box, None, Rect::new(400, 400, 600, 180))
