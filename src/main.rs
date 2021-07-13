@@ -175,11 +175,21 @@ fn main() {
                 .load_texture("src/images/Crop_Tileset.png")
                 .unwrap(),
             false,
-            crop::CropType::Lettuce,
+            crop::CropType::Corn,
             Some(genes::Genes::new()),
         );
         println!("Made {}", _c.get_all_genes().as_ref().unwrap());
         p.add_item(_c);
+        p.add_item(crop::Crop::new(
+            Rect::new(0, 0, TILE_SIZE, TILE_SIZE),
+            0,
+            texture_creator
+                .load_texture("src/images/Crop_Tileset.png")
+                .unwrap(),
+            false,
+            crop::CropType::Potato,
+            Some(genes::Genes::new()),
+        ));
         p.add_item(crop::Crop::new(
             Rect::new(0, 0, TILE_SIZE, TILE_SIZE),
             0,
@@ -417,13 +427,18 @@ fn main() {
 
                     // Use inventory slot function
                     // Result is given when we want to add an item to the inventory
-                    // This is done when a fully grown crop is hoed
+                    // This is done when a fully grown crop is used by the hand
                     let result = p.use_inventory(coordinates, &mut pop);
                     match result {
                         Some((Some(t), Some(g))) => {
                             // TODO add harvested crop to inventory using type and genes in `t` and `g`
                             //Return multiple seeds from harvesting a plant
                             //This may want to be determined on a plant's genes later
+
+                            let mut grown_crop = crop::Crop::new(Rect::new(0,0,0,0),3,texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap(), false, t, Some(g.clone()),);
+                            grown_crop.set_stage(3);
+                            p.add_item(grown_crop);
+
                             for _seeds_returned in 0..2 {
                                 let new_crop = crop::Crop::new(
                                     Rect::new(0, 0, 0, 0),
