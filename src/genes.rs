@@ -4,7 +4,7 @@ use rand_distr::{Distribution, Normal};
 
 const MEAN: f32 = 0.5;
 // TODO adjust this value as needed to balance gene generation
-const STD_DEV: f32 = 0.2;
+const STD_DEV: f32 = 0.1;
 
 /// Gene type enum
 pub enum GeneType {
@@ -29,17 +29,34 @@ impl Genes {
         let normal = Normal::new(MEAN, STD_DEV).unwrap();
         Genes {
             genes: vec![
-                Gene::new(GeneType::GrowthRate, normal.sample(&mut rand::thread_rng())),
-                Gene::new(GeneType::Value, normal.sample(&mut rand::thread_rng())),
+                Gene::new(
+                    GeneType::GrowthRate,
+                    normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0),
+                ),
+                Gene::new(
+                    GeneType::Value,
+                    normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0),
+                ),
             ],
         }
     }
 
+    /// Get the value of a specific gene
     pub fn get_gene(&self, t: GeneType) -> f32 {
         match t {
             GeneType::GrowthRate => self.genes.get(0).unwrap().value,
             GeneType::Value => self.genes.get(1).unwrap().value,
         }
+    }
+
+    pub fn average(&self) -> f32 {
+        let mut sum = 0.0;
+        let mut count = 0;
+        for g in &self.genes {
+            sum += g.value;
+            count += 1;
+        }
+        sum / (count as f32)
     }
 }
 
@@ -78,5 +95,16 @@ impl std::fmt::Display for Genes {
         self.genes.iter().fold(Ok(()), |result, gene| {
             result.and_then(|_| writeln!(f, "{}", gene))
         })
+    }
+}
+
+impl std::clone::Clone for Genes {
+    fn clone(&self) -> Genes {
+        Genes {
+            genes: vec![
+                Gene::new(GeneType::GrowthRate, self.get_gene(GeneType::GrowthRate)),
+                Gene::new(GeneType::Value, self.get_gene(GeneType::Value)),
+            ],
+        }
     }
 }

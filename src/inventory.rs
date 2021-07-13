@@ -4,6 +4,7 @@ use sdl2::render::WindowCanvas;
 
 use crate::crop::Crop;
 use crate::crop::CropType;
+use crate::genes;
 use crate::inventory_item_trait;
 use crate::population::Population;
 use crate::tool::Tool;
@@ -60,11 +61,11 @@ impl<'a> Inventory_Item<'a> {
         self.items.insert(insert_pos, new_item);
     }
 
-    /// TODO still need to implement using/planting crops
     /// This will pop the highest sorted item at index 0
     pub fn pop_item(&mut self) -> Box<dyn inventory_item_trait + 'a> {
-        self.items.pop().unwrap()
+        self.items.remove(0 as usize)
     }
+
     pub fn get_item(&self, index: i32) -> Option<&Box<dyn inventory_item_trait + 'a>> {
         if index >= self.get_len() {
             return None;
@@ -259,20 +260,32 @@ impl<'a> Inventory<'a> {
         &mut self,
         square: (i32, i32),
         mut pop: &mut Population,
-    ) -> Option<CropType> {
+    ) -> Option<(Option<CropType>, Option<genes::Genes>)> {
         let current_item = self.inventory_slots[self.selected as usize].get_item(0);
         match current_item {
             Some(x) => {
                 let ret_val = x.inventory_input(square, pop);
 
                 match ret_val {
-                    Some(y) => {
-                        if matches!(y, CropType::None) {
-                            //TODO return this value rather than return the CropType
-                            self.inventory_slots[self.selected as usize].pop_item();
-                            return None;
-                        } else {
-                            ret_val
+                    Some((t, g)) => {
+                        match (t, g) {
+                            (Some(_t), Some(_g)) => {
+                                // If crop harvested...
+                                Some((Some(_t), Some(_g)))
+                            }
+                            (Some(_t), None) => {
+                                if matches!(_t, CropType::None) {
+                                    // If seed planted...
+                                    self.inventory_slots
+                                        .get_mut(self.selected as usize)
+                                        .unwrap()
+                                        .pop_item();
+                                    None
+                                } else {
+                                    None
+                                }
+                            }
+                            _ => None,
                         }
                     }
                     None => None,

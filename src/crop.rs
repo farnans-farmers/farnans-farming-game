@@ -2,13 +2,14 @@
 use sdl2::rect::Rect;
 use sdl2::render::{Texture, WindowCanvas};
 
+use crate::genes;
 use crate::inventory_item_trait;
 use crate::population::Population;
 
 // Import constant from main
 use crate::{CAM_H, CAM_W, TILE_SIZE};
 use std::str::FromStr;
-use std::string::ParseError;
+// use std::string::ParseError;
 
 use rand::Rng;
 
@@ -42,12 +43,10 @@ pub struct Crop<'a> {
 
     t: CropType,
 
-    /// Example to show sorting
-    /// I'm not sure how this will be implemented further on
-    /// May need to make seperate seed class?
-    some_internal_genetic_value: i32,
+    genes: Option<genes::Genes>,
+
+    pollinated: bool,
 }
-// TODO add crop genetics
 
 impl<'a> Crop<'a> {
     /// Creates a new Crop instance.
@@ -66,6 +65,7 @@ impl<'a> Crop<'a> {
         watered: bool,
         tex_path: String,
         t: CropType,
+        genes: Option<genes::Genes>,
     ) -> Crop {
         let (x, y) = match t {
             CropType::None => (0, 0),
@@ -77,8 +77,6 @@ impl<'a> Crop<'a> {
 
         let src = Rect::new(x as i32, y as i32, TILE_SIZE, TILE_SIZE);
 
-        let mut rng = rand::thread_rng();
-
         Crop {
             pos,
             stage,
@@ -87,7 +85,9 @@ impl<'a> Crop<'a> {
             watered,
             tex_path,
             t,
-            some_internal_genetic_value: rng.gen_range(0, 100),
+            genes,
+            pollinated: false,
+            // some_internal_genetic_value: rng.gen_range(0, 100),
         }
     }
 
@@ -100,11 +100,19 @@ impl<'a> Crop<'a> {
     /// stage of growth, clamping to `0..3`
     pub fn grow(&mut self) {
         if self.get_watered() && self.stage != 3 {
-            self.stage = (self.stage + 1).clamp(0, 3);
-            // Change src from sprite sheet
-            self.src.set_x(self.src.x() + (TILE_SIZE as i32));
-            // Plant requires more water after growing
-            self.watered = false;
+            // Choose random value; if it is less than a crop's
+            // growth rate, let it grow
+            if let Some(g) = self.get_gene(genes::GeneType::GrowthRate) {
+                let mut rng = rand::thread_rng();
+                let check: f32 = rng.gen();
+                if check < g {
+                    self.stage = (self.stage + 1).clamp(0, 3);
+                    // Change src from sprite sheet
+                    self.src.set_x(self.src.x() + (TILE_SIZE as i32));
+                    // Plant requires more water after growing
+                    self.watered = false;
+                }
+            }
         }
     }
 
@@ -137,6 +145,24 @@ impl<'a> Crop<'a> {
             return win;
         }
         win
+    }
+
+    /// Get the value of a certain gene
+    pub fn get_gene(&self, t: genes::GeneType) -> Option<f32> {
+        match &self.genes {
+            Some(g) => Some(g.get_gene(t)),
+            _ => None,
+        }
+    }
+
+    /// Get all genes; mostly for debugging
+    pub fn get_all_genes(&self) -> &Option<genes::Genes> {
+        &self.genes
+    }
+
+    /// Set a crop's genes
+    pub fn set_genes(&mut self, g: Option<genes::Genes>) {
+        self.genes = g;
     }
 
     /// Get a Crop's texture
@@ -249,7 +275,11 @@ impl inventory_item_trait for Crop<'_> {
     /// This can be a combination of factors
     /// i.e. 2*speed + resistance
     fn get_value(&self) -> i32 {
-        self.some_internal_genetic_value
+        if let Some(g) = self.get_all_genes() {
+            (g.average() * 100 as f32) as i32
+        } else {
+            0
+        }
     }
     fn texture(&self) -> &Texture {
         &self.texture
@@ -257,7 +287,11 @@ impl inventory_item_trait for Crop<'_> {
     fn src(&self) -> Rect {
         self.src
     }
-    fn inventory_input(&self, square: (i32, i32), pop: &mut Population) -> Option<CropType> {
+    fn inventory_input(
+        &self,
+        square: (i32, i32),
+        pop: &mut Population,
+    ) -> Option<(Option<CropType>, Option<genes::Genes>)> {
         let (x, y) = square;
         if pop.get_tile_with_index(x as u32, y as u32).tilled()
             && pop
@@ -270,10 +304,10 @@ impl inventory_item_trait for Crop<'_> {
             _c.set_crop_type_enum(self.t);
             _c.set_stage(0);
             _c.set_water(false);
+            _c.set_genes(self.get_all_genes().clone());
 
-            /// Return none for right now to signal a crop was placed
-            /// TODO change this to something less weird
-            return Some(CropType::None);
+            // Return none for right now to signal a crop was placed
+            return Some((Some(CropType::None), None));
         }
         return None;
     }

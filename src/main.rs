@@ -3,6 +3,7 @@ extern crate sdl2;
 // Modules
 mod anim;
 mod crop;
+mod genes;
 mod inventory;
 mod item;
 mod market_transition_menu;
@@ -69,7 +70,7 @@ pub trait inventory_item_trait {
         &self,
         square: (i32, i32),
         pop: &mut population::Population,
-    ) -> Option<crop::CropType>;
+    ) -> Option<(Option<crop::CropType>, Option<genes::Genes>)>;
 }
 
 fn main() {
@@ -137,6 +138,7 @@ fn main() {
                     false,
                     "src/images/Crop_Tileset.png".parse().unwrap(),
                     crop::CropType::None,
+                    None,
                 ),
             ));
         }
@@ -158,6 +160,37 @@ fn main() {
             .unwrap(),
         &texture_creator,
     );
+
+    // TODO FOR DEMO PURPOSES - REMOVE LATER
+    // Add new seeds with random genes to inventory
+    // like the player would buy from the store
+    for _ in 0..5 {
+        let _c = crop::Crop::new(
+            Rect::new(0, 0, TILE_SIZE, TILE_SIZE),
+            0,
+            texture_creator
+                .load_texture("src/images/Crop_Tileset.png")
+                .unwrap(),
+            false,
+            String::from("src/images/Crop_Tileset.png"),
+            crop::CropType::Lettuce,
+            Some(genes::Genes::new()),
+        );
+        println!("Made {}", _c.get_all_genes().as_ref().unwrap());
+        p.add_item(_c);
+        p.add_item(crop::Crop::new(
+            Rect::new(0, 0, TILE_SIZE, TILE_SIZE),
+            0,
+            texture_creator
+                .load_texture("src/images/Crop_Tileset.png")
+                .unwrap(),
+            false,
+            String::from("src/images/Crop_Tileset.png"),
+            crop::CropType::Carrot,
+            Some(genes::Genes::new()),
+        ));
+    }
+    // REMOVE LATER ^^
 
     let mut home_item_vec = Vec::new();
     let mut market_item_vec = Vec::new();
@@ -208,6 +241,9 @@ fn main() {
                             results[5].parse::<bool>().unwrap(),
                             results[4].parse().unwrap(),
                             results[6].parse::<crop::CropType>().unwrap(),
+                            None,
+                            // Some(genes::Genes::new()),
+                            // TODO load via serialization
                         ),
                     );
                 // If crop is present, set tile as tilled
@@ -280,6 +316,7 @@ fn main() {
                     keycode: Some(Keycode::Escape),
                     ..
                 } => {
+                    // TODO try saving via serialization
                     //Iterates through item vector and crop vector saving their positions into a txt file
                     let mut file_to_save = match File::create("src/home_data.txt") {
                         Err(why) => panic!("couldn't create home_data.txt: {}", why),
@@ -388,15 +425,16 @@ fn main() {
                             .clamp(0, ((BG_H / TILE_SIZE) as i32) + 1),
                     );
 
-                    /// Use inventory slot function
-                    /// Result is given when we want to add an item to the inventory
-                    /// This is done when a fully grown crop is hoed
+                    // Use inventory slot function
+                    // Result is given when we want to add an item to the inventory
+                    // This is done when a fully grown crop is hoed
                     let result = p.use_inventory(coordinates, &mut pop);
                     match result {
-                        Some(x) => {
+                        Some((Some(t), Some(g))) => {
+                            // TODO add harvested crop to inventory using type and genes in `t` and `g`
                             //Return multiple seeds from harvesting a plant
                             //This may want to be determined on a plant's genes later
-                            for seeds_returned in 0..2 {
+                            for _seeds_returned in 0..2 {
                                 let new_crop = crop::Crop::new(
                                     Rect::new(0, 0, 0, 0),
                                     0,
@@ -405,12 +443,14 @@ fn main() {
                                         .unwrap(),
                                     false,
                                     "src/images/Crop_Tileset.png".parse().unwrap(),
-                                    x,
+                                    t,
+                                    Some(g.clone()),
+                                    // TODO get genes via breeding
                                 );
                                 p.add_item(new_crop);
                             }
                         }
-                        None => (),
+                        _ => (),
                     };
                 }
 

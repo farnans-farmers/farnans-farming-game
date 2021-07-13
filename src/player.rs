@@ -14,6 +14,7 @@ use sdl2::video::WindowContext;
 use crate::anim::Animation;
 use crate::crop::Crop;
 use crate::crop::CropType;
+use crate::genes;
 use crate::inventory::Inventory;
 use crate::item::Item;
 use crate::population::Population;
@@ -157,7 +158,7 @@ impl<'a> Player<'a> {
         &mut self,
         square: (i32, i32),
         mut pop: &mut Population,
-    ) -> Option<CropType> {
+    ) -> Option<(Option<CropType>, Option<genes::Genes>)> {
         self.inventory.use_inventory(square, pop)
         /*match return_crop{
             Some(x) => Some(x),
