@@ -1,6 +1,7 @@
 // Imports
 use sdl2::rect::Rect;
 use sdl2::render::{Texture, WindowCanvas};
+use std::str::FromStr;
 
 use crate::genes;
 use crate::inventory_item_trait;
@@ -8,7 +9,6 @@ use crate::population::Population;
 
 // Import constant from main
 use crate::{CAM_H, CAM_W, TILE_SIZE};
-use std::str::FromStr;
 // use std::string::ParseError;
 
 use rand::Rng;
@@ -39,8 +39,7 @@ pub struct Crop<'a> {
     /// watered or not.
     watered: bool,
 
-    tex_path: String,
-
+    // tex_path: String,
     t: CropType,
 
     genes: Option<genes::Genes>,
@@ -63,7 +62,6 @@ impl<'a> Crop<'a> {
         stage: u8,
         texture: Texture<'a>,
         watered: bool,
-        tex_path: String,
         t: CropType,
         genes: Option<genes::Genes>,
     ) -> Crop {
@@ -83,7 +81,6 @@ impl<'a> Crop<'a> {
             src,
             texture,
             watered,
-            tex_path,
             t,
             genes,
             pollinated: false,
@@ -209,9 +206,9 @@ impl<'a> Crop<'a> {
         self.watered
     }
 
-    pub fn get_tex_path(&self) -> &String {
-        &self.tex_path
-    }
+    // pub fn get_tex_path(&self) -> &String {
+    //     &self.tex_path
+    // }
 
     pub fn get_stage(&self) -> u8 {
         self.stage
@@ -267,6 +264,50 @@ impl<'a> Crop<'a> {
         };
 
         self.src = Rect::new(x as i32, y as i32, TILE_SIZE, TILE_SIZE);
+    }
+
+    /// Generate string to save crop to file
+    pub fn to_save_string(&self) -> String {
+        let mut s = String::from("crop;");
+        s.push_str(((self.get_x() / TILE_SIZE as i32).to_string() + ";").as_ref());
+        s.push_str(((self.get_y() / TILE_SIZE as i32).to_string() + ";").as_ref());
+        s.push_str(((self.stage).to_string() + ";").as_ref());
+        s.push_str(((self.watered).to_string() + ";").as_ref());
+        s.push_str((self.get_crop_type().to_owned() + ";").as_ref());
+        if let Some(g) = self.genes.as_ref() {
+            s.push_str(g.to_save_string().as_ref());
+        }
+        // s.push_str(self.genes.as_ref().unwrap().to_save_string().as_ref());
+        s.push('\n');
+
+        s
+    }
+
+    /// Load a crop from a save string
+    pub fn from_save_string(s: &Vec<&str>, t: Texture<'a>) -> Crop<'a> {
+        let g;
+        println!("Loading from {:?}, len = {:?}", s, s.len());
+        if s.len() > 7 {
+            g = Some(genes::Genes::make_genes(vec![
+                s[6].parse::<f32>().unwrap(),
+                s[7].parse::<f32>().unwrap(),
+            ]));
+        } else {
+            g = None;
+        }
+        Crop::new(
+            Rect::new(
+                s[1].parse::<i32>().unwrap() * TILE_SIZE as i32,
+                s[2].parse::<i32>().unwrap() * TILE_SIZE as i32,
+                TILE_SIZE,
+                TILE_SIZE,
+            ),
+            s[3].parse::<u8>().unwrap(),
+            t,
+            s[4].parse::<bool>().unwrap(),
+            s[5].parse::<CropType>().unwrap(),
+            g,
+        )
     }
 }
 
@@ -326,3 +367,27 @@ impl FromStr for CropType {
         }
     }
 }
+
+// Implement Serialize
+// impl Serialize for Crop<'_> {
+//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+//     where
+//         S: Serializer,
+//     {
+//         let mut seq = serializer.serialize_seq(Some(self.get_all_genes().as_ref().unwrap()));
+
+//         let mut state = serializer.serialize_struct("Crop", 7)?;
+//         state.serialize_field("x", &self.pos.x())?;
+//         state.serialize_field("y", &self.pos.y())?;
+//         state.serialize_field("stage", &self.get_stage())?;
+//         state.serialize_field("watered", &self.get_watered())?;
+//         state.serialize_field("type", &self.get_crop_type_enum())?;
+//         state.serialize_field("genes", &self.genes.unwrap())?;
+//         state.serialize_field("pollinated", &self.pollinated)?;
+//         state.end()
+//     }
+// }
+
+// impl Deserialize for Crop<'_> {
+
+// }

@@ -201,8 +201,8 @@ impl<'a> Player<'a> {
 
     pub fn set_speed(&mut self, vel: (f32, f32)) -> (i32, i32) {
         // Update player velocity
-        let mut x_deltav_f = self.resist(self.velocity.0, vel.0);
-        let mut y_deltav_f = self.resist(self.velocity.1, vel.1);
+        let x_deltav_f = self.resist(self.velocity.0, vel.0);
+        let y_deltav_f = self.resist(self.velocity.1, vel.1);
 
         self.velocity.0 = (self.velocity.0 + x_deltav_f as f32).clamp(-SPEED_LIMIT, SPEED_LIMIT);
         self.velocity.1 = (self.velocity.1 + y_deltav_f as f32).clamp(-SPEED_LIMIT, SPEED_LIMIT);
@@ -235,7 +235,7 @@ impl<'a> Player<'a> {
 
     /// Set the player's sprite facing direction.
     pub fn set_direction(&mut self, vel: (i32, i32)) {
-        /// Set the player's movement animation status
+        // Set the player's movement animation status
         if vel.0 == 0 && vel.1 == 0 {
             self.moving = false;
             return;

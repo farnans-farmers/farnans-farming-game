@@ -100,6 +100,10 @@ fn main() {
     wincan.set_draw_color(Color::RGBA(255, 255, 255, 255));
     wincan.clear();
 
+    let crop_texture = texture_creator
+        .load_texture("src/images/Crop_Tileset.png")
+        .unwrap();
+
     // Roll group credits
     // let _ = roll_credits(&mut wincan, &texture_creator, r);
     // roll_credits(&mut wincan, &texture_creator, r).unwrap();
@@ -136,7 +140,6 @@ fn main() {
                         .load_texture("src/images/Crop_Tileset.png")
                         .unwrap(),
                     false,
-                    "src/images/Crop_Tileset.png".parse().unwrap(),
                     crop::CropType::None,
                     None,
                 ),
@@ -172,7 +175,6 @@ fn main() {
                 .load_texture("src/images/Crop_Tileset.png")
                 .unwrap(),
             false,
-            String::from("src/images/Crop_Tileset.png"),
             crop::CropType::Lettuce,
             Some(genes::Genes::new()),
         );
@@ -185,11 +187,11 @@ fn main() {
                 .load_texture("src/images/Crop_Tileset.png")
                 .unwrap(),
             false,
-            String::from("src/images/Crop_Tileset.png"),
             crop::CropType::Carrot,
             Some(genes::Genes::new()),
         ));
     }
+
     // REMOVE LATER ^^
 
     let mut home_item_vec = Vec::new();
@@ -227,27 +229,14 @@ fn main() {
                     .unwrap()
                     .get_mut(_y as usize)
                     .unwrap()
-                    .setCrop(
-                        // crop_vec.push(
-                        crop::Crop::new(
-                            Rect::new(
-                                results[1].parse::<i32>().unwrap() * TILE_SIZE as i32,
-                                results[2].parse::<i32>().unwrap() * TILE_SIZE as i32,
-                                TILE_SIZE,
-                                TILE_SIZE,
-                            ),
-                            results[3].parse::<u8>().unwrap(),
-                            texture_creator.load_texture(results[4]).unwrap(),
-                            results[5].parse::<bool>().unwrap(),
-                            results[4].parse().unwrap(),
-                            results[6].parse::<crop::CropType>().unwrap(),
-                            None,
-                            // Some(genes::Genes::new()),
-                            // TODO load via serialization
-                        ),
-                    );
+                    .setCrop(crop::Crop::from_save_string(
+                        &results,
+                        texture_creator
+                            .load_texture("src/images/Crop_Tileset.png")
+                            .unwrap(),
+                    ));
                 // If crop is present, set tile as tilled
-                if results[6]
+                if results[5]
                     .parse::<std::string::String>()
                     .unwrap()
                     .to_owned()
@@ -348,19 +337,20 @@ fn main() {
                             match _c.get_crop_type() {
                                 "None" => {}
                                 _ => {
-                                    let output = "crop;".to_owned()
-                                        + &(_c.get_x() / TILE_SIZE as i32).to_string()
-                                        + ";"
-                                        + &(_c.get_y() / TILE_SIZE as i32).to_string()
-                                        + ";"
-                                        + &_c.get_stage().to_string()
-                                        + ";"
-                                        + &_c.get_tex_path()
-                                        + ";"
-                                        + &_c.get_watered().to_string()
-                                        + ";"
-                                        + &_c.get_crop_type()
-                                        + "\n";
+                                    // let output = "crop;".to_owned()
+                                    //     + &(_c.get_x() / TILE_SIZE as i32).to_string()
+                                    //     + ";"
+                                    //     + &(_c.get_y() / TILE_SIZE as i32).to_string()
+                                    //     + ";"
+                                    //     + &_c.get_stage().to_string()
+                                    //     + ";"
+                                    //     + &_c.get_tex_path()
+                                    //     + ";"
+                                    //     + &_c.get_watered().to_string()
+                                    //     + ";"
+                                    //     + &_c.get_crop_type()
+                                    //     + "\n";
+                                    let output = _c.to_save_string();
                                     match file_to_save.write_all(output.as_ref()) {
                                         Err(why) => {
                                             panic!("couldn't write to home_data.txt: {}", why)
@@ -442,7 +432,6 @@ fn main() {
                                         .load_texture("src/images/Crop_Tileset.png")
                                         .unwrap(),
                                     false,
-                                    "src/images/Crop_Tileset.png".parse().unwrap(),
                                     t,
                                     Some(g.clone()),
                                     // TODO get genes via breeding

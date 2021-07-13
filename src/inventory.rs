@@ -13,7 +13,7 @@ use sdl2::image::LoadTexture;
 use sdl2::render::TextureCreator;
 use sdl2::video::WindowContext;
 
-use sdl2::render::TextureQuery;
+// use sdl2::render::TextureQuery;
 
 static INVENTORY_X_POS: i32 = 295;
 static INVENTORY_Y_POS: i32 = 640;
@@ -21,6 +21,7 @@ static INVENTORY_Y_POS: i32 = 640;
 static ITEM_BOX_SIZE: i32 = 64;
 static BORDER_SIZE: i32 = 4;
 static SELECTED_SIZE: i32 = 2;
+static NUMBER_SIZE: i32 = 20;
 
 /// Individual inventory slot. This takes in an inventory trait object(crop or tool)
 /// Inventory slots are sorted, so you have the "best" seed at the bottom of the queue
@@ -86,11 +87,11 @@ pub struct Inventory<'a> {
 /// Takes in texture_creator in order to load tools into the tool slots
 impl<'a> Inventory<'a> {
     pub fn new(texture_creator: &'a TextureCreator<WindowContext>) -> Inventory<'a> {
-        /// Initializes inventory slots and sets tool slots to true
+        // Initializes inventory slots and sets tool slots to true
         let mut inventory_slots: Vec<Inventory_Item> =
             (0..10).map(|x| Inventory_Item::new(x < 3)).collect();
 
-        /// Add tool slots into the inventory
+        // Add tool slots into the inventory
         inventory_slots[0].add_item(Box::new(Tool::new(
             Rect::new(0 * 32, 0, 32, 32),
             texture_creator
@@ -117,7 +118,7 @@ impl<'a> Inventory<'a> {
 
         let temp_select = 0;
 
-        /// Initialize squares to be drawn
+        // Initialize squares to be drawn
         let squares: Vec<Rect> = (0..10)
             .map(|x| {
                 Rect::new(
@@ -140,7 +141,7 @@ impl<'a> Inventory<'a> {
     pub fn draw(&self, wincan: &mut WindowCanvas) {
         wincan.set_draw_color(Color::RGBA(159, 82, 30, 255));
 
-        /// Draw background of inventory
+        // Draw background of inventory
         wincan
             .fill_rect(Rect::new(
                 INVENTORY_X_POS - BORDER_SIZE,
@@ -150,7 +151,7 @@ impl<'a> Inventory<'a> {
             ))
             .expect("ERROR");
 
-        /// Draw selected box
+        // Draw selected box
         wincan.set_draw_color(Color::RGBA(244, 0, 0, 255));
         wincan
             .fill_rect(Rect::new(
@@ -167,9 +168,9 @@ impl<'a> Inventory<'a> {
 
         let mut x = 0;
 
-        /// Draw each inventory slot
+        // Draw each inventory slot
         for inventory in &self.inventory_slots {
-            /// Don't draw empty slots
+            // Don't draw empty slots
             if inventory.get_len() == 0 {
                 x = x + 1;
                 continue;
@@ -189,8 +190,8 @@ impl<'a> Inventory<'a> {
                 )
                 .unwrap();
 
-            /// Dont draw tool slots
-            /// This is so that it isn't shown that there is (1) tool
+            // Dont draw tool slots
+            // This is so that it isn't shown that there is (1) tool
             if !inventory.is_tool {
                 self.draw_numbers(wincan, x, inventory.get_len());
             }
@@ -201,7 +202,7 @@ impl<'a> Inventory<'a> {
 
     /// Draw length for inventory slot
     pub fn draw_numbers(&self, wincan: &mut WindowCanvas, inventory_slot: i32, mut value: i32) {
-        let NUMBER_SIZE = 20;
+        // let NUMBER_SIZE = 20;
 
         let texture_creator = wincan.texture_creator();
         let values_texture = texture_creator
@@ -213,21 +214,23 @@ impl<'a> Inventory<'a> {
             let digit = value % 10;
             value /= 10;
 
-            wincan.copy(
-                &values_texture,
-                Rect::new(20 * digit, 0, 20, 20),
-                Rect::new(
-                    INVENTORY_X_POS + ((inventory_slot + 1) * (ITEM_BOX_SIZE + BORDER_SIZE))
-                        - digit_place * NUMBER_SIZE,
-                    INVENTORY_Y_POS + ITEM_BOX_SIZE - NUMBER_SIZE,
-                    NUMBER_SIZE as u32,
-                    NUMBER_SIZE as u32,
-                ),
-            );
+            wincan
+                .copy(
+                    &values_texture,
+                    Rect::new(20 * digit, 0, 20, 20),
+                    Rect::new(
+                        INVENTORY_X_POS + ((inventory_slot + 1) * (ITEM_BOX_SIZE + BORDER_SIZE))
+                            - digit_place * NUMBER_SIZE,
+                        INVENTORY_Y_POS + ITEM_BOX_SIZE - NUMBER_SIZE,
+                        NUMBER_SIZE as u32,
+                        NUMBER_SIZE as u32,
+                    ),
+                )
+                .unwrap();
             digit_place += 1;
 
             // While
-            if (value == 0) {
+            if value == 0 {
                 break;
             }
         }

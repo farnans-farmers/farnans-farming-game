@@ -41,6 +41,15 @@ impl Genes {
         }
     }
 
+    pub fn make_genes(v: Vec<f32>) -> Genes {
+        Genes {
+            genes: vec![
+                Gene::new(GeneType::GrowthRate, *v.get(0).unwrap()),
+                Gene::new(GeneType::Value, *v.get(1).unwrap()),
+            ],
+        }
+    }
+
     /// Get the value of a specific gene
     pub fn get_gene(&self, t: GeneType) -> f32 {
         match t {
@@ -57,6 +66,14 @@ impl Genes {
             count += 1;
         }
         sum / (count as f32)
+    }
+
+    pub fn to_save_string(&self) -> String {
+        let mut s = String::new();
+        for g in &self.genes {
+            s.push_str(((g.value).to_string() + ";").as_ref());
+        }
+        s
     }
 }
 
