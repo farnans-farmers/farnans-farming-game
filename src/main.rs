@@ -7,6 +7,7 @@ mod genes;
 mod inventory;
 mod item;
 mod market;
+mod market_item;
 mod player;
 mod population;
 mod save_load;
@@ -14,7 +15,6 @@ mod sleep_menu;
 mod store;
 mod tile;
 mod tool;
-mod market_item;
 
 use anim::Animation;
 use item::Item;
@@ -33,9 +33,9 @@ use std::thread;
 use std::time::Duration;
 use std::time::Instant;
 
-use crate::player::{Direction, PLAYER_HEIGHT, PLAYER_WIDTH};
-use crate::market_item::Market_item;
 use crate::crop::CropType;
+use crate::market_item::Market_item;
+use crate::player::{Direction, PLAYER_HEIGHT, PLAYER_WIDTH};
 
 use std::fs::File;
 use std::io::{Read, Write};
@@ -184,18 +184,17 @@ fn main() {
     let mut m_item_vec = market_tup.1;
 
     // create a store with temp items
-    let mut seed_textures = texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap();
-    let store_item_0 = Market_item::new(0, 10, 3, Rect::new(0, 0, 80, 80),CropType::Carrot,);
-    let store_item_1 = Market_item::new(7, 12, 2, Rect::new(0, 80, 80, 80),CropType::Corn,);
-    let store_item_2 = Market_item::new(14, 11, 4, Rect::new(0, 160, 80, 80),CropType::Lettuce,);
-    let store_item_3 = Market_item::new(21, 15, 6, Rect::new(0, 240, 80, 80),CropType::Potato,);
+    let mut seed_textures = texture_creator
+        .load_texture("src/images/Crop_Tileset.png")
+        .unwrap();
+    let store_item_0 = Market_item::new(0, 10, 3, Rect::new(0, 0, 80, 80), CropType::Carrot);
+    let store_item_1 = Market_item::new(7, 12, 2, Rect::new(0, 80, 80, 80), CropType::Corn);
+    let store_item_2 = Market_item::new(14, 11, 4, Rect::new(0, 160, 80, 80), CropType::Lettuce);
+    let store_item_3 = Market_item::new(21, 15, 6, Rect::new(0, 240, 80, 80), CropType::Potato);
 
     let mut market_items = vec![store_item_0, store_item_1, store_item_2, store_item_3];
 
     let mut store = store::Store::new(4, &mut market_items);
-
-
-
 
     let mut in_area = Area::Home;
     // Things that might be used every frame but should only be loaded once:
@@ -278,7 +277,16 @@ fn main() {
                                     //Return multiple seeds from harvesting a plant
                                     //This may want to be determined on a plant's genes later
 
-                                    let mut grown_crop = crop::Crop::new(Rect::new(0, 0, 0, 0), 3, texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap(), false, t, Some(g.clone()), );
+                                    let mut grown_crop = crop::Crop::new(
+                                        Rect::new(0, 0, 0, 0),
+                                        3,
+                                        texture_creator
+                                            .load_texture("src/images/Crop_Tileset.png")
+                                            .unwrap(),
+                                        false,
+                                        t,
+                                        Some(g.clone()),
+                                    );
                                     grown_crop.set_stage(3);
                                     p.add_item(grown_crop);
 
@@ -297,41 +305,42 @@ fn main() {
                                         p.add_item(new_crop);
                                     }
                                 }
-                            }
+                                None => (),
+                                _ => (),
+                            };
                         }
                         Area::Market => (),
                     }
-
-                    if keystate.contains(&Keycode::Num1) {
-                        p.set_selected(0);
-                    }
-                    if keystate.contains(&Keycode::Num2) {
-                        p.set_selected(1);
-                    }
-                    if keystate.contains(&Keycode::Num3) {
-                        p.set_selected(2);
-                    }
-                    if keystate.contains(&Keycode::Num4) {
-                        p.set_selected(3);
-                    }
-                    if keystate.contains(&Keycode::Num5) {
-                        p.set_selected(4);
-                    }
-                    if keystate.contains(&Keycode::Num6) {
-                        p.set_selected(5);
-                    }
-                    if keystate.contains(&Keycode::Num7) {
-                        p.set_selected(6);
-                    }
-                    if keystate.contains(&Keycode::Num8) {
-                        p.set_selected(7);
-                    }
-                    if keystate.contains(&Keycode::Num9) {
-                        p.set_selected(8);
-                    }
-                    if keystate.contains(&Keycode::Num0) {
-                        p.set_selected(9);
-                    }
+                }
+                if keystate.contains(&Keycode::Num1) {
+                    p.set_selected(0);
+                }
+                if keystate.contains(&Keycode::Num2) {
+                    p.set_selected(1);
+                }
+                if keystate.contains(&Keycode::Num3) {
+                    p.set_selected(2);
+                }
+                if keystate.contains(&Keycode::Num4) {
+                    p.set_selected(3);
+                }
+                if keystate.contains(&Keycode::Num5) {
+                    p.set_selected(4);
+                }
+                if keystate.contains(&Keycode::Num6) {
+                    p.set_selected(5);
+                }
+                if keystate.contains(&Keycode::Num7) {
+                    p.set_selected(6);
+                }
+                if keystate.contains(&Keycode::Num8) {
+                    p.set_selected(7);
+                }
+                if keystate.contains(&Keycode::Num9) {
+                    p.set_selected(8);
+                }
+                if keystate.contains(&Keycode::Num0) {
+                    p.set_selected(9);
                 }
             }
             //I know having 3 seperate methods isn't really 'modular' but the code has already been written for each and they all require different things so... this is it
@@ -382,8 +391,8 @@ fn main() {
                 }
                 if keystate.contains(&Keycode::P) {
                     let new_crop_texture = texture_creator
-                                .load_texture("src/images/Crop_Tileset.png")
-                                .unwrap();
+                        .load_texture("src/images/Crop_Tileset.png")
+                        .unwrap();
                     store.confirm_purchase();
                     in_menu = None;
                     thread::sleep(Duration::from_millis(160));
@@ -428,10 +437,7 @@ fn main() {
                 }
             }
             Area::Market => {
-
-
                 market::update_market_pos(&mut p, &m_item_vec, player_vel, &mut in_menu)
-
             }
         }
 

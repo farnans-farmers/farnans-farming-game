@@ -1,17 +1,16 @@
+use crate::crop::Crop;
+use crate::crop::CropType;
+use crate::genes::Genes;
+use crate::item::Item;
 use sdl2::image::LoadTexture;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::Texture;
 use sdl2::render::TextureCreator;
 use sdl2::render::WindowCanvas;
-use crate::item::Item;
-use crate::crop::Crop;
-use crate::crop::CropType;
-use crate::genes::Genes;
 
 use crate::market_item::Market_item;
 use crate::player::Player;
-
 
 pub struct Store<'a> {
     item_selected: i32,
@@ -23,12 +22,11 @@ pub struct Store<'a> {
     money_Rect: Rect,
     amount_Rect: Rect,
     menu_Rect: Rect,
-    items_array: &'a mut Vec<Market_item> ,
+    items_array: &'a mut Vec<Market_item>,
 }
 
-impl<'a> Store <'a> {
-    pub fn new (number_of_goods: i32, items_array: &'a mut Vec<Market_item>) -> Store<'a> {
-
+impl<'a> Store<'a> {
+    pub fn new(number_of_goods: i32, items_array: &'a mut Vec<Market_item>) -> Store<'a> {
         let item_selected = 0;
         let amount_selected = 1;
         let price = 1;
@@ -98,7 +96,11 @@ impl<'a> Store <'a> {
         let item_textures = texture_creator
             .load_texture("src/images/Crop_Tileset.png")
             .unwrap();
-        wincan.copy(&item_textures, self.items_array[self.item_selected as usize].pos, Rect::new(665, 35, 460, 460));
+        wincan.copy(
+            &item_textures,
+            self.items_array[self.item_selected as usize].pos,
+            Rect::new(665, 35, 460, 460),
+        );
     }
 
     pub fn navigate(&mut self, increment: i32) {
@@ -108,7 +110,7 @@ impl<'a> Store <'a> {
                 self.price = 1;
                 self.amount_selected = 1;
             }
-            if increment == 1 && self.item_selected != self.number_of_goods-1 {
+            if increment == 1 && self.item_selected != self.number_of_goods - 1 {
                 self.item_selected = self.item_selected + increment;
                 self.price = 1;
                 self.amount_selected = 1;
@@ -125,14 +127,15 @@ impl<'a> Store <'a> {
         }
 
         if self.sub_menu == 1 {
-            if increment == -1 && self.amount_selected != self.items_array[self.item_selected as usize].amount {
+            if increment == -1
+                && self.amount_selected != self.items_array[self.item_selected as usize].amount
+            {
                 self.price = self.price + (self.price / self.amount_selected);
                 self.amount_selected = self.amount_selected - increment;
             }
             if increment == 1 && self.amount_selected != 1 {
                 self.price = self.price - (self.price / self.amount_selected);
                 self.amount_selected = self.amount_selected - increment;
-
             }
         }
     }
@@ -155,7 +158,13 @@ impl<'a> Store <'a> {
         }
     }
 
-    pub fn price_draw(wincan: &mut WindowCanvas, mut steps: i32, initx: i32, inity: i32, value: i32) {
+    pub fn price_draw(
+        wincan: &mut WindowCanvas,
+        mut steps: i32,
+        initx: i32,
+        inity: i32,
+        value: i32,
+    ) {
         let texture_creator = wincan.texture_creator();
         let values_texture = texture_creator
             .load_texture("src/images/MoneySpriteSheet.png")
@@ -185,7 +194,7 @@ impl<'a> Store <'a> {
         }
     }
 
-    pub fn item_list_draw(wincan: &mut WindowCanvas, items_array: &[Market_item]){
+    pub fn item_list_draw(wincan: &mut WindowCanvas, items_array: &[Market_item]) {
         let texture_creator = wincan.texture_creator();
         let market_menu_items = texture_creator
             .load_texture("src/images/Market_menu_items.png")
@@ -197,22 +206,23 @@ impl<'a> Store <'a> {
                 Rect::new(0, item.item_label_offset, 100, 6),
                 Rect::new(150, 30 + i * 50, 500, 50),
             );
-            Store::price_draw(wincan, 3, 380, 45 + i*50, item.amount);
-            Store::price_draw(wincan, 3, 530, 45 + i*50, item.price);
+            Store::price_draw(wincan, 3, 380, 45 + i * 50, item.amount);
+            Store::price_draw(wincan, 3, 530, 45 + i * 50, item.price);
             i = i + 1;
         }
     }
 
-    pub fn confirm_purchase(&mut self,){
+    pub fn confirm_purchase(&mut self) {
         let total = self.items_array[self.item_selected as usize].price * self.amount_selected;
-        
-        if total <= self.price && total != 0 { 
-            self.items_array[self.item_selected as usize].amount = self.items_array[self.item_selected as usize].amount - self.amount_selected;
-            
-            // loop for self.amount_selected 
-                // add seed type to the inventory
-                // self.items_array[self.item_selected as usize].crop is the enum of the crop type
-            
+
+        if total <= self.price && total != 0 {
+            self.items_array[self.item_selected as usize].amount =
+                self.items_array[self.item_selected as usize].amount - self.amount_selected;
+
+            // loop for self.amount_selected
+            // add seed type to the inventory
+            // self.items_array[self.item_selected as usize].crop is the enum of the crop type
+
             /*
             let _c = Crop::new(
                 Rect::new(0, 0, 80, 80),
@@ -228,7 +238,5 @@ impl<'a> Store <'a> {
 
         self.amount_selected = 1;
         self.price = 1;
-        
     }
-
 }
