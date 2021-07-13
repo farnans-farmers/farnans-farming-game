@@ -4,7 +4,7 @@
 use std::time::{Duration, Instant};
 
 // Imports
-use sdl2::image::LoadTexture;
+
 use sdl2::rect::Rect;
 use sdl2::render::Texture;
 use sdl2::render::TextureCreator;
@@ -16,7 +16,7 @@ use crate::crop::Crop;
 use crate::crop::CropType;
 use crate::genes;
 use crate::inventory::Inventory;
-use crate::item::Item;
+
 use crate::population::Population;
 
 // Player sprites are 54x90 px.
@@ -157,7 +157,7 @@ impl<'a> Player<'a> {
     pub fn use_inventory(
         &mut self,
         square: (i32, i32),
-        mut pop: &mut Population,
+        pop: &mut Population,
     ) -> Option<(Option<CropType>, Option<genes::Genes>)> {
         self.inventory.use_inventory(square, pop)
         /*match return_crop{

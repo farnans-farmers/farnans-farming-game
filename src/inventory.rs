@@ -247,7 +247,7 @@ impl<'a> Inventory<'a> {
     /// Add item into the correct inventory slot
     /// Right now the correct slot is hard coded
     pub fn add_item(&mut self, new_crop: Crop<'a>) {
-        if (new_crop.get_stage() == 3) {
+        if new_crop.get_stage() == 3 {
             let inventory_slot_index = match new_crop.get_crop_type_enum() {
                 CropType::Carrot => 4,
                 CropType::Corn => 6,
@@ -273,7 +273,7 @@ impl<'a> Inventory<'a> {
     pub fn use_inventory(
         &mut self,
         square: (i32, i32),
-        mut pop: &mut Population,
+        pop: &mut Population,
     ) -> Option<(Option<CropType>, Option<genes::Genes>)> {
         let current_item = self.inventory_slots[self.selected as usize].get_item(0);
         match current_item {

@@ -1,16 +1,10 @@
-use crate::crop::Crop;
-use crate::crop::CropType;
-use crate::genes::Genes;
-use crate::item::Item;
 use sdl2::image::LoadTexture;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use sdl2::render::Texture;
-use sdl2::render::TextureCreator;
+
 use sdl2::render::WindowCanvas;
 
 use crate::market_item::Market_item;
-use crate::player::Player;
 
 pub struct Store<'a> {
     item_selected: i32,
@@ -50,7 +44,7 @@ impl<'a> Store<'a> {
     }
 
     pub fn draw(&self, wincan: &mut WindowCanvas) {
-        let item_Rect = Rect::new(150, 30, 500, 580);
+        let _item_Rect = Rect::new(150, 30, 500, 580);
 
         //draw menu canvas
         wincan.set_draw_color(Color::RGBA(159, 82, 30, 255));

@@ -1,10 +1,6 @@
 use crate::crop::CropType;
-use sdl2::image::LoadTexture;
-use sdl2::pixels::Color;
+
 use sdl2::rect::Rect;
-use sdl2::render::Texture;
-use sdl2::render::TextureCreator;
-use sdl2::render::WindowCanvas;
 
 /*OFFSETS FOR REFERENCE*/
 // SEED 1 - 0

@@ -17,11 +17,11 @@ mod tile;
 mod tool;
 
 use anim::Animation;
-use item::Item;
+
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
-use sdl2::mouse::MouseButton;
+
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::BlendMode;
@@ -31,14 +31,10 @@ use sdl2::render::WindowCanvas;
 use std::collections::HashSet;
 use std::thread;
 use std::time::Duration;
-use std::time::Instant;
 
 use crate::crop::CropType;
 use crate::market_item::Market_item;
-use crate::player::{Direction, PLAYER_HEIGHT, PLAYER_WIDTH};
-
-use std::fs::File;
-use std::io::{Read, Write};
+use crate::player::{PLAYER_HEIGHT, PLAYER_WIDTH};
 
 const VSYNC: bool = true;
 // Camera dimensions
@@ -106,7 +102,7 @@ fn main() {
     wincan.set_draw_color(Color::RGBA(255, 255, 255, 255));
     wincan.clear();
 
-    let crop_texture = texture_creator
+    let _crop_texture = texture_creator
         .load_texture("src/images/Crop_Tileset.png")
         .unwrap();
 
@@ -115,10 +111,10 @@ fn main() {
     // roll_credits(&mut wincan, &texture_creator, r).unwrap();
 
     let mut event_pump = sdl_cxt.event_pump().unwrap();
-    let mut x_vel = 0;
-    let mut y_vel = 0;
+    let _x_vel = 0;
+    let _y_vel = 0;
 
-    let mut menu_location = 0;
+    let _menu_location = 0;
 
     let mut p = player::Player::new(
         Rect::new(
@@ -173,18 +169,18 @@ fn main() {
 
     // REMOVE LATER ^^
 
-    let mut crop_vec: Vec<crop::Crop> = Vec::new();
+    let _crop_vec: Vec<crop::Crop> = Vec::new();
 
     let home_tup = save_load::load_home(&texture_creator);
     let mut pop = home_tup.0;
-    let mut item_vec = home_tup.1;
+    let item_vec = home_tup.1;
 
     let market_tup = save_load::load_market(&texture_creator);
-    let mut m_pop = market_tup.0;
-    let mut m_item_vec = market_tup.1;
+    let m_pop = market_tup.0;
+    let m_item_vec = market_tup.1;
 
     // create a store with temp items
-    let mut seed_textures = texture_creator
+    let _seed_textures = texture_creator
         .load_texture("src/images/Crop_Tileset.png")
         .unwrap();
     let store_item_0 = Market_item::new(0, 10, 3, Rect::new(0, 0, 80, 80), CropType::Carrot);
@@ -198,7 +194,7 @@ fn main() {
 
     let mut in_area = Area::Home;
     // Things that might be used every frame but should only be loaded once:
-    let bg_tiles_tex = texture_creator
+    let _bg_tiles_tex = texture_creator
         .load_texture("src/images/Background_Tileset.png")
         .unwrap();
 
@@ -390,7 +386,7 @@ fn main() {
                     thread::sleep(Duration::from_millis(160));
                 }
                 if keystate.contains(&Keycode::P) {
-                    let new_crop_texture = texture_creator
+                    let _new_crop_texture = texture_creator
                         .load_texture("src/images/Crop_Tileset.png")
                         .unwrap();
                     store.confirm_purchase();

@@ -1,7 +1,7 @@
 use crate::{crop, item, population, tile, BG_H, BG_W, TILE_SIZE};
 use sdl2::image::LoadTexture;
 use sdl2::rect::Rect;
-use sdl2::render::{TextureCreator, WindowCanvas};
+use sdl2::render::TextureCreator;
 use sdl2::video::WindowContext;
 use std::fs::File;
 use std::io::{Read, Write};
@@ -45,7 +45,7 @@ pub fn load_market<'a>(
         tile_vec.push(sub_vec);
     }
 
-    let mut pop = population::Population::new(tile_vec);
+    let pop = population::Population::new(tile_vec);
     let mut market_item_vec = Vec::new();
     let mut market_file = File::open("src/market_data.txt").expect("Can't open save market_file");
     let mut market_contents = String::new();
@@ -56,7 +56,7 @@ pub fn load_market<'a>(
     print!("{}", market_contents);
     for line in market_contents.lines() {
         let results: Vec<&str> = line.split(";").collect();
-        if (results[0] == "item") {
+        if results[0] == "item" {
             market_item_vec.push(item::Item::new(
                 Rect::new(
                     results[1].parse::<i32>().unwrap(),
@@ -125,7 +125,7 @@ pub fn load_home<'a>(
         print!("{}", home_contents);
         for line in home_contents.lines() {
             let results: Vec<&str> = line.split(";").collect();
-            if (results[0] == "item") {
+            if results[0] == "item" {
                 home_item_vec.push(item::Item::new(
                     Rect::new(
                         results[1].parse::<i32>().unwrap(),
@@ -137,7 +137,7 @@ pub fn load_home<'a>(
                     results[5].parse().unwrap(),
                     results[6].parse::<bool>().unwrap(),
                 ));
-            } else if (results[0] == "crop") {
+            } else if results[0] == "crop" {
                 let _x = results[1].parse::<i32>().unwrap();
                 let _y = results[2].parse::<i32>().unwrap();
                 pop.get_vec_mut()
@@ -174,7 +174,7 @@ pub fn save_home(pop: population::Population, item_vec: Vec<item::Item>) {
         Ok(file_to_save) => file_to_save,
     };
     for item in item_vec {
-        let mut output = "item;".to_owned()
+        let output = "item;".to_owned()
             + &item.x().to_string()
             + ";"
             + &item.y().to_string()

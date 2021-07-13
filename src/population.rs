@@ -1,8 +1,6 @@
 use crate::crop::Crop;
 use crate::tile::Tile;
-use crate::{CAM_H, CAM_W, TILE_SIZE};
-use sdl2::rect::Rect;
-use sdl2::render::{Texture, WindowCanvas};
+use crate::TILE_SIZE;
 
 //Struct used to combine tile and crop structs into one for easy storage into the vector
 pub struct Crop_Tile<'a> {
