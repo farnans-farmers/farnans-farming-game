@@ -1,4 +1,5 @@
 use crate::crop::CropType;
+use crate::genes;
 use crate::inventory_item_trait;
 use crate::population::Population;
 use sdl2::rect::Rect;
@@ -44,25 +45,48 @@ impl inventory_item_trait for Tool<'_> {
     fn src(&self) -> Rect {
         self.src
     }
-    fn inventory_input(&self, square: (i32, i32), pop: &mut Population) -> Option<CropType> {
+    fn inventory_input(
+        &self,
+        square: (i32, i32),
+        pop: &mut Population,
+    ) -> Option<(Option<CropType>, Option<genes::Genes>)> {
         let (x, y) = square;
 
         match self.current_type {
             // Hand
             tool_type::hand => {
+                // TODO remove debugging that prints genes
+                if let Some(_i) = pop
+                    .get_crop_with_index(x as u32, y as u32)
+                    .get_gene(crate::genes::GeneType::GrowthRate)
+                {
+                    println!(
+                        "{}",
+                        pop.get_crop_with_index(x as u32, y as u32)
+                            .get_all_genes()
+                            .as_ref()
+                            .unwrap()
+                    )
+                }
                 // If tile has plant ready to harvest, harvest
                 if pop.get_crop_with_index(x as u32, y as u32).get_stage() == 3 {
+                    let _g = pop
+                        .get_crop_with_index(x as u32, y as u32)
+                        .get_all_genes()
+                        .as_ref()
+                        .unwrap()
+                        .clone();
                     let mut _c = pop.get_crop_with_index_mut(x as u32, y as u32);
                     let return_crop_type = _c.get_crop_type_enum();
+                    // let _g = _c.get_all_genes().unwrap().clone();
                     _c.set_crop_type("None");
                     _c.set_stage(0);
                     _c.set_water(false);
+                    _c.set_genes(None);
                     let mut _t = pop.get_tile_with_index_mut(x as u32, y as u32);
                     _t.set_tilled(false);
 
-                    // I couldn't get cloning to work so I'm passing back the type
-                    // TODO send back clone of crop or some other datastructure with genetic info
-                    return Some(return_crop_type);
+                    return Some((Some(return_crop_type), Some(_g)));
                 }
             }
             // Hoe
@@ -84,6 +108,8 @@ impl inventory_item_trait for Tool<'_> {
                 if !pop.get_crop_with_index(x as u32, y as u32).get_watered() {
                     pop.get_crop_with_index_mut(x as u32, y as u32)
                         .set_water(true);
+                }
+                if pop.get_tile_with_index(x as u32, y as u32).tilled() {
                     pop.get_tile_with_index_mut(x as u32, y as u32)
                         .set_water(true);
                 }

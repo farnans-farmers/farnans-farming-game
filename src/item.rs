@@ -84,7 +84,7 @@ impl<'a> Item<'a> {
         win
     }
 
-    pub fn check_for_collision(&self, x: i32, y: i32, w: i32, h: i32) -> bool {
-        true
-    }
+    // pub fn check_for_collision(&self, x: i32, y: i32, w: i32, h: i32) -> bool {
+    //     true
+    // }
 }

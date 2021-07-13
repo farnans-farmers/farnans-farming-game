@@ -34,15 +34,17 @@ pub fn start_sleep_menu(
         //Cut to black and then fade into night scene
         let mut i = 0;
         while i < 254 {
-            wincan.copy(
-                &texture_creator
-                    .load_texture("src/images/sleeping_screen.png")
-                    .unwrap(),
-                None,
-                None,
-            );
+            wincan
+                .copy(
+                    &texture_creator
+                        .load_texture("src/images/sleeping_screen.png")
+                        .unwrap(),
+                    None,
+                    None,
+                )
+                .unwrap();
             wincan.set_draw_color(Color::RGBA(0, 0, 0, 255 - i));
-            wincan.fill_rect(r);
+            wincan.fill_rect(r).unwrap();
             wincan.present();
             thread::sleep(Duration::from_millis(1));
             i = i + 2;
@@ -61,6 +63,7 @@ pub fn start_sleep_menu(
                         _c.grow();
                     }
                 }
+                _c.set_water(false);
                 // Set tile watered to false
                 pop.get_tile_with_index_mut(_x as u32, _y as u32)
                     .set_water(false);
@@ -70,15 +73,17 @@ pub fn start_sleep_menu(
         // fade to white because the sun is coming up
         i = 0;
         while i < 254 {
-            wincan.copy(
-                &texture_creator
-                    .load_texture("src/images/sleeping_screen.png")
-                    .unwrap(),
-                None,
-                None,
-            );
+            wincan
+                .copy(
+                    &texture_creator
+                        .load_texture("src/images/sleeping_screen.png")
+                        .unwrap(),
+                    None,
+                    None,
+                )
+                .unwrap();
             wincan.set_draw_color(Color::RGBA(255, 255, 255, i));
-            wincan.fill_rect(r);
+            wincan.fill_rect(r).unwrap();
             wincan.present();
             thread::sleep(Duration::from_millis(1));
             i = i + 2;

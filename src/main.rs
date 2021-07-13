@@ -3,6 +3,7 @@ extern crate sdl2;
 // Modules
 mod anim;
 mod crop;
+mod genes;
 mod inventory;
 mod item;
 mod market_transition_menu;
@@ -69,7 +70,7 @@ pub trait inventory_item_trait {
         &self,
         square: (i32, i32),
         pop: &mut population::Population,
-    ) -> Option<crop::CropType>;
+    ) -> Option<(Option<crop::CropType>, Option<genes::Genes>)>;
 }
 
 fn main() {
@@ -98,6 +99,10 @@ fn main() {
     let r = Rect::new((0) as i32, (0) as i32, CAM_W, CAM_H);
     wincan.set_draw_color(Color::RGBA(255, 255, 255, 255));
     wincan.clear();
+
+    let crop_texture = texture_creator
+        .load_texture("src/images/Crop_Tileset.png")
+        .unwrap();
 
     // Roll group credits
     // let _ = roll_credits(&mut wincan, &texture_creator, r);
@@ -135,8 +140,8 @@ fn main() {
                         .load_texture("src/images/Crop_Tileset.png")
                         .unwrap(),
                     false,
-                    "src/images/Crop_Tileset.png".parse().unwrap(),
                     crop::CropType::None,
+                    None,
                 ),
             ));
         }
@@ -158,6 +163,36 @@ fn main() {
             .unwrap(),
         &texture_creator,
     );
+
+    // TODO FOR DEMO PURPOSES - REMOVE LATER
+    // Add new seeds with random genes to inventory
+    // like the player would buy from the store
+    for _ in 0..5 {
+        let _c = crop::Crop::new(
+            Rect::new(0, 0, TILE_SIZE, TILE_SIZE),
+            0,
+            texture_creator
+                .load_texture("src/images/Crop_Tileset.png")
+                .unwrap(),
+            false,
+            crop::CropType::Lettuce,
+            Some(genes::Genes::new()),
+        );
+        println!("Made {}", _c.get_all_genes().as_ref().unwrap());
+        p.add_item(_c);
+        p.add_item(crop::Crop::new(
+            Rect::new(0, 0, TILE_SIZE, TILE_SIZE),
+            0,
+            texture_creator
+                .load_texture("src/images/Crop_Tileset.png")
+                .unwrap(),
+            false,
+            crop::CropType::Carrot,
+            Some(genes::Genes::new()),
+        ));
+    }
+
+    // REMOVE LATER ^^
 
     let mut home_item_vec = Vec::new();
     let mut market_item_vec = Vec::new();
@@ -194,24 +229,14 @@ fn main() {
                     .unwrap()
                     .get_mut(_y as usize)
                     .unwrap()
-                    .setCrop(
-                        // crop_vec.push(
-                        crop::Crop::new(
-                            Rect::new(
-                                results[1].parse::<i32>().unwrap() * TILE_SIZE as i32,
-                                results[2].parse::<i32>().unwrap() * TILE_SIZE as i32,
-                                TILE_SIZE,
-                                TILE_SIZE,
-                            ),
-                            results[3].parse::<u8>().unwrap(),
-                            texture_creator.load_texture(results[4]).unwrap(),
-                            results[5].parse::<bool>().unwrap(),
-                            results[4].parse().unwrap(),
-                            results[6].parse::<crop::CropType>().unwrap(),
-                        ),
-                    );
+                    .setCrop(crop::Crop::from_save_string(
+                        &results,
+                        texture_creator
+                            .load_texture("src/images/Crop_Tileset.png")
+                            .unwrap(),
+                    ));
                 // If crop is present, set tile as tilled
-                if results[6]
+                if results[5]
                     .parse::<std::string::String>()
                     .unwrap()
                     .to_owned()
@@ -280,6 +305,7 @@ fn main() {
                     keycode: Some(Keycode::Escape),
                     ..
                 } => {
+                    // TODO try saving via serialization
                     //Iterates through item vector and crop vector saving their positions into a txt file
                     let mut file_to_save = match File::create("src/home_data.txt") {
                         Err(why) => panic!("couldn't create home_data.txt: {}", why),
@@ -311,19 +337,20 @@ fn main() {
                             match _c.get_crop_type() {
                                 "None" => {}
                                 _ => {
-                                    let output = "crop;".to_owned()
-                                        + &(_c.get_x() / TILE_SIZE as i32).to_string()
-                                        + ";"
-                                        + &(_c.get_y() / TILE_SIZE as i32).to_string()
-                                        + ";"
-                                        + &_c.get_stage().to_string()
-                                        + ";"
-                                        + &_c.get_tex_path()
-                                        + ";"
-                                        + &_c.get_watered().to_string()
-                                        + ";"
-                                        + &_c.get_crop_type()
-                                        + "\n";
+                                    // let output = "crop;".to_owned()
+                                    //     + &(_c.get_x() / TILE_SIZE as i32).to_string()
+                                    //     + ";"
+                                    //     + &(_c.get_y() / TILE_SIZE as i32).to_string()
+                                    //     + ";"
+                                    //     + &_c.get_stage().to_string()
+                                    //     + ";"
+                                    //     + &_c.get_tex_path()
+                                    //     + ";"
+                                    //     + &_c.get_watered().to_string()
+                                    //     + ";"
+                                    //     + &_c.get_crop_type()
+                                    //     + "\n";
+                                    let output = _c.to_save_string();
                                     match file_to_save.write_all(output.as_ref()) {
                                         Err(why) => {
                                             panic!("couldn't write to home_data.txt: {}", why)
@@ -388,15 +415,16 @@ fn main() {
                             .clamp(0, ((BG_H / TILE_SIZE) as i32) + 1),
                     );
 
-                    /// Use inventory slot function
-                    /// Result is given when we want to add an item to the inventory
-                    /// This is done when a fully grown crop is hoed
+                    // Use inventory slot function
+                    // Result is given when we want to add an item to the inventory
+                    // This is done when a fully grown crop is hoed
                     let result = p.use_inventory(coordinates, &mut pop);
                     match result {
-                        Some(x) => {
+                        Some((Some(t), Some(g))) => {
+                            // TODO add harvested crop to inventory using type and genes in `t` and `g`
                             //Return multiple seeds from harvesting a plant
                             //This may want to be determined on a plant's genes later
-                            for seeds_returned in 0..2 {
+                            for _seeds_returned in 0..2 {
                                 let new_crop = crop::Crop::new(
                                     Rect::new(0, 0, 0, 0),
                                     0,
@@ -404,13 +432,14 @@ fn main() {
                                         .load_texture("src/images/Crop_Tileset.png")
                                         .unwrap(),
                                     false,
-                                    "src/images/Crop_Tileset.png".parse().unwrap(),
-                                    x,
+                                    t,
+                                    Some(g.clone()),
+                                    // TODO get genes via breeding
                                 );
                                 p.add_item(new_crop);
                             }
                         }
-                        None => (),
+                        _ => (),
                     };
                 }
 
