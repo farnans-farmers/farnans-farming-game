@@ -1,3 +1,5 @@
+#![deny(nonstandard_style, unused_parens)]
+
 extern crate sdl2;
 
 // Modules
