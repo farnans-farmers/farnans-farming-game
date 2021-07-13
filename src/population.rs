@@ -3,36 +3,36 @@ use crate::tile::Tile;
 use crate::TILE_SIZE;
 
 //Struct used to combine tile and crop structs into one for easy storage into the vector
-pub struct Crop_Tile<'a> {
+pub struct CropTile<'a> {
     pub tile: Tile<'a>,
     pub crop: Crop<'a>,
 }
 
-impl<'a> Crop_Tile<'a> {
-    pub fn new(tile: Tile<'a>, crop: Crop<'a>) -> Crop_Tile<'a> {
-        Crop_Tile { tile, crop }
+impl<'a> CropTile<'a> {
+    pub fn new(tile: Tile<'a>, crop: Crop<'a>) -> CropTile<'a> {
+        CropTile { tile, crop }
     }
 
-    pub fn setCrop(&mut self, c: Crop<'a>) {
+    pub fn set_crop(&mut self, c: Crop<'a>) {
         self.crop = c;
     }
 }
 
 pub struct Population<'a> {
-    crop_tile_vec: Vec<Vec<Crop_Tile<'a>>>,
+    crop_tile_vec: Vec<Vec<CropTile<'a>>>,
 }
 
 impl<'a> Population<'a> {
-    pub fn new(crop_tile_vec: Vec<Vec<Crop_Tile<'a>>>) -> Population<'a> {
+    pub fn new(crop_tile_vec: Vec<Vec<CropTile<'a>>>) -> Population<'a> {
         Population { crop_tile_vec }
     }
 
     //Lends out the whole vector
-    pub fn get_vec(&self) -> &Vec<Vec<Crop_Tile>> {
+    pub fn get_vec(&self) -> &Vec<Vec<CropTile>> {
         &self.crop_tile_vec
     }
 
-    pub fn get_vec_mut(&mut self) -> &mut Vec<Vec<Crop_Tile<'a>>> {
+    pub fn get_vec_mut(&mut self) -> &mut Vec<Vec<CropTile<'a>>> {
         &mut self.crop_tile_vec
     }
 

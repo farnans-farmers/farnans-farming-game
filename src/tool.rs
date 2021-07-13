@@ -1,23 +1,23 @@
 use crate::crop::CropType;
 use crate::genes;
-use crate::inventory_item_trait;
 use crate::population::Population;
+use crate::InventoryItemTrait;
 use sdl2::rect::Rect;
 use sdl2::render::Texture;
 
 /// This class is for tool functionality
 /// Right now, just have 3 tools
 
-pub enum tool_type {
-    hand,
-    hoe,
-    watering_can,
+pub enum ToolType {
+    Hand,
+    Hoe,
+    WateringCan,
 }
 
 pub struct Tool<'a> {
     src: Rect,
     texture: Texture<'a>,
-    current_type: tool_type,
+    current_type: ToolType,
 }
 
 impl<'a> Tool<'a> {
@@ -26,7 +26,7 @@ impl<'a> Tool<'a> {
     /// # Arguments
     /// * `pos` - Position of the player.
     /// * `texture` - Sprite sheet texture
-    pub fn new(src: Rect, texture: Texture<'a>, t: tool_type) -> Tool<'a> {
+    pub fn new(src: Rect, texture: Texture<'a>, t: ToolType) -> Tool<'a> {
         Tool {
             src,
             texture,
@@ -35,7 +35,7 @@ impl<'a> Tool<'a> {
     }
 }
 
-impl inventory_item_trait for Tool<'_> {
+impl InventoryItemTrait for Tool<'_> {
     fn get_value(&self) -> i32 {
         1
     }
@@ -54,7 +54,7 @@ impl inventory_item_trait for Tool<'_> {
 
         match self.current_type {
             // Hand
-            tool_type::hand => {
+            ToolType::Hand => {
                 // TODO remove debugging that prints genes
                 if let Some(_i) = pop
                     .get_crop_with_index(x as u32, y as u32)
@@ -90,7 +90,7 @@ impl inventory_item_trait for Tool<'_> {
                 }
             }
             // Hoe
-            tool_type::hoe => {
+            ToolType::Hoe => {
                 // If tile is empty, set as tilled dirt
                 if pop
                     .get_crop_with_index(x as u32, y as u32)
@@ -104,7 +104,7 @@ impl inventory_item_trait for Tool<'_> {
                 }
             }
             // Watering can
-            tool_type::watering_can => {
+            ToolType::WateringCan => {
                 if !pop.get_crop_with_index(x as u32, y as u32).get_watered() {
                     pop.get_crop_with_index_mut(x as u32, y as u32)
                         .set_water(true);

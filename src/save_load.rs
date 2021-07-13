@@ -13,7 +13,7 @@ pub fn load_market<'a>(
     for x in 0..((BG_W / TILE_SIZE) as i32) + 1 {
         let mut sub_vec = Vec::new();
         for y in 0..((BG_H / TILE_SIZE) as i32) + 1 {
-            sub_vec.push(population::Crop_Tile::new(
+            sub_vec.push(population::CropTile::new(
                 tile::Tile::new(
                     Rect::new(
                         (TILE_SIZE as i32) * x,
@@ -80,7 +80,7 @@ pub fn load_home<'a>(
     for x in 0..((BG_W / TILE_SIZE) as i32) + 1 {
         let mut sub_vec = Vec::new();
         for y in 0..((BG_H / TILE_SIZE) as i32) + 1 {
-            sub_vec.push(population::Crop_Tile::new(
+            sub_vec.push(population::CropTile::new(
                 tile::Tile::new(
                     Rect::new(
                         (TILE_SIZE as i32) * x,
@@ -145,7 +145,7 @@ pub fn load_home<'a>(
                     .unwrap()
                     .get_mut(_y as usize)
                     .unwrap()
-                    .setCrop(crop::Crop::from_save_string(
+                    .set_crop(crop::Crop::from_save_string(
                         &results,
                         texture_creator
                             .load_texture("src/images/Crop_Tileset.png")

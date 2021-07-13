@@ -3,7 +3,7 @@ use crate::Menu;
 use crate::BG_H;
 use crate::BG_W;
 use crate::TILE_SIZE;
-use crate::{crop, item, population, save_load, tile, Animation, CAM_H, CAM_W};
+use crate::{item, population, Animation, CAM_H, CAM_W};
 
 use crate::player::Player;
 

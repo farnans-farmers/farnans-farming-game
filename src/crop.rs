@@ -4,8 +4,8 @@ use sdl2::render::{Texture, WindowCanvas};
 use std::str::FromStr;
 
 use crate::genes;
-use crate::inventory_item_trait;
 use crate::population::Population;
+use crate::InventoryItemTrait;
 
 // Import constant from main
 use crate::{CAM_H, CAM_W, TILE_SIZE};
@@ -311,7 +311,7 @@ impl<'a> Crop<'a> {
     }
 }
 
-impl inventory_item_trait for Crop<'_> {
+impl InventoryItemTrait for Crop<'_> {
     /// Sort inventory so that you take the best item from the inventory
     /// This can be a combination of factors
     /// i.e. 2*speed + resistance
