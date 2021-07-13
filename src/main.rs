@@ -295,12 +295,12 @@ fn main() {
     let market_house = {
         let pos = Rect::new(2000, 2000, 533, 408);
         let texture = texture_creator
-            .load_texture("src/images/marketstallPlaceholder.png")
+            .load_texture("src/images/marketstall.png")
             .unwrap();
         Item::new(
             pos,
             texture,
-            "src/images/marketstallPlaceholder.png".into(),
+            "src/images/marketstall.png".into(),
             true,
         )
     };
@@ -568,7 +568,7 @@ fn main() {
                 for item in &market_item_vec {
                     if p.check_collision(&item.pos()) {
                         p.stay_still_x(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-                        if item.tex_path() == "src/images/marketstallPlaceholder.png" {
+                        if item.tex_path() == "src/images/marketstall.png" {
                             in_menu = Some(Menu::Shop);
                         }
                     }
@@ -579,7 +579,7 @@ fn main() {
                 for item in &market_item_vec {
                     if p.check_collision(&item.pos()) {
                         p.stay_still_y(player_vel, (0, (BG_W - TILE_SIZE) as i32));
-                        if item.tex_path() == "src/images/marketstallPlaceholder.png" {
+                        if item.tex_path() == "src/images/marketstall.png" {
                             in_menu = Some(Menu::Shop);
                         }
                     }
