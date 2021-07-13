@@ -13,6 +13,7 @@ mod sleep_menu;
 mod store;
 mod tile;
 mod tool;
+mod market_item;
 
 use anim::Animation;
 use item::Item;
@@ -32,6 +33,9 @@ use std::time::Duration;
 use std::time::Instant;
 
 use crate::player::{Direction, PLAYER_HEIGHT, PLAYER_WIDTH};
+use crate::market_item::Market_item;
+use crate::crop::CropType;
+
 use std::fs::File;
 use std::io::{Read, Write};
 
@@ -273,7 +277,19 @@ fn main() {
         }
     }
 
-    let mut store = store::Store::new(24);
+    // create a store with temp items
+    let mut seed_textures = texture_creator.load_texture("src/images/Crop_Tileset.png").unwrap();
+    let store_item_0 = Market_item::new(0, 10, 3, Rect::new(0, 0, 80, 80),CropType::Carrot,);
+    let store_item_1 = Market_item::new(7, 12, 2, Rect::new(0, 80, 80, 80),CropType::Corn,);
+    let store_item_2 = Market_item::new(14, 11, 4, Rect::new(0, 160, 80, 80),CropType::Lettuce,);
+    let store_item_3 = Market_item::new(21, 15, 6, Rect::new(0, 240, 80, 80),CropType::Potato,);
+
+    let mut market_items = vec![store_item_0, store_item_1, store_item_2, store_item_3];    
+
+    let mut store = store::Store::new(4, &mut market_items);
+
+
+
 
     let mut in_area = Area::Home;
     // Things that might be used every frame but should only be loaded once:
@@ -495,19 +511,27 @@ fn main() {
                 }
                 if keystate.contains(&Keycode::Up) {
                     store.navigate(-1);
-                    thread::sleep(Duration::from_millis(80));
+                    thread::sleep(Duration::from_millis(160));
                 }
                 if keystate.contains(&Keycode::Down) {
                     store.navigate(1);
-                    thread::sleep(Duration::from_millis(80));
+                    thread::sleep(Duration::from_millis(160));
                 }
                 if keystate.contains(&Keycode::Left) {
                     store.cycle(-1);
-                    thread::sleep(Duration::from_millis(80));
+                    thread::sleep(Duration::from_millis(160));
                 }
                 if keystate.contains(&Keycode::Right) {
                     store.cycle(1);
-                    thread::sleep(Duration::from_millis(80));
+                    thread::sleep(Duration::from_millis(160));
+                }
+                if keystate.contains(&Keycode::P) {
+                    let new_crop_texture = texture_creator
+                                .load_texture("src/images/Crop_Tileset.png")
+                                .unwrap();
+                    store.confirm_purchase();
+                    in_menu = None;
+                    thread::sleep(Duration::from_millis(160));
                 }
             }
         }
