@@ -269,7 +269,6 @@ fn main() {
                             let result = p.use_inventory(coordinates, &mut pop);
                             match result {
                                 Some((Some(t), Some(g))) => {
-                                    // TODO add harvested crop to inventory using type and genes in `t` and `g`
                                     //Return multiple seeds from harvesting a plant
                                     //This may want to be determined on a plant's genes later
 
@@ -389,7 +388,22 @@ fn main() {
                     let _new_crop_texture = texture_creator
                         .load_texture("src/images/Crop_Tileset.png")
                         .unwrap();
-                    store.confirm_purchase();
+                    let _p = store.confirm_purchase();
+                    if let Some((a, t)) = _p {
+                        for _ in 0..a {
+                            let _c = crop::Crop::new(
+                                Rect::new(0, 0, 0, 0),
+                                0,
+                                texture_creator
+                                    .load_texture("src/images/Crop_Tileset.png")
+                                    .unwrap(),
+                                false,
+                                t,
+                                Some(genes::Genes::new()),
+                            );
+                            p.add_item(_c);
+                        }
+                    }
                     in_menu = None;
                     thread::sleep(Duration::from_millis(160));
                 }

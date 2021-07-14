@@ -218,12 +218,19 @@ impl<'a> Store<'a> {
         }
     }
 
-    pub fn confirm_purchase(&mut self) {
+    pub fn confirm_purchase(&mut self) -> Option<(i32, crate::crop::CropType)> {
         let total = self.items_array[self.item_selected as usize].price * self.amount_selected;
 
+        let mut t = None;
+
         if total <= self.price && total != 0 {
-            self.items_array[self.item_selected as usize].amount =
-                self.items_array[self.item_selected as usize].amount - self.amount_selected;
+            t = Some((
+                self.amount_selected,
+                self.items_array[self.item_selected as usize].crop,
+            ));
+
+            // self.items_array[self.item_selected as usize].amount =
+            // self.items_array[self.item_selected as usize].amount - self.amount_selected;
 
             // loop for self.amount_selected
             // add seed type to the inventory
@@ -244,5 +251,6 @@ impl<'a> Store<'a> {
 
         self.amount_selected = 1;
         self.price = 1;
+        t
     }
 }
