@@ -4,7 +4,7 @@
 use std::time::{Duration, Instant};
 
 // Imports
-use sdl2::image::LoadTexture;
+
 use sdl2::rect::Rect;
 use sdl2::render::Texture;
 use sdl2::render::TextureCreator;
@@ -16,7 +16,7 @@ use crate::crop::Crop;
 use crate::crop::CropType;
 use crate::genes;
 use crate::inventory::Inventory;
-use crate::item::Item;
+
 use crate::population::Population;
 
 // Player sprites are 54x90 px.
@@ -107,21 +107,25 @@ impl<'a> Player<'a> {
     }
 
     /// Get left bound of player
+    #[allow(dead_code)]
     pub fn left(&self) -> i32 {
         self.pos.left()
     }
 
     /// Get right bound of player
+    #[allow(dead_code)]
     pub fn right(&self) -> i32 {
         self.pos.right()
     }
 
     /// Get top bound of player
+    #[allow(dead_code)]
     pub fn top(&self) -> i32 {
         self.pos.top()
     }
 
     /// Get bottom bound of player
+    #[allow(dead_code)]
     pub fn bottom(&self) -> i32 {
         self.pos.bottom()
     }
@@ -150,6 +154,7 @@ impl<'a> Player<'a> {
         self.inventory.set_selected(_selected);
     }
 
+    #[allow(dead_code)]
     pub fn get_selected(&self) -> i32 {
         self.inventory.get_selected()
     }
@@ -157,7 +162,7 @@ impl<'a> Player<'a> {
     pub fn use_inventory(
         &mut self,
         square: (i32, i32),
-        mut pop: &mut Population,
+        pop: &mut Population,
     ) -> Option<(Option<CropType>, Option<genes::Genes>)> {
         self.inventory.use_inventory(square, pop)
         /*match return_crop{
@@ -296,6 +301,7 @@ impl<'a> Player<'a> {
             || a.left() > b.right())
     }
 
+    #[allow(dead_code)]
     pub fn get_inventory(&mut self) -> &mut Inventory<'a> {
         &mut self.inventory
     }

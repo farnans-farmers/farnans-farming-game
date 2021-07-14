@@ -5,20 +5,16 @@ use crate::BG_H;
 use crate::BG_W;
 use crate::TILE_SIZE;
 
-use sdl2::event::Event;
 use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
-use sdl2::mouse::MouseButton;
+
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use sdl2::render::BlendMode;
-use sdl2::render::Texture;
-use sdl2::render::TextureCreator;
+
 use sdl2::render::WindowCanvas;
 use std::collections::HashSet;
 use std::thread;
 use std::time::Duration;
-use std::time::Instant;
 
 pub fn start_sleep_menu(
     mut in_menu: Option<Menu>,

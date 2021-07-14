@@ -1,10 +1,6 @@
 use crate::crop::CropType;
-use sdl2::image::LoadTexture;
-use sdl2::pixels::Color;
+
 use sdl2::rect::Rect;
-use sdl2::render::Texture;
-use sdl2::render::TextureCreator;
-use sdl2::render::WindowCanvas;
 
 /*OFFSETS FOR REFERENCE*/
 // SEED 1 - 0
@@ -12,7 +8,7 @@ use sdl2::render::WindowCanvas;
 // SEED 3 -
 // SEED 4 -
 
-pub struct Market_item {
+pub struct MarketItem {
     pub item_label_offset: i32,
     pub amount: i32,
     pub price: i32,
@@ -21,15 +17,15 @@ pub struct Market_item {
     // texture: Texture,
 }
 
-impl Market_item {
+impl MarketItem {
     pub fn new(
         item_label_offset: i32,
         amount: i32,
         price: i32,
         pos: Rect,
         crop: CropType, /*, texture: Texture */
-    ) -> Market_item {
-        Market_item {
+    ) -> MarketItem {
+        MarketItem {
             item_label_offset,
             amount,
             price,

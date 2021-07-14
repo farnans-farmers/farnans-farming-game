@@ -3,20 +3,18 @@ use crate::Menu;
 use crate::BG_H;
 use crate::BG_W;
 use crate::TILE_SIZE;
-use crate::{crop, item, population, save_load, tile, Animation, CAM_H, CAM_W};
+use crate::{item, population, Animation, CAM_H, CAM_W};
 
 use crate::player::Player;
-use sdl2::event::Event;
+
 use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
-use sdl2::mouse::MouseButton;
+
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use sdl2::render::BlendMode;
-use sdl2::render::Texture;
-use sdl2::render::TextureCreator;
+
 use sdl2::render::WindowCanvas;
-use sdl2::video::WindowContext;
+
 use std::collections::HashSet;
 use std::thread;
 use std::time::Duration;
@@ -28,7 +26,7 @@ pub fn start_market_transition_menu<'a>(
     wincan: &mut WindowCanvas,
     keystate: HashSet<Keycode>,
     r: Rect,
-    mut in_area: Option<Area>,
+    in_area: Option<Area>,
 ) -> (Option<Menu>, Area) {
     let texture_creator = wincan.texture_creator();
 
