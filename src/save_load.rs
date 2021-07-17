@@ -47,7 +47,7 @@ pub fn load_market<'a>(
 
     let pop = population::Population::new(tile_vec);
     let mut market_item_vec = Vec::new();
-    let mut market_file = File::open("src/market_data.txt").expect("Can't open save market_file");
+    let mut market_file = File::open("saves/market_data.txt").expect("Can't open save market_file");
     let mut market_contents = String::new();
 
     market_file
@@ -117,12 +117,12 @@ pub fn load_home<'a>(
     //let mut crop_vec: Vec<crop::Crop> = Vec::new();
 
     {
-        let mut home_file = File::open("src/home_data.txt").expect("Can't open save home_file");
+        let mut home_file = File::open("saves/home_data.txt").expect("Can't open save home_file");
         let mut home_contents = String::new();
         home_file
             .read_to_string(&mut home_contents)
             .expect("Can't read home_file");
-        print!("{}", home_contents);
+        // print!("{}", home_contents);
         for line in home_contents.lines() {
             let results: Vec<&str> = line.split(";").collect();
             if results[0] == "item" {
@@ -169,7 +169,7 @@ pub fn load_home<'a>(
 
 // TODO try saving via serialization
 pub fn save_home(pop: population::Population, item_vec: Vec<item::Item>) {
-    let mut file_to_save = match File::create("src/home_data.txt") {
+    let mut file_to_save = match File::create("saves/home_data.txt") {
         Err(why) => panic!("couldn't create home_data.txt: {}", why),
         Ok(file_to_save) => file_to_save,
     };

@@ -15,7 +15,7 @@ use sdl2::video::WindowContext;
 
 // use sdl2::render::TextureQuery;
 
-static INVENTORY_X_POS: i32 = 295;
+static INVENTORY_X_POS: i32 = 261;
 static INVENTORY_Y_POS: i32 = 640;
 
 static ITEM_BOX_SIZE: i32 = 64;
@@ -89,7 +89,7 @@ impl<'a> Inventory<'a> {
     pub fn new(texture_creator: &'a TextureCreator<WindowContext>) -> Inventory<'a> {
         // Initializes inventory slots and sets tool slots to true
         let mut inventory_slots: Vec<InventoryItem> =
-            (0..10).map(|x| InventoryItem::new(x < 3)).collect();
+            (0..11).map(|x| InventoryItem::new(x < 3)).collect();
 
         // Add tool slots into the inventory
         inventory_slots[0].add_item(Box::new(Tool::new(
@@ -119,7 +119,7 @@ impl<'a> Inventory<'a> {
         let temp_select = 0;
 
         // Initialize squares to be drawn
-        let squares: Vec<Rect> = (0..10)
+        let squares: Vec<Rect> = (0..11)
             .map(|x| {
                 Rect::new(
                     INVENTORY_X_POS + (x * (ITEM_BOX_SIZE + BORDER_SIZE)),
@@ -146,7 +146,7 @@ impl<'a> Inventory<'a> {
             .fill_rect(Rect::new(
                 INVENTORY_X_POS - BORDER_SIZE,
                 INVENTORY_Y_POS - BORDER_SIZE,
-                (10 * (ITEM_BOX_SIZE + BORDER_SIZE) + BORDER_SIZE) as u32,
+                (11 * (ITEM_BOX_SIZE + BORDER_SIZE) + BORDER_SIZE) as u32,
                 (ITEM_BOX_SIZE + 2 * BORDER_SIZE) as u32,
             ))
             .expect("ERROR");
@@ -253,7 +253,7 @@ impl<'a> Inventory<'a> {
                 CropType::Carrot => 4,
                 CropType::Corn => 6,
                 CropType::Potato => 8,
-                CropType::Lettuce => 9, //Fully grown lettuce doesnt have an inventory spot or binding so idk man
+                CropType::Lettuce => 10, //Fully grown lettuce doesnt have an inventory spot or binding so idk man
                 _ => 0,
             };
             self.inventory_slots[inventory_slot_index].add_item(Box::new(new_crop));

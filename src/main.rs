@@ -165,6 +165,16 @@ fn main() {
             crop::CropType::Carrot,
             Some(genes::Genes::new()),
         ));
+        p.add_item(crop::Crop::new(
+            Rect::new(0, 0, TILE_SIZE, TILE_SIZE),
+            0,
+            texture_creator
+                .load_texture("src/images/Crop_Tileset.png")
+                .unwrap(),
+            false,
+            crop::CropType::Lettuce,
+            Some(genes::Genes::new()),
+        ));
     }
 
     // REMOVE LATER ^^
@@ -316,6 +326,9 @@ fn main() {
                 }
                 if keystate.contains(&Keycode::Num0) {
                     p.set_selected(9);
+                }
+                if keystate.contains(&Keycode::Minus) {
+                    p.set_selected(10);
                 }
             }
             //I know having 3 seperate methods isn't really 'modular' but the code has already been written for each and they all require different things so... this is it

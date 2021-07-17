@@ -287,7 +287,8 @@ impl<'a> Crop<'a> {
     /// Load a crop from a save string
     pub fn from_save_string(s: &Vec<&str>, t: Texture<'a>) -> Crop<'a> {
         let g;
-        println!("Loading from {:?}, len = {:?}", s, s.len());
+        // println!("Loading from {:?}, len = {:?}", s, s.len());
+        // TODO add to this as more genes are added or make from_save_string in Genes
         if s.len() > 7 {
             g = Some(genes::Genes::make_genes(vec![
                 s[6].parse::<f32>().unwrap(),
