@@ -335,6 +335,9 @@ impl InventoryItemTrait for Crop<'_> {
         square: (i32, i32),
         pop: &mut Population,
     ) -> Option<(Option<CropType>, Option<genes::Genes>)> {
+        if self.stage != 0 {
+            return None;
+        }
         let (x, y) = square;
         if pop.get_tile_with_index(x as u32, y as u32).tilled()
             && pop
