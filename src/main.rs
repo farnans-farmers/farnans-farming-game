@@ -240,27 +240,7 @@ fn main() {
                     x_deltav_f += player::ACCEL_RATE;
                 }
                 if event_pump.mouse_state().left() || keystate.contains(&Keycode::C) {
-                    let offset: (i32, i32) = {
-                        match p.get_dir() {
-                            // Down
-                            0 => (0, 1),
-                            // Left
-                            1 => (-1, 0),
-                            // Right
-                            2 => (1, 0),
-                            // Up
-                            3 => (0, -1),
-                            // Other (shouldn't happen)
-                            _ => (0, 0),
-                        }
-                    };
-                    let coordinates = (
-                        (((p.x() + TILE_SIZE as i32 / 2) / TILE_SIZE as i32) + offset.0)
-                            .clamp(0, ((BG_W / TILE_SIZE) as i32) + 1),
-                        (((p.y() + TILE_SIZE as i32) / TILE_SIZE as i32) + offset.1)
-                            .clamp(0, ((BG_H / TILE_SIZE) as i32) + 1),
-                    );
-
+                    let coordinates = p.get_facing();
                     // Use inventory slot function
                     // Result is given when we want to add an item to the inventory
                     // This is done when a fully grown crop is used by the hand
@@ -478,6 +458,7 @@ fn main() {
         // Draw tiles
         match in_area {
             Area::Home => {
+                let coordinates = p.get_facing();
                 for crop_tile in pop.get_vec().iter().flatten() {
                     let x_pos = crop_tile.tile.x() - cur_bg.x();
                     let y_pos = crop_tile.tile.y() - cur_bg.y();
@@ -496,6 +477,17 @@ fn main() {
                         wincan
                             .copy(crop_tile.tile.texture(), crop_tile.tile.src(), cur_tile)
                             .unwrap();
+                        if (
+                            crop_tile.tile.x() / TILE_SIZE as i32,
+                            crop_tile.tile.y() / TILE_SIZE as i32,
+                        ) == coordinates
+                        {
+                            // println!("Drawing rect!");
+                            wincan.set_draw_color(Color::RED);
+                            wincan
+                                .draw_rect(Rect::new(x_pos, y_pos, TILE_SIZE, TILE_SIZE))
+                                .unwrap();
+                        }
                     }
                 }
                 // Drawing item
