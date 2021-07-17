@@ -1,4 +1,4 @@
-use crate::{crop, item, population, tile, BG_H, BG_W, TILE_SIZE};
+use crate::{crop, inventory, item, population, tile, BG_H, BG_W, TILE_SIZE};
 use sdl2::image::LoadTexture;
 use sdl2::rect::Rect;
 use sdl2::render::TextureCreator;
@@ -199,19 +199,6 @@ pub fn save_home(pop: population::Population, item_vec: Vec<item::Item>) {
             match _c.get_crop_type() {
                 "None" => {}
                 _ => {
-                    // let output = "crop;".to_owned()
-                    //     + &(_c.get_x() / TILE_SIZE as i32).to_string()
-                    //     + ";"
-                    //     + &(_c.get_y() / TILE_SIZE as i32).to_string()
-                    //     + ";"
-                    //     + &_c.get_stage().to_string()
-                    //     + ";"
-                    //     + &_c.get_tex_path()
-                    //     + ";"
-                    //     + &_c.get_watered().to_string()
-                    //     + ";"
-                    //     + &_c.get_crop_type()
-                    //     + "\n";
                     let output = _c.to_save_string();
                     match file_to_save.write_all(output.as_ref()) {
                         Err(why) => {
@@ -223,6 +210,52 @@ pub fn save_home(pop: population::Population, item_vec: Vec<item::Item>) {
                     }
                 }
             }
+        }
+    }
+}
+
+pub fn save_inventory(inventory: &inventory::Inventory) {
+    let mut file_to_save = match File::create("saves/inventory_data.txt") {
+        Err(why) => panic!("Couldn't create inventory_data.txt: {}", why),
+        Ok(file_to_save) => file_to_save,
+    };
+    // Save all crops in Inventory slots 3 through 10
+    for i in 3..11 {
+        if let Some(v) = inventory.get_inventory_slot(i) {
+            for j in 0..v.get_len() {
+                // Save each crop
+                if let Some(crop) = v.get_item(j) {
+                    if let Some(output) = crop.to_save_string() {
+                        match file_to_save.write_all(output.as_ref()) {
+                            Err(why) => panic!("Couldn't write to inventory_data.txt: {}", why),
+                            Ok(_) => println!("Successfully wrote crop to inventory_data.txt"),
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+pub fn load_inventory<'a>(
+    inventory: &mut inventory::Inventory<'a>,
+    texture_creator: &'a TextureCreator<WindowContext>,
+) {
+    let mut inventory_file =
+        File::open("saves/inventory_data.txt").expect("Can't open inventory_data.txt");
+    let mut contents = String::new();
+    inventory_file
+        .read_to_string(&mut contents)
+        .expect("Can't read inventory_data.txt");
+    for line in contents.lines() {
+        let results: Vec<&str> = line.split(";").collect();
+        if results[0] == "crop" {
+            inventory.add_item(crop::Crop::from_save_string(
+                &results,
+                texture_creator
+                    .load_texture("src/images/Crop_Tileset.png")
+                    .unwrap(),
+            ));
         }
     }
 }

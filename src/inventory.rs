@@ -27,7 +27,7 @@ static NUMBER_SIZE: i32 = 20;
 /// Inventory slots are sorted, so you have the "best" seed at the bottom of the queue
 /// This is done so that seed can have different genetics, but still have one inventory slot
 /// The vectors are sorted by their value: a number that is determined in the crop class
-struct InventoryItem<'a> {
+pub struct InventoryItem<'a> {
     items: Vec<Box<dyn InventoryItemTrait + 'a>>,
     is_tool: bool,
 }
@@ -267,6 +267,10 @@ impl<'a> Inventory<'a> {
             };
             self.inventory_slots[inventory_slot_index].add_item(Box::new(new_crop));
         }
+    }
+
+    pub fn get_inventory_slot(&self, index: i32) -> Option<&InventoryItem> {
+        self.inventory_slots.get(index as usize)
     }
 
     /// Use the inventory slot for the correct function

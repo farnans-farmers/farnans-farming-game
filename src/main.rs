@@ -73,6 +73,8 @@ pub trait InventoryItemTrait {
         square: (i32, i32),
         pop: &mut population::Population,
     ) -> Option<(Option<crop::CropType>, Option<genes::Genes>)>;
+    /// Make save string for crops; return None for tools
+    fn to_save_string(&self) -> Option<String>;
 }
 
 fn main() {
@@ -132,6 +134,7 @@ fn main() {
     // TODO FOR DEMO PURPOSES - REMOVE LATER
     // Add new seeds with random genes to inventory
     // like the player would buy from the store
+    /*
     for _ in 0..5 {
         let _c = crop::Crop::new(
             Rect::new(0, 0, TILE_SIZE, TILE_SIZE),
@@ -176,18 +179,25 @@ fn main() {
             Some(genes::Genes::new()),
         ));
     }
+    */
 
     // REMOVE LATER ^^
 
     let _crop_vec: Vec<crop::Crop> = Vec::new();
 
+    // LOAD SAVE DATA
+    // Load home area
     let home_tup = save_load::load_home(&texture_creator);
     let mut pop = home_tup.0;
     let item_vec = home_tup.1;
 
+    // Load market
     let market_tup = save_load::load_market(&texture_creator);
     let m_pop = market_tup.0;
     let m_item_vec = market_tup.1;
+
+    // Load inventory
+    save_load::load_inventory(p.get_inventory(), &texture_creator);
 
     // create a store with temp items
     let _seed_textures = texture_creator
@@ -219,6 +229,7 @@ fn main() {
                     ..
                 } => {
                     save_load::save_home(pop, item_vec);
+                    save_load::save_inventory(p.get_inventory());
                     break 'gameloop;
                 }
                 _ => {}

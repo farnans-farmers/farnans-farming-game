@@ -357,6 +357,23 @@ impl InventoryItemTrait for Crop<'_> {
         }
         return None;
     }
+
+    /// Generate string to save crop to file
+    fn to_save_string(&self) -> Option<String> {
+        let mut s = String::from("crop;");
+        s.push_str(((self.get_x() / TILE_SIZE as i32).to_string() + ";").as_ref());
+        s.push_str(((self.get_y() / TILE_SIZE as i32).to_string() + ";").as_ref());
+        s.push_str(((self.stage).to_string() + ";").as_ref());
+        s.push_str(((self.watered).to_string() + ";").as_ref());
+        s.push_str((self.get_crop_type().to_owned() + ";").as_ref());
+        if let Some(g) = self.genes.as_ref() {
+            s.push_str(g.to_save_string().as_ref());
+        }
+        // s.push_str(self.genes.as_ref().unwrap().to_save_string().as_ref());
+        s.push('\n');
+
+        Some(s)
+    }
 }
 
 impl FromStr for CropType {

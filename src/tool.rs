@@ -45,6 +45,9 @@ impl InventoryItemTrait for Tool<'_> {
     fn src(&self) -> Rect {
         self.src
     }
+    fn to_save_string(&self) -> Option<String> {
+        None
+    }
     fn inventory_input(
         &self,
         square: (i32, i32),
