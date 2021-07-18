@@ -73,6 +73,8 @@ pub trait InventoryItemTrait {
         square: (i32, i32),
         pop: &mut population::Population,
     ) -> Option<(Option<crop::CropType>, Option<genes::Genes>)>;
+    /// Make save string for crops; return None for tools
+    fn to_save_string(&self) -> Option<String>;
 }
 
 fn main() {
@@ -132,6 +134,7 @@ fn main() {
     // TODO FOR DEMO PURPOSES - REMOVE LATER
     // Add new seeds with random genes to inventory
     // like the player would buy from the store
+    /*
     for _ in 0..5 {
         let _c = crop::Crop::new(
             Rect::new(0, 0, TILE_SIZE, TILE_SIZE),
@@ -165,19 +168,36 @@ fn main() {
             crop::CropType::Carrot,
             Some(genes::Genes::new()),
         ));
+        p.add_item(crop::Crop::new(
+            Rect::new(0, 0, TILE_SIZE, TILE_SIZE),
+            0,
+            texture_creator
+                .load_texture("src/images/Crop_Tileset.png")
+                .unwrap(),
+            false,
+            crop::CropType::Lettuce,
+            Some(genes::Genes::new()),
+        ));
     }
+    */
 
     // REMOVE LATER ^^
 
     let _crop_vec: Vec<crop::Crop> = Vec::new();
 
+    // LOAD SAVE DATA
+    // Load home area
     let home_tup = save_load::load_home(&texture_creator);
     let mut pop = home_tup.0;
     let item_vec = home_tup.1;
 
+    // Load market
     let market_tup = save_load::load_market(&texture_creator);
     let m_pop = market_tup.0;
     let m_item_vec = market_tup.1;
+
+    // Load inventory
+    save_load::load_inventory(p.get_inventory(), &texture_creator);
 
     // create a store with temp items
     let _seed_textures = texture_creator
@@ -209,6 +229,7 @@ fn main() {
                     ..
                 } => {
                     save_load::save_home(pop, item_vec);
+                    save_load::save_inventory(p.get_inventory());
                     break 'gameloop;
                 }
                 _ => {}
@@ -240,27 +261,7 @@ fn main() {
                     x_deltav_f += player::ACCEL_RATE;
                 }
                 if event_pump.mouse_state().left() || keystate.contains(&Keycode::C) {
-                    let offset: (i32, i32) = {
-                        match p.get_dir() {
-                            // Down
-                            0 => (0, 1),
-                            // Left
-                            1 => (-1, 0),
-                            // Right
-                            2 => (1, 0),
-                            // Up
-                            3 => (0, -1),
-                            // Other (shouldn't happen)
-                            _ => (0, 0),
-                        }
-                    };
-                    let coordinates = (
-                        (((p.x() + TILE_SIZE as i32 / 2) / TILE_SIZE as i32) + offset.0)
-                            .clamp(0, ((BG_W / TILE_SIZE) as i32) + 1),
-                        (((p.y() + TILE_SIZE as i32) / TILE_SIZE as i32) + offset.1)
-                            .clamp(0, ((BG_H / TILE_SIZE) as i32) + 1),
-                    );
-
+                    let coordinates = p.get_facing();
                     // Use inventory slot function
                     // Result is given when we want to add an item to the inventory
                     // This is done when a fully grown crop is used by the hand
@@ -336,6 +337,9 @@ fn main() {
                 }
                 if keystate.contains(&Keycode::Num0) {
                     p.set_selected(9);
+                }
+                if keystate.contains(&Keycode::Minus) {
+                    p.set_selected(10);
                 }
             }
             //I know having 3 seperate methods isn't really 'modular' but the code has already been written for each and they all require different things so... this is it
@@ -478,6 +482,7 @@ fn main() {
         // Draw tiles
         match in_area {
             Area::Home => {
+                let coordinates = p.get_facing();
                 for crop_tile in pop.get_vec().iter().flatten() {
                     let x_pos = crop_tile.tile.x() - cur_bg.x();
                     let y_pos = crop_tile.tile.y() - cur_bg.y();
@@ -496,6 +501,17 @@ fn main() {
                         wincan
                             .copy(crop_tile.tile.texture(), crop_tile.tile.src(), cur_tile)
                             .unwrap();
+                        if (
+                            crop_tile.tile.x() / TILE_SIZE as i32,
+                            crop_tile.tile.y() / TILE_SIZE as i32,
+                        ) == coordinates
+                        {
+                            // println!("Drawing rect!");
+                            wincan.set_draw_color(Color::RED);
+                            wincan
+                                .draw_rect(Rect::new(x_pos, y_pos, TILE_SIZE, TILE_SIZE))
+                                .unwrap();
+                        }
                     }
                 }
                 // Drawing item

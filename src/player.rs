@@ -19,6 +19,9 @@ use crate::inventory::Inventory;
 
 use crate::population::Population;
 
+// Import constants from main
+use crate::{BG_H, BG_W, TILE_SIZE};
+
 // Player sprites are 54x90 px.
 pub const PLAYER_WIDTH: u32 = 54;
 pub const PLAYER_HEIGHT: u32 = 90;
@@ -257,6 +260,32 @@ impl<'a> Player<'a> {
         } else {
             Direction::Down
         };
+    }
+
+    /// Returns the grid coordinates of the
+    /// tile the player is facing
+    pub fn get_facing(&self) -> (i32, i32) {
+        let offset: (i32, i32) = {
+            match self.get_dir() {
+                // Down
+                0 => (0, 1),
+                // Left
+                1 => (-1, 0),
+                // Right
+                2 => (1, 0),
+                // Up
+                3 => (0, -1),
+                // Other (shouldn't happen)
+                _ => (0, 0),
+            }
+        };
+        let coordinates = (
+            (((self.x() + TILE_SIZE as i32 / 2) / TILE_SIZE as i32) + offset.0)
+                .clamp(0, (BG_W / TILE_SIZE) as i32),
+            (((self.y() + TILE_SIZE as i32) / TILE_SIZE as i32) + offset.1)
+                .clamp(0, (BG_H / TILE_SIZE) as i32),
+        );
+        coordinates
     }
 
     pub fn get_dir(&self) -> i32 {

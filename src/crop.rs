@@ -287,7 +287,8 @@ impl<'a> Crop<'a> {
     /// Load a crop from a save string
     pub fn from_save_string(s: &Vec<&str>, t: Texture<'a>) -> Crop<'a> {
         let g;
-        println!("Loading from {:?}, len = {:?}", s, s.len());
+        // println!("Loading from {:?}, len = {:?}", s, s.len());
+        // TODO add to this as more genes are added or make from_save_string in Genes
         if s.len() > 7 {
             g = Some(genes::Genes::make_genes(vec![
                 s[6].parse::<f32>().unwrap(),
@@ -334,6 +335,9 @@ impl InventoryItemTrait for Crop<'_> {
         square: (i32, i32),
         pop: &mut Population,
     ) -> Option<(Option<CropType>, Option<genes::Genes>)> {
+        if self.stage != 0 {
+            return None;
+        }
         let (x, y) = square;
         if pop.get_tile_with_index(x as u32, y as u32).tilled()
             && pop
@@ -352,6 +356,23 @@ impl InventoryItemTrait for Crop<'_> {
             return Some((Some(CropType::None), None));
         }
         return None;
+    }
+
+    /// Generate string to save crop to file
+    fn to_save_string(&self) -> Option<String> {
+        let mut s = String::from("crop;");
+        s.push_str(((self.get_x() / TILE_SIZE as i32).to_string() + ";").as_ref());
+        s.push_str(((self.get_y() / TILE_SIZE as i32).to_string() + ";").as_ref());
+        s.push_str(((self.stage).to_string() + ";").as_ref());
+        s.push_str(((self.watered).to_string() + ";").as_ref());
+        s.push_str((self.get_crop_type().to_owned() + ";").as_ref());
+        if let Some(g) = self.genes.as_ref() {
+            s.push_str(g.to_save_string().as_ref());
+        }
+        // s.push_str(self.genes.as_ref().unwrap().to_save_string().as_ref());
+        s.push('\n');
+
+        Some(s)
     }
 }
 
