@@ -1,13 +1,15 @@
 use crate::{crop, inventory, item, population, tile, BG_H, BG_W, TILE_SIZE};
 use sdl2::image::LoadTexture;
 use sdl2::rect::Rect;
-use sdl2::render::TextureCreator;
+use sdl2::render::{Texture, TextureCreator};
 use sdl2::video::WindowContext;
 use std::fs::File;
 use std::io::{Read, Write};
 
 pub fn load_market<'a>(
     texture_creator: &'a TextureCreator<WindowContext>,
+    crop_texture: &'a Texture<'a>,
+    tile_texture: &'a Texture<'a>,
 ) -> (population::Population<'a>, Vec<item::Item<'a>>) {
     let mut tile_vec = Vec::new();
     for x in 0..((BG_W / TILE_SIZE) as i32) + 1 {
@@ -21,9 +23,7 @@ pub fn load_market<'a>(
                         TILE_SIZE,
                         TILE_SIZE,
                     ),
-                    texture_creator
-                        .load_texture("src/images/Background_Tileset.png")
-                        .unwrap(),
+                    tile_texture,
                 ),
                 crop::Crop::new(
                     Rect::new(
@@ -33,9 +33,7 @@ pub fn load_market<'a>(
                         TILE_SIZE,
                     ),
                     0,
-                    texture_creator
-                        .load_texture("src/images/Crop_Tileset.png")
-                        .unwrap(),
+                    crop_texture,
                     false,
                     crop::CropType::None,
                     None,
@@ -75,6 +73,8 @@ pub fn load_market<'a>(
 
 pub fn load_home<'a>(
     texture_creator: &'a TextureCreator<WindowContext>,
+    crop_texture: &'a Texture<'a>,
+    tile_texture: &'a Texture<'a>,
 ) -> (population::Population<'a>, Vec<item::Item<'a>>) {
     let mut tile_vec = Vec::new();
     for x in 0..((BG_W / TILE_SIZE) as i32) + 1 {
@@ -88,9 +88,7 @@ pub fn load_home<'a>(
                         TILE_SIZE,
                         TILE_SIZE,
                     ),
-                    texture_creator
-                        .load_texture("src/images/Background_Tileset.png")
-                        .unwrap(),
+                    tile_texture,
                 ),
                 crop::Crop::new(
                     Rect::new(
@@ -100,9 +98,7 @@ pub fn load_home<'a>(
                         TILE_SIZE,
                     ),
                     0,
-                    texture_creator
-                        .load_texture("src/images/Crop_Tileset.png")
-                        .unwrap(),
+                    crop_texture,
                     false,
                     crop::CropType::None,
                     None,
@@ -145,12 +141,7 @@ pub fn load_home<'a>(
                     .unwrap()
                     .get_mut(_y as usize)
                     .unwrap()
-                    .set_crop(crop::Crop::from_save_string(
-                        &results,
-                        texture_creator
-                            .load_texture("src/images/Crop_Tileset.png")
-                            .unwrap(),
-                    ));
+                    .set_crop(crop::Crop::from_save_string(&results, crop_texture));
                 // If crop is present, set tile as tilled
                 if results[5]
                     .parse::<std::string::String>()
@@ -237,10 +228,7 @@ pub fn save_inventory(inventory: &inventory::Inventory) {
     }
 }
 
-pub fn load_inventory<'a>(
-    inventory: &mut inventory::Inventory<'a>,
-    texture_creator: &'a TextureCreator<WindowContext>,
-) {
+pub fn load_inventory<'a>(inventory: &mut inventory::Inventory<'a>, crop_texture: &'a Texture<'a>) {
     let mut inventory_file =
         File::open("saves/inventory_data.txt").expect("Can't open inventory_data.txt");
     let mut contents = String::new();
@@ -250,12 +238,7 @@ pub fn load_inventory<'a>(
     for line in contents.lines() {
         let results: Vec<&str> = line.split(";").collect();
         if results[0] == "crop" {
-            inventory.add_item(crop::Crop::from_save_string(
-                &results,
-                texture_creator
-                    .load_texture("src/images/Crop_Tileset.png")
-                    .unwrap(),
-            ));
+            inventory.add_item(crop::Crop::from_save_string(&results, crop_texture));
         }
     }
 }

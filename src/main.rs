@@ -104,8 +104,14 @@ fn main() {
     wincan.set_draw_color(Color::RGBA(255, 255, 255, 255));
     wincan.clear();
 
-    let _crop_texture = texture_creator
+    // Crop and tile textures; all use the same one, so
+    // just reference it for efficiency
+    let crop_texture = texture_creator
         .load_texture("src/images/Crop_Tileset.png")
+        .unwrap();
+
+    let tile_texture = texture_creator
+        .load_texture("src/images/Background_Tileset.png")
         .unwrap();
 
     // Roll group credits
@@ -187,17 +193,17 @@ fn main() {
 
     // LOAD SAVE DATA
     // Load home area
-    let home_tup = save_load::load_home(&texture_creator);
+    let home_tup = save_load::load_home(&texture_creator, &crop_texture, &tile_texture);
     let mut pop = home_tup.0;
     let item_vec = home_tup.1;
 
     // Load market
-    let market_tup = save_load::load_market(&texture_creator);
+    let market_tup = save_load::load_market(&texture_creator, &crop_texture, &tile_texture);
     let m_pop = market_tup.0;
     let m_item_vec = market_tup.1;
 
     // Load inventory
-    save_load::load_inventory(p.get_inventory(), &texture_creator);
+    save_load::load_inventory(p.get_inventory(), &crop_texture);
 
     // create a store with temp items
     let _seed_textures = texture_creator
@@ -276,9 +282,7 @@ fn main() {
                                     let mut grown_crop = crop::Crop::new(
                                         Rect::new(0, 0, 0, 0),
                                         3,
-                                        texture_creator
-                                            .load_texture("src/images/Crop_Tileset.png")
-                                            .unwrap(),
+                                        &crop_texture,
                                         false,
                                         t,
                                         Some(g.clone()),
@@ -290,9 +294,7 @@ fn main() {
                                         let new_crop = crop::Crop::new(
                                             Rect::new(0, 0, 0, 0),
                                             0,
-                                            texture_creator
-                                                .load_texture("src/images/Crop_Tileset.png")
-                                                .unwrap(),
+                                            &crop_texture,
                                             false,
                                             t,
                                             Some(g.clone()),
@@ -398,9 +400,7 @@ fn main() {
                             let _c = crop::Crop::new(
                                 Rect::new(0, 0, 0, 0),
                                 0,
-                                texture_creator
-                                    .load_texture("src/images/Crop_Tileset.png")
-                                    .unwrap(),
+                                &crop_texture,
                                 false,
                                 t,
                                 Some(genes::Genes::new()),
