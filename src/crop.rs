@@ -113,13 +113,11 @@ impl<'a> Crop<'a> {
                         w = w / 2.0;
                         if watered_check < w {
                             self.watered = true;
-                        } else{
+                        } else {
                             // Plant requires more water after growing
                             self.watered = false;
                         }
-
                     }
-
                 }
             }
         }
