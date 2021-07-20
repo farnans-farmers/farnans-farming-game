@@ -102,13 +102,24 @@ impl<'a> Crop<'a> {
             // growth rate, let it grow
             if let Some(g) = self.get_gene(genes::GeneType::GrowthRate) {
                 let mut rng = rand::thread_rng();
-                let check: f32 = rng.gen();
-                if check < g {
+                let grow_check: f32 = rng.gen();
+                if grow_check < g {
                     self.stage = (self.stage + 1).clamp(0, 3);
                     // Change src from sprite sheet
                     self.src.set_x(self.src.x() + (TILE_SIZE as i32));
-                    // Plant requires more water after growing
-                    self.watered = false;
+                    if let Some(w) = self.get_gene(genes::GeneType::WaterRetention) {
+                        let mut rng = rand::thread_rng();
+                        let mut watered_check: f32 = rng.gen();
+                        watered_check = watered_check / 2.0;
+                        if watered_check < w {
+                            self.watered = true;
+                        } else{
+                            // Plant requires more water after growing
+                            self.watered = false;
+                        }
+
+                    }
+
                 }
             }
         }
