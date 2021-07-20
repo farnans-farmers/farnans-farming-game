@@ -10,6 +10,7 @@ const STD_DEV: f32 = 0.1;
 pub enum GeneType {
     GrowthRate,
     Value,
+    WaterRetention,
 }
 
 struct Gene {
@@ -37,6 +38,10 @@ impl Genes {
                     GeneType::Value,
                     normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0),
                 ),
+                Gene::new(
+                    GeneType::WaterRetention,
+                    normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0),
+                ),
             ],
         }
     }
@@ -46,6 +51,7 @@ impl Genes {
             genes: vec![
                 Gene::new(GeneType::GrowthRate, *v.get(0).unwrap()),
                 Gene::new(GeneType::Value, *v.get(1).unwrap()),
+                Gene::new(GeneType::WaterRetention, *v.get(2).unwrap()),
             ],
         }
     }
@@ -55,6 +61,7 @@ impl Genes {
         match t {
             GeneType::GrowthRate => self.genes.get(0).unwrap().value,
             GeneType::Value => self.genes.get(1).unwrap().value,
+            GeneType::WaterRetention => self.genes.get(2).unwrap().value,
         }
     }
 
@@ -91,6 +98,7 @@ impl std::fmt::Display for GeneType {
         match self {
             GeneType::GrowthRate => write!(f, "GrowthRate"),
             GeneType::Value => write!(f, "Value"),
+            GeneType::WaterRetention => write!(f, "WaterRetention"),
         }
     }
 }
@@ -121,6 +129,10 @@ impl std::clone::Clone for Genes {
             genes: vec![
                 Gene::new(GeneType::GrowthRate, self.get_gene(GeneType::GrowthRate)),
                 Gene::new(GeneType::Value, self.get_gene(GeneType::Value)),
+                Gene::new(
+                    GeneType::WaterRetention,
+                    self.get_gene(GeneType::WaterRetention),
+                ),
             ],
         }
     }
