@@ -34,7 +34,7 @@ pub struct Crop<'a> {
     /// appropriate tile.
     src: Rect,
     /// Texture of sprite sheet.
-    texture: Texture<'a>,
+    texture: &'a Texture<'a>,
     /// Boolean to hold whether plant has been
     /// watered or not.
     watered: bool,
@@ -61,7 +61,7 @@ impl<'a> Crop<'a> {
     pub fn new(
         pos: Rect,
         stage: u8,
-        texture: Texture<'a>,
+        texture: &'a Texture<'a>,
         watered: bool,
         t: CropType,
         genes: Option<genes::Genes>,
@@ -285,7 +285,7 @@ impl<'a> Crop<'a> {
     }
 
     /// Load a crop from a save string
-    pub fn from_save_string(s: &Vec<&str>, t: Texture<'a>) -> Crop<'a> {
+    pub fn from_save_string(s: &Vec<&str>, t: &'a Texture<'a>) -> Crop<'a> {
         let g;
         // println!("Loading from {:?}, len = {:?}", s, s.len());
         // TODO add to this as more genes are added or make from_save_string in Genes

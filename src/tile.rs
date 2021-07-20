@@ -6,12 +6,12 @@ use crate::TILE_SIZE;
 pub struct Tile<'a> {
     pos: Rect,
     src: Rect,
-    texture: Texture<'a>,
+    texture: &'a Texture<'a>,
     tilled: bool,
 }
 
 impl<'a> Tile<'a> {
-    pub fn new(pos: Rect, texture: Texture<'a>) -> Tile {
+    pub fn new(pos: Rect, texture: &'a Texture<'a>) -> Tile {
         let src = Rect::new(0, 0, TILE_SIZE, TILE_SIZE);
         Tile {
             pos,
