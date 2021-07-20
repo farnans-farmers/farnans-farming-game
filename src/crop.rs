@@ -107,10 +107,10 @@ impl<'a> Crop<'a> {
                     self.stage = (self.stage + 1).clamp(0, 3);
                     // Change src from sprite sheet
                     self.src.set_x(self.src.x() + (TILE_SIZE as i32));
-                    if let Some(w) = self.get_gene(genes::GeneType::WaterRetention) {
+                    if let Some(mut w) = self.get_gene(genes::GeneType::WaterRetention) {
                         let mut rng = rand::thread_rng();
-                        let mut watered_check: f32 = rng.gen();
-                        watered_check = watered_check / 2.0;
+                        let watered_check: f32 = rng.gen();
+                        w = w / 2.0;
                         if watered_check < w {
                             self.watered = true;
                         } else{
@@ -304,6 +304,7 @@ impl<'a> Crop<'a> {
             g = Some(genes::Genes::make_genes(vec![
                 s[6].parse::<f32>().unwrap(),
                 s[7].parse::<f32>().unwrap(),
+                s[8].parse::<f32>().unwrap(),
             ]));
         } else {
             g = None;

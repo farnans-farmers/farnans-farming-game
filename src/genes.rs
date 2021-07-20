@@ -129,7 +129,10 @@ impl std::clone::Clone for Genes {
             genes: vec![
                 Gene::new(GeneType::GrowthRate, self.get_gene(GeneType::GrowthRate)),
                 Gene::new(GeneType::Value, self.get_gene(GeneType::Value)),
-                Gene::new(GeneType::WaterRetention, self.get_gene(GeneType::WaterRetention)),
+                Gene::new(
+                    GeneType::WaterRetention,
+                    self.get_gene(GeneType::WaterRetention),
+                ),
             ],
         }
     }

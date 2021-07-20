@@ -59,10 +59,14 @@ pub fn start_sleep_menu(
                         _c.grow();
                     }
                 }
-                _c.set_water(false);
+                //_c.set_water(false);
                 // Set tile watered to false
-                pop.get_tile_with_index_mut(_x as u32, _y as u32)
-                    .set_water(false);
+                if pop.get_crop_with_index_mut(_x as u32, _y as u32).get_watered() == false{
+                    pop.get_tile_with_index_mut(_x as u32, _y as u32).set_water(false);
+                }else{
+                    pop.get_tile_with_index_mut(_x as u32, _y as u32).set_water(true);
+                }
+                
             }
         }
 
