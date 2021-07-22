@@ -24,6 +24,7 @@ use sdl2::event::Event;
 use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
 
+use sdl2::mixer;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::BlendMode;
@@ -46,6 +47,7 @@ const BG_H: u32 = 3000;
 const TITLE: &str = "Farnan's Farmers";
 pub const TILE_SIZE: u32 = 80; // Make this public so we can import it elsewhere
 
+#[derive(Clone, Copy)]
 pub enum Menu {
     Sleep,
     ToMarket,
@@ -80,6 +82,9 @@ pub trait InventoryItemTrait {
 fn main() {
     let sdl_cxt = sdl2::init().unwrap();
     let video_subsys = sdl_cxt.video().unwrap();
+    let _audio = sdl_cxt.audio().unwrap();
+    mixer::open_audio(44100, mixer::AUDIO_S16LSB, mixer::DEFAULT_CHANNELS, 256).unwrap();
+    let _mix_ctx = mixer::init(mixer::InitFlag::OGG).unwrap();
 
     let window = video_subsys
         .window(TITLE, CAM_W, CAM_H)
@@ -224,6 +229,11 @@ fn main() {
         .load_texture("src/images/Background_Tileset.png")
         .unwrap();
 
+    let farm_bgm = mixer::Music::from_file("src/music/farmer.ogg").unwrap();
+    // Start playing farm BGM, because we start there for now.
+    farm_bgm.play(-1).unwrap();
+    let mut cur_bgm = Some(&farm_bgm);
+
     // enum used to pause the game while any menu is up.
     let mut in_menu: Option<Menu> = None;
     'gameloop: loop {
@@ -346,7 +356,7 @@ fn main() {
             }
             //I know having 3 seperate methods isn't really 'modular' but the code has already been written for each and they all require different things so... this is it
             Some(Menu::Sleep) => {
-                in_menu = sleep_menu::start_sleep_menu(in_menu, &mut wincan, keystate, &mut pop, r);
+                in_menu = sleep_menu::start_sleep_menu(in_menu, &mut wincan, keystate, &mut pop, r, cur_bgm);
             }
             Some(Menu::ToMarket) => {
                 let menu_and_area_tup = market::start_market_transition_menu(
@@ -356,6 +366,16 @@ fn main() {
                     r,
                     Some(in_area),
                 );
+                if let (None, Area::Home) = menu_and_area_tup {
+                    match in_area {
+                        Area::Home => {}
+                        _ => {
+                            // Transitioned to home. Start playing music.
+                            cur_bgm = Some(&farm_bgm);
+                            farm_bgm.fade_in(-1, 100).unwrap();
+                        }
+                    }
+                }
                 in_menu = menu_and_area_tup.0;
                 in_area = menu_and_area_tup.1;
             }
@@ -369,6 +389,11 @@ fn main() {
                 );
                 in_menu = menu_and_area_tup.0;
                 in_area = menu_and_area_tup.1;
+                if let (None, Area::Home) = menu_and_area_tup {
+                    // Transitioned to home. Start playing music.
+                    cur_bgm = Some(&farm_bgm);
+                    farm_bgm.fade_in(-1, 100).unwrap();
+                }
             }
             Some(Menu::Shop) => {
                 if keystate.contains(&Keycode::Q) {
