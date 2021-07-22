@@ -356,7 +356,14 @@ fn main() {
             }
             //I know having 3 seperate methods isn't really 'modular' but the code has already been written for each and they all require different things so... this is it
             Some(Menu::Sleep) => {
-                in_menu = sleep_menu::start_sleep_menu(in_menu, &mut wincan, keystate, &mut pop, r, cur_bgm);
+                in_menu = sleep_menu::start_sleep_menu(
+                    in_menu,
+                    &mut wincan,
+                    keystate,
+                    &mut pop,
+                    r,
+                    cur_bgm,
+                );
             }
             Some(Menu::ToMarket) => {
                 let menu_and_area_tup = market::start_market_transition_menu(
