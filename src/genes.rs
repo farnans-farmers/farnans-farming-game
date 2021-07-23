@@ -28,20 +28,14 @@ impl Genes {
     /// Normal Distribution
     pub fn new() -> Genes {
         let normal = Normal::new(MEAN, STD_DEV).unwrap();
+        let growth_var = normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0);
+        let water_ret_var = normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0);
+        let value_var = (growth_var + water_ret_var) / 2.0;
         Genes {
             genes: vec![
-                Gene::new(
-                    GeneType::GrowthRate,
-                    normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0),
-                ),
-                Gene::new(
-                    GeneType::Value,
-                    normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0),
-                ),
-                Gene::new(
-                    GeneType::WaterRetention,
-                    normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0),
-                ),
+                Gene::new(GeneType::GrowthRate, growth_var),
+                Gene::new(GeneType::Value, value_var),
+                Gene::new(GeneType::WaterRetention, water_ret_var),
             ],
         }
     }
