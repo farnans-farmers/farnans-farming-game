@@ -33,18 +33,9 @@ impl Genes {
         let value_var = (growth_var + water_ret_var) / 2.0;
         Genes {
             genes: vec![
-                Gene::new(
-                    GeneType::GrowthRate,
-                    growth_var,
-                ),
-                Gene::new(
-                    GeneType::Value,
-                    value_var,
-                ),
-                Gene::new(
-                    GeneType::WaterRetention,
-                    water_ret_var,
-                ),
+                Gene::new(GeneType::GrowthRate, growth_var),
+                Gene::new(GeneType::Value, value_var),
+                Gene::new(GeneType::WaterRetention, water_ret_var),
             ],
         }
     }
