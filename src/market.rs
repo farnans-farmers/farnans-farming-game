@@ -10,7 +10,6 @@ use crate::player::Player;
 use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
 
-use sdl2::mixer;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 
@@ -33,8 +32,7 @@ pub fn start_market_transition_menu<'a>(
 
     if let Some(Area::Home) = in_area {
         if keystate.contains(&Keycode::Y) {
-            // Go to market. First stop music and fade to white.
-            mixer::Music::fade_out(100).unwrap();
+            // Go to market. First fade to white.
             let alphas: Vec<u8> = (0..=255).collect();
             let dt = Duration::from_secs_f64(2.0 / (alphas.len() as f64));
             let mut blank = Animation::new(alphas, dt, Instant::now());

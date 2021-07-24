@@ -8,7 +8,6 @@ use crate::TILE_SIZE;
 use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
 
-use sdl2::mixer;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 
@@ -23,16 +22,10 @@ pub fn start_sleep_menu(
     keystate: HashSet<Keycode>,
     pop: &mut Population,
     r: Rect,
-    cur_bgm: Option<&mixer::Music>,
 ) -> Option<Menu> {
     let texture_creator = wincan.texture_creator();
     if keystate.contains(&Keycode::Y) {
         //Player has selected yes
-
-        // Turn off music. Eventually we might have a nappin jingle.
-        if let Some(_) = cur_bgm {
-            mixer::Music::fade_out(100).unwrap();
-        }
 
         //Cut to black and then fade into night scene
         let mut i = 0;
@@ -99,11 +92,6 @@ pub fn start_sleep_menu(
             wincan.present();
             thread::sleep(Duration::from_millis(1));
             i = i + 2;
-        }
-
-        // Restart BGM.
-        if let Some(bgm) = cur_bgm {
-            bgm.fade_in(-1, 100).unwrap();
         }
 
         in_menu = None;
