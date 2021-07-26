@@ -286,6 +286,10 @@ impl<'a> Crop<'a> {
     }
 
     pub fn pollinate(&mut self, pop: &mut Population) {
+        // If self is already pollinated, return immediately
+        if self.pollinated {
+            return;
+        }
         // TODO tweak pollination prob
         let mut prob: f32 = 0.4; // Pollination probability
         let x = self.get_x() / TILE_SIZE as i32;
