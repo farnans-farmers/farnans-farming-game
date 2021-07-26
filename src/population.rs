@@ -1,6 +1,6 @@
 use crate::crop::Crop;
 use crate::tile::Tile;
-use crate::TILE_SIZE;
+use crate::{BOTTOM_TILE_BOUND, RIGHT_TILE_BOUND, TILE_SIZE};
 
 //Struct used to combine tile and crop structs into one for easy storage into the vector
 pub struct CropTile<'a> {
@@ -76,4 +76,22 @@ impl<'a> Population<'a> {
     pub fn plant_seed(&self) {}
 
     pub fn destroy_plant(&self) {}
+
+    /// Returns an array of neighboring crops, sorted by distance from
+    /// (x,y)
+    pub fn get_neighbors(&self, x: i32, y: i32) -> Vec<&Crop> {
+        let mut v = Vec::new();
+        // Loop through nearest rings
+        for col in (x - 2).clamp(0, RIGHT_TILE_BOUND)..(x + 2).clamp(0, RIGHT_TILE_BOUND) {
+            for row in (y - 2).clamp(0, BOTTOM_TILE_BOUND)..(y + 2).clamp(0, BOTTOM_TILE_BOUND) {
+                let c = self.get_crop_with_index(col as u32, row as u32);
+                if c.get_crop_type_enum() != crate::crop::CropType::None {
+                    v.push(c);
+                }
+            }
+        }
+        // Sort vector
+        v.sort_by_cached_key(|k| (k.distance(x, y) * 100.0) as i32);
+        v
+    }
 }

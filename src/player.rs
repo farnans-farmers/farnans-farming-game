@@ -58,7 +58,6 @@ pub struct Player<'a> {
     inventory: Inventory<'a>,
 }
 
-// TODO implement player animation
 impl<'a> Player<'a> {
     /// Creates a new `Player` instance.
     ///
