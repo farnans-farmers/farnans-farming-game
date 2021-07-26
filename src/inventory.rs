@@ -245,28 +245,28 @@ impl<'a> Inventory<'a> {
         self.selected
     }
 
-    /// Add item into the correct inventory slot
+    /// Map a crop or seed type to an inventory index.
     /// Right now the correct slot is hard coded
-    pub fn add_item(&mut self, new_crop: Crop<'a>) {
-        if new_crop.get_stage() == 3 {
-            let inventory_slot_index = match new_crop.get_crop_type_enum() {
-                CropType::Carrot => 4,
-                CropType::Corn => 6,
-                CropType::Potato => 8,
-                CropType::Lettuce => 10, //Fully grown lettuce doesnt have an inventory spot or binding so idk man
-                _ => 0,
-            };
-            self.inventory_slots[inventory_slot_index].add_item(Box::new(new_crop));
+    fn crop_idx(kind: CropType, seedy: bool) -> usize {
+        let r: usize = match kind {
+            CropType::None => panic!("there is no inv slot for no crop"),
+            CropType::Carrot => 3,
+            CropType::Corn => 5,
+            CropType::Potato => 7,
+            CropType::Lettuce => 9,
+        };
+        if seedy {
+            r + 1
         } else {
-            let inventory_slot_index = match new_crop.get_crop_type_enum() {
-                CropType::Carrot => 3,
-                CropType::Corn => 5,
-                CropType::Potato => 7,
-                CropType::Lettuce => 9,
-                _ => 0,
-            };
-            self.inventory_slots[inventory_slot_index].add_item(Box::new(new_crop));
+            r
         }
+    }
+
+    /// Add item into the correct inventory slot
+    pub fn add_item(&mut self, new_crop: Crop<'a>) {
+        let seedy = new_crop.get_stage() != 3;
+        let k = Inventory::crop_idx(new_crop.get_crop_type_enum(), seedy);
+        self.inventory_slots[k].add_item(Box::new(new_crop));
     }
 
     pub fn get_inventory_slot(&self, index: i32) -> Option<&InventoryItem> {
@@ -311,6 +311,17 @@ impl<'a> Inventory<'a> {
                 }
             }
             None => None,
+        }
+    }
+
+    /// Eat a food yum. Or no food!
+    pub fn eat(&mut self, kind: CropType) -> bool {
+        let k = Inventory::crop_idx(kind, false);
+        if self.inventory_slots[k].get_len() == 0 {
+            false
+        } else {
+            self.inventory_slots.get_mut(k).unwrap().pop_item();
+            true
         }
     }
 }

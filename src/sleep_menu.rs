@@ -1,3 +1,4 @@
+use crate::player::Player;
 // Module for sleeping menu and code.
 use crate::population::Population;
 use crate::Menu;
@@ -20,6 +21,7 @@ pub fn start_sleep_menu(
     mut in_menu: Option<Menu>,
     wincan: &mut WindowCanvas,
     keystate: HashSet<Keycode>,
+    player: &mut Player,
     pop: &mut Population,
     r: Rect,
 ) -> Option<Menu> {
@@ -73,6 +75,12 @@ pub fn start_sleep_menu(
                         .set_water(true);
                 }
             }
+        }
+
+        // Eat dinner.
+        let hunger = player.dinner();
+        if hunger > 0 {
+            println!("how sad, your are still {} hungery", hunger)
         }
 
         // fade to white because the sun is coming up
