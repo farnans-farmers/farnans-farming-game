@@ -5,6 +5,7 @@ use std::time::{Duration, Instant};
 
 // Imports
 
+use rand::Rng;
 use sdl2::rect::Rect;
 use sdl2::render::Texture;
 use sdl2::render::TextureCreator;
@@ -58,7 +59,6 @@ pub struct Player<'a> {
     inventory: Inventory<'a>,
 }
 
-// TODO implement player animation
 impl<'a> Player<'a> {
     /// Creates a new `Player` instance.
     ///
@@ -333,5 +333,32 @@ impl<'a> Player<'a> {
     #[allow(dead_code)]
     pub fn get_inventory(&mut self) -> &mut Inventory<'a> {
         &mut self.inventory
+    }
+
+    /// Eat two or three randomly selected crops. Returns the number of
+    /// crops that the PC wanted to eat but couldn't.
+    pub fn dinner(&mut self) -> i32 {
+        let mut rng = rand::thread_rng();
+        let mut n = if rng.gen_ratio(1, 3) { 3 } else { 2 };
+        // Shuffle a list of the available crop types.
+        let mut opts = [
+            CropType::Carrot,
+            CropType::Corn,
+            CropType::Potato,
+            CropType::Lettuce,
+        ];
+        rand::seq::SliceRandom::shuffle(&mut opts[..], &mut rng);
+        // The crops are in random order. If we have them, eat them in the
+        // same order; otherwise, try the next.
+        for kind in opts {
+            if n <= 0 {
+                return 0;
+            }
+            if self.inventory.eat(kind) {
+                println!("eat a {:?}", kind);
+                n -= 1;
+            }
+        }
+        n
     }
 }
