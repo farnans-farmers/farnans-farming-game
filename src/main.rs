@@ -46,6 +46,10 @@ const BG_H: u32 = 3000;
 const TITLE: &str = "Farnan's Farmers";
 pub const TILE_SIZE: u32 = 80; // Make this public so we can import it elsewhere
 
+// Right and bottom tile bounds
+pub const RIGHT_TILE_BOUND: i32 = (BG_W / TILE_SIZE) as i32;
+pub const BOTTOM_TILE_BOUND: i32 = (BG_H / TILE_SIZE) as i32;
+
 pub enum Menu {
     Sleep,
     ToMarket,

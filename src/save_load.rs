@@ -158,7 +158,6 @@ pub fn load_home<'a>(
     return (pop, home_item_vec);
 }
 
-// TODO try saving via serialization
 pub fn save_home(pop: population::Population, item_vec: Vec<item::Item>) {
     let mut file_to_save = match File::create("saves/home_data.txt") {
         Err(why) => panic!("couldn't create home_data.txt: {}", why),

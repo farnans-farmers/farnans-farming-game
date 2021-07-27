@@ -14,7 +14,8 @@ use crate::{CAM_H, CAM_W, TILE_SIZE};
 use rand::Rng;
 
 /// Crop type enum
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
+
 pub enum CropType {
     None,
     Carrot,
@@ -44,7 +45,6 @@ pub struct Crop<'a> {
 
     genes: Option<genes::Genes>,
 
-    #[allow(dead_code)]
     pollinated: bool,
 }
 
@@ -228,6 +228,10 @@ impl<'a> Crop<'a> {
         self.stage = n;
     }
 
+    pub fn set_pollinated(&mut self, p: bool) {
+        self.pollinated = p;
+    }
+
     pub fn get_crop_type(&self) -> &str {
         match self.t {
             CropType::None => "None",
@@ -276,6 +280,39 @@ impl<'a> Crop<'a> {
         self.src = Rect::new(x as i32, y as i32, TILE_SIZE, TILE_SIZE);
     }
 
+    pub fn distance(&self, x: i32, y: i32) -> f32 {
+        ((((self.get_x() / TILE_SIZE as i32) - x).abs() as f32).powi(2)
+            + (((self.get_y() / TILE_SIZE as i32) - y).abs() as f32).powi(2))
+        .sqrt()
+    }
+
+    pub fn pollinate(&mut self, pop: &mut Population) {
+        // If self is already pollinated, return immediately
+        if self.pollinated {
+            return;
+        }
+        // TODO tweak pollination prob
+        let mut prob: f32 = 0.4; // Pollination probability
+        let x = self.get_x() / TILE_SIZE as i32;
+        let y = self.get_y() / TILE_SIZE as i32;
+        let neighbors = pop.get_neighbors(x, y);
+        let mut rng = rand::thread_rng();
+        let mut r: f32;
+        for c in neighbors {
+            if c.distance(x, y) > 1.5 {
+                // If second ring, use lower probability
+                prob = 0.1;
+            }
+            // Pick a random number
+            r = rng.gen();
+            // If r < prob, pollinate
+            if r < prob {
+                self.set_pollinated(true);
+                // TODO implement breeding
+            }
+        }
+    }
+
     /// Generate string to save crop to file
     pub fn to_save_string(&self) -> String {
         let mut s = String::from("crop;");
@@ -283,6 +320,7 @@ impl<'a> Crop<'a> {
         s.push_str(((self.get_y() / TILE_SIZE as i32).to_string() + ";").as_ref());
         s.push_str(((self.stage).to_string() + ";").as_ref());
         s.push_str(((self.watered).to_string() + ";").as_ref());
+        s.push_str(((self.pollinated).to_string() + ";").as_ref());
         s.push_str((self.get_crop_type().to_owned() + ";").as_ref());
         if let Some(g) = self.genes.as_ref() {
             s.push_str(g.to_save_string().as_ref());
@@ -294,20 +332,32 @@ impl<'a> Crop<'a> {
     }
 
     /// Load a crop from a save string
+    /// Save string format:
+    /// 0. x
+    /// 1. y
+    /// 2. stage
+    /// 3. watered
+    /// 4. pollinated
+    /// 5. type
+    /// 6. growth rate gene
+    /// 7. value gene
+    /// 8. water retention gene
     pub fn from_save_string(s: &Vec<&str>, t: &'a Texture<'a>) -> Crop<'a> {
         let g;
         // println!("Loading from {:?}, len = {:?}", s, s.len());
         // TODO add to this as more genes are added or make from_save_string in Genes
-        if s.len() > 7 {
+
+        // TODO fix indexing
+        if s.len() > 8 {
             g = Some(genes::Genes::make_genes(vec![
-                s[6].parse::<f32>().unwrap(),
                 s[7].parse::<f32>().unwrap(),
                 s[8].parse::<f32>().unwrap(),
+                s[9].parse::<f32>().unwrap(),
             ]));
         } else {
             g = None;
         }
-        Crop::new(
+        let mut c = Crop::new(
             Rect::new(
                 s[1].parse::<i32>().unwrap() * TILE_SIZE as i32,
                 s[2].parse::<i32>().unwrap() * TILE_SIZE as i32,
@@ -317,9 +367,11 @@ impl<'a> Crop<'a> {
             s[3].parse::<u8>().unwrap(),
             t,
             s[4].parse::<bool>().unwrap(),
-            s[5].parse::<CropType>().unwrap(),
+            s[6].parse::<CropType>().unwrap(),
             g,
-        )
+        );
+        c.set_pollinated(s[5].parse::<bool>().unwrap());
+        c
     }
 }
 
@@ -370,19 +422,20 @@ impl InventoryItemTrait for Crop<'_> {
 
     /// Generate string to save crop to file
     fn to_save_string(&self) -> Option<String> {
-        let mut s = String::from("crop;");
-        s.push_str(((self.get_x() / TILE_SIZE as i32).to_string() + ";").as_ref());
-        s.push_str(((self.get_y() / TILE_SIZE as i32).to_string() + ";").as_ref());
-        s.push_str(((self.stage).to_string() + ";").as_ref());
-        s.push_str(((self.watered).to_string() + ";").as_ref());
-        s.push_str((self.get_crop_type().to_owned() + ";").as_ref());
-        if let Some(g) = self.genes.as_ref() {
-            s.push_str(g.to_save_string().as_ref());
-        }
-        // s.push_str(self.genes.as_ref().unwrap().to_save_string().as_ref());
-        s.push('\n');
+        // let mut s = String::from("crop;");
+        // s.push_str(((self.get_x() / TILE_SIZE as i32).to_string() + ";").as_ref());
+        // s.push_str(((self.get_y() / TILE_SIZE as i32).to_string() + ";").as_ref());
+        // s.push_str(((self.stage).to_string() + ";").as_ref());
+        // s.push_str(((self.watered).to_string() + ";").as_ref());
+        // s.push_str(((self.pollinated).to_string() + ";").as_ref());
+        // s.push_str((self.get_crop_type().to_owned() + ";").as_ref());
+        // if let Some(g) = self.genes.as_ref() {
+        //     s.push_str(g.to_save_string().as_ref());
+        // }
+        // // s.push_str(self.genes.as_ref().unwrap().to_save_string().as_ref());
+        // s.push('\n');
 
-        Some(s)
+        Some(self.to_save_string())
     }
 }
 
@@ -399,27 +452,3 @@ impl FromStr for CropType {
         }
     }
 }
-
-// Implement Serialize
-// impl Serialize for Crop<'_> {
-//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-//     where
-//         S: Serializer,
-//     {
-//         let mut seq = serializer.serialize_seq(Some(self.get_all_genes().as_ref().unwrap()));
-
-//         let mut state = serializer.serialize_struct("Crop", 7)?;
-//         state.serialize_field("x", &self.pos.x())?;
-//         state.serialize_field("y", &self.pos.y())?;
-//         state.serialize_field("stage", &self.get_stage())?;
-//         state.serialize_field("watered", &self.get_watered())?;
-//         state.serialize_field("type", &self.get_crop_type_enum())?;
-//         state.serialize_field("genes", &self.genes.unwrap())?;
-//         state.serialize_field("pollinated", &self.pollinated)?;
-//         state.end()
-//     }
-// }
-
-// impl Deserialize for Crop<'_> {
-
-// }
