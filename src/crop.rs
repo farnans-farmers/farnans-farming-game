@@ -14,7 +14,8 @@ use crate::{CAM_H, CAM_W, TILE_SIZE};
 use rand::Rng;
 
 /// Crop type enum
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
+
 pub enum CropType {
     None,
     Carrot,
