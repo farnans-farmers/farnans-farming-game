@@ -1,7 +1,7 @@
 use crate::player::Player;
 // Module for sleeping menu and code.
-use crate::population::Population;
 use crate::genes;
+use crate::population::Population;
 use crate::Menu;
 use crate::BG_H;
 use crate::BG_W;
@@ -36,6 +36,7 @@ pub fn start_sleep_menu(
         //Generate a random number between 1 and 5 (inclusive). a 5 is a bug night.
         let mut rng = rand::thread_rng();
         let bug_night_result = rng.gen_range(0..6);
+        //let bug_night_result = 5;
 
         //Cut to black and then fade into night scene
         if bug_night_result != 5 {
@@ -83,7 +84,10 @@ pub fn start_sleep_menu(
             for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
                 if bug_night_result == 5 {
                     // Choose random value; if it is more than a crops pest resistence, remove it from the game (RIP)
-                    if let Some(g) = pop.get_crop_with_index_mut(_x as u32, _y as u32).get_gene(genes::GeneType::PestResistance) {
+                    if let Some(g) = pop
+                        .get_crop_with_index_mut(_x as u32, _y as u32)
+                        .get_gene(genes::GeneType::PestResistance)
+                    {
                         let mut rng = rand::thread_rng();
                         let kill_check: f32 = rng.gen();
                         if kill_check > g {
