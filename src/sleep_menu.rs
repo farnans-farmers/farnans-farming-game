@@ -1,6 +1,7 @@
 use crate::player::Player;
 // Module for sleeping menu and code.
 use crate::population::Population;
+use crate::genes;
 use crate::Menu;
 use crate::BG_H;
 use crate::BG_W;
@@ -80,7 +81,22 @@ pub fn start_sleep_menu(
         // Grow crops
         for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
             for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
-                if bug_night_result == 5 {}
+                if bug_night_result == 5 {
+                    // Choose random value; if it is more than a crops pest resistence, remove it from the game (RIP)
+                    if let Some(g) = pop.get_crop_with_index_mut(_x as u32, _y as u32).get_gene(genes::GeneType::PestResistance) {
+                        let mut rng = rand::thread_rng();
+                        let kill_check: f32 = rng.gen();
+                        if kill_check > g {
+                            let mut _c = pop.get_crop_with_index_mut(_x as u32, _y as u32);
+                            _c.set_crop_type("None");
+                            _c.set_stage(0);
+                            _c.set_water(false);
+                            _c.set_genes(None);
+                            let mut _t = pop.get_tile_with_index_mut(_x as u32, _y as u32);
+                            _t.set_tilled(false);
+                        }
+                    }
+                }
 
                 let mut _c = pop.get_crop_with_index_mut(_x as u32, _y as u32);
                 match _c.get_crop_type() {
