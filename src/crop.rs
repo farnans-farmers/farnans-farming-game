@@ -353,6 +353,7 @@ impl<'a> Crop<'a> {
                 s[7].parse::<f32>().unwrap(),
                 s[8].parse::<f32>().unwrap(),
                 s[9].parse::<f32>().unwrap(),
+                s[10].parse::<f32>().unwrap(),
             ]));
         } else {
             g = None;
