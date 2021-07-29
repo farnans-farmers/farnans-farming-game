@@ -52,7 +52,7 @@ impl InventoryItemTrait for Tool<'_> {
         &self,
         square: (i32, i32),
         pop: &mut Population,
-    ) -> Option<(Option<CropType>, Option<genes::Genes>)> {
+    ) -> Option<(Option<CropType>, Option<genes::Genes>, Option<genes::Genes>)> {
         let (x, y) = square;
 
         match self.current_type {
@@ -69,7 +69,16 @@ impl InventoryItemTrait for Tool<'_> {
                             .get_all_genes()
                             .as_ref()
                             .unwrap()
-                    )
+                    );
+                    if let Some(p) = pop
+                        .get_crop_with_index(x as u32, y as u32)
+                        .get_child()
+                        .as_ref()
+                    {
+                        println!("{}", p);
+                    } else {
+                        println!("None");
+                    }
                 }
                 // If tile has plant ready to harvest, harvest
                 if pop.get_crop_with_index(x as u32, y as u32).get_stage() == 3 {
@@ -86,10 +95,12 @@ impl InventoryItemTrait for Tool<'_> {
                     _c.set_stage(0);
                     _c.set_water(false);
                     _c.set_genes(None);
-                    let mut _t = pop.get_tile_with_index_mut(x as u32, y as u32);
-                    _t.set_tilled(false);
+                    // let mut _t = pop.get_tile_with_index_mut(x as u32, y as u32);
+                    // _t.set_tilled(false);
 
-                    return Some((Some(return_crop_type), Some(_g)));
+                    let child = _c.get_child().clone();
+
+                    return Some((Some(return_crop_type), Some(_g), child));
                 }
             }
             // Hoe
