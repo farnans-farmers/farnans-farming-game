@@ -279,18 +279,18 @@ impl<'a> Inventory<'a> {
         &mut self,
         square: (i32, i32),
         pop: &mut Population,
-    ) -> Option<(Option<CropType>, Option<genes::Genes>)> {
+    ) -> Option<(Option<CropType>, Option<genes::Genes>, Option<genes::Genes>)> {
         let current_item = self.inventory_slots[self.selected as usize].get_item(0);
         match current_item {
             Some(x) => {
                 let ret_val = x.inventory_input(square, pop);
 
                 match ret_val {
-                    Some((t, g)) => {
+                    Some((t, g, child)) => {
                         match (t, g) {
                             (Some(_t), Some(_g)) => {
                                 // If crop harvested...
-                                Some((Some(_t), Some(_g)))
+                                Some((Some(_t), Some(_g), child))
                             }
                             (Some(_t), None) => {
                                 if matches!(_t, CropType::None) {

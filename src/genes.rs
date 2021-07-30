@@ -7,6 +7,7 @@ const MEAN: f32 = 0.5;
 const STD_DEV: f32 = 0.1;
 
 /// Gene type enum
+#[derive(Copy, Clone, Debug)]
 pub enum GeneType {
     GrowthRate,
     Value,
@@ -14,12 +15,14 @@ pub enum GeneType {
     PestResistance,
 }
 
+#[derive(Debug)]
 struct Gene {
     gene_type: GeneType,
     value: f32,
 }
 
 /// Genes struct
+#[derive(Debug)]
 pub struct Genes {
     genes: Vec<Gene>,
 }
@@ -80,6 +83,10 @@ impl Genes {
             s.push_str(((g.value).to_string() + ";").as_ref());
         }
         s
+    }
+
+    pub fn num_genes(&self) -> usize {
+        self.genes.len()
     }
 }
 

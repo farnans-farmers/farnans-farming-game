@@ -76,7 +76,11 @@ pub trait InventoryItemTrait {
         &self,
         square: (i32, i32),
         pop: &mut population::Population,
-    ) -> Option<(Option<crop::CropType>, Option<genes::Genes>)>;
+    ) -> Option<(
+        Option<crop::CropType>,
+        Option<genes::Genes>,
+        Option<genes::Genes>,
+    )>;
     /// Make save string for crops; return None for tools
     fn to_save_string(&self) -> Option<String>;
 }
@@ -279,7 +283,7 @@ fn main() {
                         Area::Home => {
                             let result = p.use_inventory(coordinates, &mut pop);
                             match result {
-                                Some((Some(t), Some(g))) => {
+                                Some((Some(t), Some(g), child)) => {
                                     //Return multiple seeds from harvesting a plant
                                     //This may want to be determined on a plant's genes later
 
@@ -294,18 +298,30 @@ fn main() {
                                     grown_crop.set_stage(3);
                                     p.add_item(grown_crop);
 
-                                    for _seeds_returned in 0..2 {
+                                    if let Some(_child) = child {
+                                        // Return seed with child genes
                                         let new_crop = crop::Crop::new(
                                             Rect::new(0, 0, 0, 0),
                                             0,
                                             &crop_texture,
                                             false,
                                             t,
-                                            Some(g.clone()),
-                                            // TODO get genes via breeding
+                                            Some(_child.clone()),
                                         );
                                         p.add_item(new_crop);
                                     }
+
+                                    // for _seeds_returned in 0..2 {
+                                    //     let new_crop = crop::Crop::new(
+                                    //         Rect::new(0, 0, 0, 0),
+                                    //         0,
+                                    //         &crop_texture,
+                                    //         false,
+                                    //         t,
+                                    //         Some(g.clone()),
+                                    //     );
+                                    //     p.add_item(new_crop);
+                                    // }
                                 }
                                 None => (),
                                 _ => (),

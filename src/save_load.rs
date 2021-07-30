@@ -151,6 +151,9 @@ pub fn load_home<'a>(
                 {
                     let _tile = pop.get_tile_with_index_mut(_x as u32, _y as u32);
                     _tile.set_tilled(true);
+                    if results[4].parse::<bool>().unwrap() {
+                        _tile.set_water(true);
+                    }
                 }
             }
         }
