@@ -345,11 +345,11 @@ impl<'a> Crop<'a> {
         let mut rng = rand::thread_rng();
         let mut r: f32;
 
-        // TODO add new genes here
         let types = vec![
             genes::GeneType::GrowthRate,
             genes::GeneType::Value,
             genes::GeneType::WaterRetention,
+            genes::GeneType::PestResistance,
         ];
 
         for t in types {
@@ -402,10 +402,12 @@ impl<'a> Crop<'a> {
     /// 7. growth rate gene
     /// 8. value gene
     /// 9. water retention gene
+    /// 10. pest resistance 
     /// CHILD
-    /// 10. child growth rate / "None" if no child
-    /// 11. child value
-    /// 12. child water retention
+    /// 11. child growth rate / "None" if no child
+    /// 12. child value
+    /// 13. child water retention
+    /// 14. child pest resistance
     pub fn from_save_string(s: &Vec<&str>, t: &'a Texture<'a>) -> Crop<'a> {
         let g;
         // println!("Loading from {:?}, len = {:?}", s, s.len());
@@ -435,13 +437,17 @@ impl<'a> Crop<'a> {
             g,
         );
         c.set_pollinated(s[5].parse::<bool>().unwrap());
-        if s[10] == "None" {
+        println!("CHECK {}", s[11]);
+        if s[11] == "None" {
+            println!("None");
             c.set_child(None);
         } else {
+            println!("{:?}", s);
             c.set_child(Some(genes::Genes::make_genes(vec![
-                s[10].parse::<f32>().unwrap(),
                 s[11].parse::<f32>().unwrap(),
                 s[12].parse::<f32>().unwrap(),
+                s[13].parse::<f32>().unwrap(),
+                s[14].parse::<f32>().unwrap(),
             ])));
         }
         c

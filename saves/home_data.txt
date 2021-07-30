@@ -1,10 +1,4 @@
 item;200;200;400;320;src/images/Barn.png;true
 item;2000;2000;400;320;src/images/house.png;true
 item;2920;2000;80;160;src/images/go_market.png;true
-crop;16;27;3;false;false;Carrot;0.6319393;0.6303305;0.54441667;0.8444167;None;
-crop;17;26;3;false;false;Carrot;0.6319393;0.6303305;0.54441667;0.7444167;None;
-crop;17;27;1;false;false;Carrot;0.6319393;0.6303305;0.54441667;0.6444167;None;
-crop;18;26;3;true;false;Carrot;0.6319393;0.6303305;0.54441667;0.5444167;None;
-crop;18;27;1;false;false;Carrot;0.6319393;0.6303305;0.54441667;0.4444167;None;
-crop;20;26;3;true;false;Carrot;0.6319393;0.6303305;0.54441667;0.1444167;None;
-crop;21;27;1;false;false;Carrot;0.6319393;0.6303305;0.54441667;0.2444167;None;
+crop;18;27;2;true;false;Carrot;0.47094136;0.5143052;0.4795519;0.59242237;None;

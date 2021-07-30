@@ -319,7 +319,6 @@ fn main() {
                                     //         false,
                                     //         t,
                                     //         Some(g.clone()),
-                                    //         // TODO get genes via breeding
                                     //     );
                                     //     p.add_item(new_crop);
                                     // }

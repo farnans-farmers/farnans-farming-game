@@ -72,7 +72,8 @@ pub fn start_sleep_menu(
                 wincan.set_draw_color(Color::RGBA(0, 0, 0, 255 - i));
                 wincan.fill_rect(r).unwrap();
                 wincan.present();
-                thread::sleep(Duration::from_millis(1));
+                // thread::sleep(Duration::from_millis(1));
+                thread::sleep(Duration::from_micros(250));
                 i = i + 2;
             }
         }
@@ -156,7 +157,8 @@ pub fn start_sleep_menu(
                 wincan.set_draw_color(Color::RGBA(255, 255, 255, i));
                 wincan.fill_rect(r).unwrap();
                 wincan.present();
-                thread::sleep(Duration::from_millis(1));
+                // thread::sleep(Duration::from_millis(1));
+                thread::sleep(Duration::from_micros(250));
                 i = i + 2;
             }
         } else {
