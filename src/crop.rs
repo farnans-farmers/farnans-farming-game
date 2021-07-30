@@ -402,7 +402,7 @@ impl<'a> Crop<'a> {
     /// 7. growth rate gene
     /// 8. value gene
     /// 9. water retention gene
-    /// 10. pest resistance 
+    /// 10. pest resistance
     /// CHILD
     /// 11. child growth rate / "None" if no child
     /// 12. child value
