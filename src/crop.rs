@@ -46,6 +46,8 @@ pub struct Crop<'a> {
     genes: Option<genes::Genes>,
 
     pollinated: bool,
+
+    child: Option<genes::Genes>,
 }
 
 impl<'a> Crop<'a> {
@@ -85,7 +87,7 @@ impl<'a> Crop<'a> {
             t,
             genes,
             pollinated: false,
-            // some_internal_genetic_value: rng.gen_range(0, 100),
+            child: None,
         }
     }
 
@@ -170,6 +172,14 @@ impl<'a> Crop<'a> {
     /// Set a crop's genes
     pub fn set_genes(&mut self, g: Option<genes::Genes>) {
         self.genes = g;
+    }
+
+    pub fn set_child(&mut self, c: Option<genes::Genes>) {
+        self.child = c;
+    }
+
+    pub fn get_child(&self) -> &Option<genes::Genes> {
+        &self.child
     }
 
     /// Get a Crop's texture
@@ -286,20 +296,27 @@ impl<'a> Crop<'a> {
         .sqrt()
     }
 
-    pub fn pollinate(&mut self, pop: &mut Population) {
+    // pub fn pollinate(&mut self, pop: &mut Population) {
+    pub fn pollinate(&mut self, neighbors: Vec<(genes::Genes, f32)>) {
         // If self is already pollinated, return immediately
-        if self.pollinated {
+        if self.pollinated || self.stage != 3 {
             return;
         }
         // TODO tweak pollination prob
         let mut prob: f32 = 0.4; // Pollination probability
-        let x = self.get_x() / TILE_SIZE as i32;
-        let y = self.get_y() / TILE_SIZE as i32;
-        let neighbors = pop.get_neighbors(x, y);
+                                 // let x = self.get_x() / TILE_SIZE as i32;
+                                 // let y = self.get_y() / TILE_SIZE as i32;
+                                 // let neighbors = pop.get_neighbors(x, y);
         let mut rng = rand::thread_rng();
         let mut r: f32;
+        // println!(
+        //     "Checking pollen at ({}, {}) with {:?}",
+        //     self.get_x() / TILE_SIZE as i32,
+        //     self.get_y() / TILE_SIZE as i32,
+        //     neighbors,
+        // );
         for c in neighbors {
-            if c.distance(x, y) > 1.5 {
+            if c.1 > 1.5 {
                 // If second ring, use lower probability
                 prob = 0.1;
             }
@@ -307,10 +324,47 @@ impl<'a> Crop<'a> {
             r = rng.gen();
             // If r < prob, pollinate
             if r < prob {
+                println!(
+                    "Pollinated at ({}, {})",
+                    self.get_x() / TILE_SIZE as i32,
+                    self.get_y() / TILE_SIZE as i32
+                );
                 self.set_pollinated(true);
-                // TODO implement breeding
+                self.breed(&c.0);
+                return;
             }
         }
+    }
+
+    /// Combine the genes of self and another crop to make child genes.
+    /// For now, we just take an average and have a chance for mutation
+    fn breed(&mut self, g: &genes::Genes) {
+        // TODO tune mutation chance
+        let mutation: f32 = 0.10; // Percent chance of mutation
+        let mut v: Vec<f32> = Vec::new(); // Vector to hold f32 values for child genes
+        let mut rng = rand::thread_rng();
+        let mut r: f32;
+
+        // TODO add new genes here
+        let types = vec![
+            genes::GeneType::GrowthRate,
+            genes::GeneType::Value,
+            genes::GeneType::WaterRetention,
+        ];
+
+        for t in types {
+            let mut cur: f32 = (self.genes.as_ref().unwrap().get_gene(t) + g.get_gene(t)) / 2.0;
+
+            // Check for mutation
+            r = rng.gen();
+            if r < mutation {
+                cur = rng.gen();
+            }
+
+            v.push(cur);
+        }
+
+        self.set_child(Some(genes::Genes::make_genes(v)));
     }
 
     /// Generate string to save crop to file
@@ -325,6 +379,11 @@ impl<'a> Crop<'a> {
         if let Some(g) = self.genes.as_ref() {
             s.push_str(g.to_save_string().as_ref());
         }
+        if let Some(c) = self.child.as_ref() {
+            s.push_str(c.to_save_string().as_ref());
+        } else {
+            s.push_str(String::from("None;").as_ref());
+        }
         // s.push_str(self.genes.as_ref().unwrap().to_save_string().as_ref());
         s.push('\n');
 
@@ -333,21 +392,25 @@ impl<'a> Crop<'a> {
 
     /// Load a crop from a save string
     /// Save string format:
-    /// 0. x
-    /// 1. y
-    /// 2. stage
-    /// 3. watered
-    /// 4. pollinated
-    /// 5. type
-    /// 6. growth rate gene
-    /// 7. value gene
-    /// 8. water retention gene
+    /// 0. "crop" (ignore)
+    /// 1. x
+    /// 2. y
+    /// 3. stage
+    /// 4. watered
+    /// 5. pollinated
+    /// 6. type
+    /// 7. growth rate gene
+    /// 8. value gene
+    /// 9. water retention gene
+    /// CHILD
+    /// 10. child growth rate / "None" if no child
+    /// 11. child value
+    /// 12. child water retention
     pub fn from_save_string(s: &Vec<&str>, t: &'a Texture<'a>) -> Crop<'a> {
         let g;
         // println!("Loading from {:?}, len = {:?}", s, s.len());
         // TODO add to this as more genes are added or make from_save_string in Genes
 
-        // TODO fix indexing
         if s.len() > 8 {
             g = Some(genes::Genes::make_genes(vec![
                 s[7].parse::<f32>().unwrap(),
@@ -372,6 +435,15 @@ impl<'a> Crop<'a> {
             g,
         );
         c.set_pollinated(s[5].parse::<bool>().unwrap());
+        if s[10] == "None" {
+            c.set_child(None);
+        } else {
+            c.set_child(Some(genes::Genes::make_genes(vec![
+                s[10].parse::<f32>().unwrap(),
+                s[11].parse::<f32>().unwrap(),
+                s[12].parse::<f32>().unwrap(),
+            ])));
+        }
         c
     }
 }
@@ -397,7 +469,7 @@ impl InventoryItemTrait for Crop<'_> {
         &self,
         square: (i32, i32),
         pop: &mut Population,
-    ) -> Option<(Option<CropType>, Option<genes::Genes>)> {
+    ) -> Option<(Option<CropType>, Option<genes::Genes>, Option<genes::Genes>)> {
         if self.stage != 0 {
             return None;
         }
@@ -416,7 +488,7 @@ impl InventoryItemTrait for Crop<'_> {
             _c.set_genes(self.get_all_genes().clone());
 
             // Return none for right now to signal a crop was placed
-            return Some((Some(CropType::None), None));
+            return Some((Some(CropType::None), None, None));
         }
         return None;
     }

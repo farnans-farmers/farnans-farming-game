@@ -1,4 +1,5 @@
 use crate::crop::Crop;
+use crate::genes;
 use crate::tile::Tile;
 use crate::{BOTTOM_TILE_BOUND, RIGHT_TILE_BOUND, TILE_SIZE};
 
@@ -79,19 +80,35 @@ impl<'a> Population<'a> {
 
     /// Returns an array of neighboring crops, sorted by distance from
     /// (x,y)
-    pub fn get_neighbors(&self, x: i32, y: i32) -> Vec<&Crop> {
-        let mut v = Vec::new();
+    pub fn get_neighbors(&self, x: i32, y: i32) -> Vec<(genes::Genes, f32)> {
+        let mut v: Vec<&Crop> = Vec::new();
         // Loop through nearest rings
         for col in (x - 2).clamp(0, RIGHT_TILE_BOUND)..(x + 2).clamp(0, RIGHT_TILE_BOUND) {
             for row in (y - 2).clamp(0, BOTTOM_TILE_BOUND)..(y + 2).clamp(0, BOTTOM_TILE_BOUND) {
+                // Don't let a plant pollinate itself
+                if col == x && row == y {
+                    continue;
+                }
                 let c = self.get_crop_with_index(col as u32, row as u32);
-                if c.get_crop_type_enum() != crate::crop::CropType::None {
+                if c.get_crop_type_enum() != crate::crop::CropType::None && c.get_stage() == 3 {
                     v.push(c);
                 }
             }
         }
         // Sort vector
         v.sort_by_cached_key(|k| (k.distance(x, y) * 100.0) as i32);
-        v
+        // Extract clones of genes and distances
+        let mut r: Vec<(genes::Genes, f32)> = Vec::new();
+        for i in v {
+            r.push((
+                i.get_all_genes().as_ref().unwrap().clone(),
+                i.distance(x, y),
+            ));
+        }
+        r
     }
+
+    // pub fn pollinate(&self, x: i32, y: i32) {
+    //     // let mut c =
+    // }
 }

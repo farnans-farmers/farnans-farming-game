@@ -166,7 +166,7 @@ impl<'a> Player<'a> {
         &mut self,
         square: (i32, i32),
         pop: &mut Population,
-    ) -> Option<(Option<CropType>, Option<genes::Genes>)> {
+    ) -> Option<(Option<CropType>, Option<genes::Genes>, Option<genes::Genes>)> {
         self.inventory.use_inventory(square, pop)
         /*match return_crop{
             Some(x) => Some(x),

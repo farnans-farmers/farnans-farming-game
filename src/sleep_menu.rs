@@ -82,6 +82,7 @@ pub fn start_sleep_menu(
         // Grow crops
         for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
             for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
+                let n = pop.get_neighbors(_x, _y);
                 if bug_night_result == 5 {
                     // Choose random value; if it is more than a crops pest resistence, remove it from the game (RIP)
                     if let Some(g) = pop
@@ -104,24 +105,32 @@ pub fn start_sleep_menu(
 
                 let mut _c = pop.get_crop_with_index_mut(_x as u32, _y as u32);
                 match _c.get_crop_type() {
-                    "None" => {}
+                    "None" => {
+                        _c.set_water(false);
+                        let mut _t = pop.get_tile_with_index_mut(_x as u32, _y as u32);
+                        _t.set_tilled(false);
+                        _t.set_water(false);
+                    }
                     _ => {
                         _c.grow();
+                        _c.pollinate(n);
+                        if !_c.get_watered() {
+                            pop.get_tile_with_index_mut(_x as u32, _y as u32)
+                                .set_water(false);
+                        } else {
+                            pop.get_tile_with_index_mut(_x as u32, _y as u32)
+                                .set_water(true);
+                        }
                     }
                 }
+                // drop(_c);
+                // _c.pollinate(pop);
                 //_c.set_water(false);
                 // Set tile watered to false
-                if pop
-                    .get_crop_with_index_mut(_x as u32, _y as u32)
-                    .get_watered()
-                    == false
-                {
-                    pop.get_tile_with_index_mut(_x as u32, _y as u32)
-                        .set_water(false);
-                } else {
-                    pop.get_tile_with_index_mut(_x as u32, _y as u32)
-                        .set_water(true);
-                }
+                // if pop
+                //     .get_crop_with_index_mut(_x as u32, _y as u32)
+                //     .get_watered()
+                //     == false
             }
         }
 
