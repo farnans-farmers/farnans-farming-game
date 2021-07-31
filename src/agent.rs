@@ -1,7 +1,7 @@
 //TODO change borrow references
 
-use crate::trade_house::{Trade, TradeSubmission};
 use crate::commodities::Commodity;
+use crate::trade_house::{Trade, TradeSubmission};
 use rand::Rng;
 use std::cmp::{max, min};
 use std::collections::HashMap;
