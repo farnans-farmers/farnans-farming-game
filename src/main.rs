@@ -10,6 +10,8 @@ mod inventory;
 mod item;
 mod market;
 mod market_item;
+mod pest;
+mod pest_population;
 mod player;
 mod population;
 mod save_load;
@@ -17,8 +19,6 @@ mod sleep_menu;
 mod store;
 mod tile;
 mod tool;
-mod pest;
-mod pest_population;
 
 use anim::Animation;
 

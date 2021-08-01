@@ -1,9 +1,9 @@
-use crate::pest::Pest;
-use rand;
-use rand_distr::{Distribution, Normal};
 use crate::pest;
+use crate::pest::Pest;
 use crate::pest::PestGeneType::AttackRate;
+use rand;
 use rand::Rng;
+use rand_distr::{Distribution, Normal};
 
 const MEAN: f32 = 0.5;
 // TODO adjust this value as needed to balance gene generation
@@ -16,12 +16,11 @@ pub struct PestPopulation {
 }
 
 impl PestPopulation {
-
     pub fn new() -> PestPopulation {
         let mut temp = Vec::new();
         let mut z = 0.0;
 
-        PestPopulation{
+        PestPopulation {
             pest_population: temp,
             avg_attack_chance: z,
         }
@@ -61,19 +60,18 @@ impl PestPopulation {
         let mut rng = rand::thread_rng();
         let mut temp = Vec::new();
         //print!("outside loop");
-        for g  in 0..POP_SIZE {
+        for g in 0..POP_SIZE {
             let n = (self.pest_population[g].get_fitness() * 100.0).round();
             //print!("{}", n);
-                for i in 0..n as i32 {
-                    //print!("loop1");
-                    let test_pest = self.pest_population[g].clone();
-                    temp.push(test_pest);
-                }
+            for i in 0..n as i32 {
+                //print!("loop1");
+                let test_pest = self.pest_population[g].clone();
+                temp.push(test_pest);
+            }
         }
         //print!("{}", temp.len());
 
         for i in 0..POP_SIZE {
-
             let pest0: &Pest = temp.get(rng.gen_range(0..temp.len())).unwrap();
             let pest1: &Pest = temp.get(rng.gen_range(0..temp.len())).unwrap();
             let mut pest3 = Pest::make_pest(pest0.breed_pests(pest1));
@@ -83,11 +81,9 @@ impl PestPopulation {
         }
 
         self.find_avg_attack_chance();
-
     }
 
     pub fn kill_pest(&mut self, i: usize) {
         self.pest_population.remove(i);
     }
-
 }

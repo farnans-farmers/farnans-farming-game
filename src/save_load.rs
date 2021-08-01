@@ -1,11 +1,13 @@
-use crate::{crop, inventory, item, population, tile, BG_H, BG_W, TILE_SIZE, pest_population, pest};
+use crate::pest_population::PestPopulation;
+use crate::{
+    crop, inventory, item, pest, pest_population, population, tile, BG_H, BG_W, TILE_SIZE,
+};
 use sdl2::image::LoadTexture;
 use sdl2::rect::Rect;
 use sdl2::render::{Texture, TextureCreator};
 use sdl2::video::WindowContext;
 use std::fs::File;
 use std::io::{Read, Write};
-use crate::pest_population::PestPopulation;
 
 pub fn load_market<'a>(
     texture_creator: &'a TextureCreator<WindowContext>,

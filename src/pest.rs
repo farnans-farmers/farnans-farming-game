@@ -1,8 +1,8 @@
-use rand;
-use rand_distr::{Distribution, Normal};
-use rand::Rng;
-use crate::crop::{CropType, Crop};
+use crate::crop::{Crop, CropType};
 use crate::genes::GeneType::PestResistance;
+use rand;
+use rand::Rng;
+use rand_distr::{Distribution, Normal};
 
 const MEAN: f32 = 0.5;
 const STD_DEV: f32 = 0.1;
@@ -23,14 +23,12 @@ struct PestGene {
 }
 
 impl PestGene {
-
     fn new(t: PestGeneType, value: f32) -> PestGene {
         PestGene {
             pest_gene_type: t,
             value: value,
         }
     }
-
 }
 
 pub struct Pest {
@@ -39,7 +37,6 @@ pub struct Pest {
 }
 
 impl Pest {
-
     pub fn new() -> Pest {
         let normal = Normal::new(MEAN, STD_DEV).unwrap();
         let attack_rate = normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0);
@@ -48,7 +45,8 @@ impl Pest {
         let corn_dmg = normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0);
         let potato_dmg = normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0);
         let lettuce_dmg = normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0);
-        let fitness_value = (attack_rate + breed_speed + carrot_dmg + corn_dmg + potato_dmg + lettuce_dmg) / 6.0;
+        let fitness_value =
+            (attack_rate + breed_speed + carrot_dmg + corn_dmg + potato_dmg + lettuce_dmg) / 6.0;
         Pest {
             pest_genes: vec![
                 PestGene::new(PestGeneType::AttackRate, attack_rate),
@@ -94,7 +92,7 @@ impl Pest {
                 sum += self.pest_genes.get(i).unwrap().value;
             }
         }
-        temp.push(sum/6.0);
+        temp.push(sum / 6.0);
 
         temp
     }
@@ -119,7 +117,8 @@ impl Pest {
         let corn_dmg = self.pest_genes[3].value;
         let potato_dmg = self.pest_genes[4].value;
         let lettuce_dmg = self.pest_genes[5].value;
-        self.fitness = (attack_rate + breed_speed + carrot_dmg + corn_dmg + potato_dmg + lettuce_dmg) / 6.0;
+        self.fitness =
+            (attack_rate + breed_speed + carrot_dmg + corn_dmg + potato_dmg + lettuce_dmg) / 6.0;
     }
 
     pub fn get_pest_gene(&self, t: PestGeneType) -> f32 {
@@ -162,9 +161,9 @@ impl Pest {
         let a = c.get_crop_type_enum();
         match a {
             CropType::Carrot => v = self.pest_genes[2].value,
-            CropType::Corn=> v = self.pest_genes[3].value,
-            CropType::Potato=> v = self.pest_genes[4].value,
-            CropType::Lettuce=> v = self.pest_genes[5].value,
+            CropType::Corn => v = self.pest_genes[3].value,
+            CropType::Potato => v = self.pest_genes[4].value,
+            CropType::Lettuce => v = self.pest_genes[5].value,
             _ => v = 0.0,
         }
 
@@ -174,15 +173,32 @@ impl Pest {
     pub fn clone(&self) -> Pest {
         Pest {
             pest_genes: vec![
-                PestGene::new(PestGeneType::AttackRate, self.pest_genes.get(0).unwrap().value),
-                PestGene::new(PestGeneType::BreedSpeed, self.pest_genes.get(1).unwrap().value),
-                PestGene::new(PestGeneType::DmgToCarrot, self.pest_genes.get(2).unwrap().value),
-                PestGene::new(PestGeneType::DmgToCorn, self.pest_genes.get(3).unwrap().value),
-                PestGene::new(PestGeneType::DmgToPotato, self.pest_genes.get(4).unwrap().value),
-                PestGene::new(PestGeneType::DmgToLettuce, self.pest_genes.get(5).unwrap().value),
+                PestGene::new(
+                    PestGeneType::AttackRate,
+                    self.pest_genes.get(0).unwrap().value,
+                ),
+                PestGene::new(
+                    PestGeneType::BreedSpeed,
+                    self.pest_genes.get(1).unwrap().value,
+                ),
+                PestGene::new(
+                    PestGeneType::DmgToCarrot,
+                    self.pest_genes.get(2).unwrap().value,
+                ),
+                PestGene::new(
+                    PestGeneType::DmgToCorn,
+                    self.pest_genes.get(3).unwrap().value,
+                ),
+                PestGene::new(
+                    PestGeneType::DmgToPotato,
+                    self.pest_genes.get(4).unwrap().value,
+                ),
+                PestGene::new(
+                    PestGeneType::DmgToLettuce,
+                    self.pest_genes.get(5).unwrap().value,
+                ),
             ],
             fitness: self.fitness,
         }
     }
-
 }

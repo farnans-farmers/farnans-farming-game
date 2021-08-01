@@ -1,11 +1,11 @@
 use crate::player::Player;
 // Module for sleeping menu and code.
-use crate::{genes, pest_population, pest};
 use crate::population::Population;
 use crate::Menu;
 use crate::BG_H;
 use crate::BG_W;
 use crate::TILE_SIZE;
+use crate::{genes, pest, pest_population};
 
 use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
@@ -19,8 +19,8 @@ use std::thread;
 use std::time::Duration;
 
 //Imported to see if it's a bug night or not
-use rand::Rng;
 use crate::pest_population::PestPopulation;
+use rand::Rng;
 
 pub fn start_sleep_menu(
     mut in_menu: Option<Menu>,
@@ -29,7 +29,7 @@ pub fn start_sleep_menu(
     player: &mut Player,
     pop: &mut Population,
     r: Rect,
-    pest_pop: &mut PestPopulation
+    pest_pop: &mut PestPopulation,
 ) -> Option<Menu> {
     let texture_creator = wincan.texture_creator();
     if keystate.contains(&Keycode::Y) {
