@@ -12,6 +12,8 @@ mod inventory;
 mod item;
 mod market;
 mod market_item;
+mod pest;
+mod pest_population;
 mod player;
 mod population;
 mod save_load;
@@ -148,6 +150,7 @@ fn main() {
         &texture_creator,
     );
 
+    let mut pest_pop = save_load::load_pests();
     // TODO FOR DEMO PURPOSES - REMOVE LATER
     // Add new seeds with random genes to inventory
     // like the player would buy from the store
@@ -247,6 +250,7 @@ fn main() {
                 } => {
                     save_load::save_home(pop, item_vec);
                     save_load::save_inventory(p.get_inventory());
+                    save_load::save_pests(pest_pop);
                     break 'gameloop;
                 }
                 _ => {}
@@ -376,6 +380,7 @@ fn main() {
                     &mut p,
                     &mut pop,
                     r,
+                    &mut pest_pop,
                 );
             }
             Some(Menu::ToMarket) => {

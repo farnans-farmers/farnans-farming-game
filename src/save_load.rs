@@ -1,4 +1,7 @@
-use crate::{crop, inventory, item, population, tile, BG_H, BG_W, TILE_SIZE};
+use crate::pest_population::PestPopulation;
+use crate::{
+    crop, inventory, item, pest, pest_population, population, tile, BG_H, BG_W, TILE_SIZE,
+};
 use sdl2::image::LoadTexture;
 use sdl2::rect::Rect;
 use sdl2::render::{Texture, TextureCreator};
@@ -241,6 +244,40 @@ pub fn load_inventory<'a>(inventory: &mut inventory::Inventory<'a>, crop_texture
         let results: Vec<&str> = line.split(";").collect();
         if results[0] == "crop" {
             inventory.add_item(crop::Crop::from_save_string(&results, crop_texture));
+        }
+    }
+}
+
+pub fn load_pests<'a>() -> PestPopulation {
+    let mut pest_pop = pest_population::PestPopulation::new();
+    let mut pest_file = File::open("saves/pest_data.txt").expect("Can't open save home_file");
+    let mut pest_contents = String::new();
+    pest_file
+        .read_to_string(&mut pest_contents)
+        .expect("Can't read home_file");
+    for line in pest_contents.lines() {
+        let results: Vec<&str> = line.split(";").collect();
+        pest_pop.add_pest(pest::Pest::from_save_string(results));
+    }
+    if pest_pop.get_length() < pest_population::POP_SIZE {
+        pest_pop.fill_pest_population();
+    }
+    pest_pop.find_avg_attack_chance();
+    pest_pop
+}
+
+pub fn save_pests<'a>(p: PestPopulation) {
+    let mut file_to_save = match File::create("saves/pest_data.txt") {
+        Err(why) => panic!("Couldn't create inventory_data.txt: {}", why),
+        Ok(file_to_save) => file_to_save,
+    };
+    for pest in 0..p.get_length() {
+        let output = p.get_pest(pest).to_save_string();
+        match file_to_save.write_all(output.as_ref()) {
+            Err(why) => {
+                panic!("couldn't write to pest_data.txt: {}", why)
+            }
+            Ok(_) => {}
         }
     }
 }

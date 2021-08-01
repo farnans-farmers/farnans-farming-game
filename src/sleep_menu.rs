@@ -1,11 +1,11 @@
 use crate::player::Player;
 // Module for sleeping menu and code.
-use crate::genes;
 use crate::population::Population;
 use crate::Menu;
 use crate::BG_H;
 use crate::BG_W;
 use crate::TILE_SIZE;
+use crate::{genes, pest, pest_population};
 
 use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
@@ -19,6 +19,7 @@ use std::thread;
 use std::time::Duration;
 
 //Imported to see if it's a bug night or not
+use crate::pest_population::PestPopulation;
 use rand::Rng;
 
 pub fn start_sleep_menu(
@@ -28,18 +29,22 @@ pub fn start_sleep_menu(
     player: &mut Player,
     pop: &mut Population,
     r: Rect,
+    pest_pop: &mut PestPopulation,
 ) -> Option<Menu> {
     let texture_creator = wincan.texture_creator();
     if keystate.contains(&Keycode::Y) {
         //Player has selected yes
 
-        //Generate a random number between 1 and 5 (inclusive). a 5 is a bug night.
+        //Generate a random number between 0.0 and 1.0. If that number is lower than the pest populations
+        //average chance to attack bugs will attack that night.
         let mut rng = rand::thread_rng();
-        let bug_night_result = rng.gen_range(0..6);
+        let bug_night_result = rng.gen_range(0.0..1.0);
+        println!("{}", bug_night_result);
+        println!("{}", pest_pop.get_avg_attack_chance());
         //let bug_night_result = 5;
 
         //Cut to black and then fade into night scene
-        if bug_night_result != 5 {
+        if bug_night_result > pest_pop.get_avg_attack_chance() {
             let mut i = 0;
             while i < 254 {
                 wincan
@@ -84,22 +89,27 @@ pub fn start_sleep_menu(
         for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
             for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
                 let n = pop.get_neighbors(_x, _y);
-                if bug_night_result == 5 {
-                    // Choose random value; if it is more than a crops pest resistence, remove it from the game (RIP)
+                if bug_night_result <= pest_pop.get_avg_attack_chance() {
+                    // Picks a random pest; if it is has a higher attack than a crops pest resistence, remove the crop from the game (RIP)
+                    // Otherwise pest is removed from the game.
                     if let Some(g) = pop
                         .get_crop_with_index_mut(_x as u32, _y as u32)
                         .get_gene(genes::GeneType::PestResistance)
                     {
                         let mut rng = rand::thread_rng();
-                        let kill_check: f32 = rng.gen();
-                        if kill_check > g {
-                            let mut _c = pop.get_crop_with_index_mut(_x as u32, _y as u32);
+                        let pest_index = rng.gen_range(0..pest_population::POP_SIZE);
+                        let attacking_pest = pest_pop.get_pest(pest_index);
+                        let mut _c = pop.get_crop_with_index_mut(_x as u32, _y as u32);
+                        if attacking_pest.attack_crop(_c) > g {
                             _c.set_crop_type("None");
                             _c.set_stage(0);
                             _c.set_water(false);
                             _c.set_genes(None);
                             let mut _t = pop.get_tile_with_index_mut(_x as u32, _y as u32);
                             _t.set_tilled(false);
+                        } else {
+                            pest_pop.kill_pest(pest_index);
+                            pest_pop.add_pest(pest::Pest::new());
                         }
                     }
                 }
@@ -135,6 +145,8 @@ pub fn start_sleep_menu(
             }
         }
 
+        pest_pop.next_generation();
+
         // Eat dinner.
         let hunger = player.dinner();
         if hunger > 0 {
@@ -142,7 +154,7 @@ pub fn start_sleep_menu(
         }
 
         // fade to white because the sun is coming up
-        if bug_night_result != 5 {
+        if bug_night_result > pest_pop.get_avg_attack_chance() {
             let mut i = 0;
             while i < 254 {
                 wincan
