@@ -35,7 +35,8 @@ pub fn start_sleep_menu(
     if keystate.contains(&Keycode::Y) {
         //Player has selected yes
 
-        //Generate a random number between 1 and 5 (inclusive). a 5 is a bug night.
+        //Generate a random number between 0.0 and 1.0. If that number is lower than the pest populations
+        //average chance to attack bugs will attack that night.
         let mut rng = rand::thread_rng();
         let bug_night_result = rng.gen_range(0.0..1.0);
         println!("{}", bug_night_result);
@@ -89,7 +90,8 @@ pub fn start_sleep_menu(
             for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
                 let n = pop.get_neighbors(_x, _y);
                 if bug_night_result <= pest_pop.get_avg_attack_chance() {
-                    // Choose random value; if it is more than a crops pest resistence, remove it from the game (RIP)
+                    // Picks a random pest; if it is has a higher attack than a crops pest resistence, remove the crop from the game (RIP)
+                    // Otherwise pest is removed from the game.
                     if let Some(g) = pop
                         .get_crop_with_index_mut(_x as u32, _y as u32)
                         .get_gene(genes::GeneType::PestResistance)

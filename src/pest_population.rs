@@ -6,7 +6,6 @@ use rand::Rng;
 use rand_distr::{Distribution, Normal};
 
 const MEAN: f32 = 0.5;
-// TODO adjust this value as needed to balance gene generation
 const STD_DEV: f32 = 0.1;
 pub(crate) const POP_SIZE: usize = 500;
 
@@ -38,12 +37,18 @@ impl PestPopulation {
         self.avg_attack_chance
     }
 
+    /*
+       If the pest population is under the appropriate size it will fill it up with new pests
+    */
     pub fn fill_pest_population(&mut self) {
         while self.pest_population.len() < POP_SIZE {
             self.pest_population.push(pest::Pest::new());
         }
     }
 
+    /*
+       Recalculates average attack chance for when pests die or when a new generation is added
+    */
     pub fn find_avg_attack_chance(&mut self) {
         let mut sum = 0.0;
         for g in 0..POP_SIZE {
@@ -56,6 +61,9 @@ impl PestPopulation {
         self.pest_population.push(p);
     }
 
+    /*
+       Generates a new generation
+    */
     pub fn next_generation(&mut self) {
         let mut rng = rand::thread_rng();
         let mut temp = Vec::new();

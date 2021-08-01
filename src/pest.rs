@@ -64,6 +64,17 @@ impl Pest {
         self.fitness
     }
 
+    /*
+       Makes a pest with a f32 vector
+       Vector must be arranged in the correct order
+       vector[0]: AttackRate
+       vector[1]: BreedSpeed
+       vector[2]: DmgToCarrot
+       vector[3]: DmgToCorn
+       vector[4]: DmgToPotato
+       vector[5]: DmgToLettuce
+       vector[6]: fitness
+    */
     pub fn make_pest(v: Vec<f32>) -> Pest {
         Pest {
             pest_genes: vec![
@@ -78,6 +89,12 @@ impl Pest {
         }
     }
 
+    /*
+       Breeds two pests and outputs a vector of f32
+       Genes are picked entirely randomly from the two parents
+       Should be called on parent 1 with parent 2 as an argument
+       To turn the f32 vector into a new pest call make_pest()
+    */
     pub fn breed_pests(&self, p: &Pest) -> Vec<f32> {
         let mut temp = Vec::new();
         let mut rng = rand::thread_rng();
@@ -97,6 +114,9 @@ impl Pest {
         temp
     }
 
+    /*
+       Goes through the pests genes and mutating them at random
+    */
     pub fn mutate_pest(&mut self) {
         let mut rng = rand::thread_rng();
 
@@ -110,6 +130,9 @@ impl Pest {
         }
     }
 
+    /*
+       Just recalculates a pests fitness incase of a mutation
+    */
     pub fn recalc_fitness(&mut self) {
         let attack_rate = self.pest_genes[0].value;
         let breed_speed = self.pest_genes[1].value;
@@ -121,6 +144,9 @@ impl Pest {
             (attack_rate + breed_speed + carrot_dmg + corn_dmg + potato_dmg + lettuce_dmg) / 6.0;
     }
 
+    /*
+       Just returns the value of a specific gene of this pest
+    */
     pub fn get_pest_gene(&self, t: PestGeneType) -> f32 {
         match t {
             PestGeneType::AttackRate => self.pest_genes[0].value,
@@ -132,6 +158,9 @@ impl Pest {
         }
     }
 
+    /*
+       Generates a save string
+    */
     pub fn to_save_string(&self) -> String {
         let mut s = String::new();
         for g in &self.pest_genes {
@@ -142,6 +171,9 @@ impl Pest {
         s
     }
 
+    /*
+       Creates a new pest from a save string
+    */
     pub fn from_save_string(v: Vec<&str>) -> Pest {
         Pest {
             pest_genes: vec![
@@ -156,6 +188,9 @@ impl Pest {
         }
     }
 
+    /*
+       Takes in a crop, returns the value of the corresponding attack gene
+    */
     pub fn attack_crop(&self, c: &mut Crop) -> f32 {
         let v;
         let a = c.get_crop_type_enum();
@@ -170,6 +205,9 @@ impl Pest {
         return v;
     }
 
+    /*
+       Copies this pest
+    */
     pub fn clone(&self) -> Pest {
         Pest {
             pest_genes: vec![
