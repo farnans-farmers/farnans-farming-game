@@ -188,9 +188,7 @@ impl Pest {
         }
     }
 
-    /*
-       Takes in a crop, returns the value of the corresponding attack gene
-    */
+    /// Takes in a crop, returns the value of the corresponding attack gene
     pub fn attack_crop(&self, c: &mut Crop) -> f32 {
         let v;
         let a = c.get_crop_type_enum();

@@ -123,6 +123,10 @@ fn main() {
         .load_texture("src/images/Crop_Tileset.png")
         .unwrap();
 
+    let rotten_texture = texture_creator
+        .load_texture("src/images/RottingCrops.png")
+        .unwrap();
+
     let tile_texture = texture_creator
         .load_texture("src/images/Background_Tileset.png")
         .unwrap();
@@ -151,73 +155,32 @@ fn main() {
     );
 
     let mut pest_pop = save_load::load_pests();
-    // TODO FOR DEMO PURPOSES - REMOVE LATER
-    // Add new seeds with random genes to inventory
-    // like the player would buy from the store
-    /*
-    for _ in 0..5 {
-        let _c = crop::Crop::new(
-            Rect::new(0, 0, TILE_SIZE, TILE_SIZE),
-            0,
-            texture_creator
-                .load_texture("src/images/Crop_Tileset.png")
-                .unwrap(),
-            false,
-            crop::CropType::Corn,
-            Some(genes::Genes::new()),
-        );
-        println!("Made {}", _c.get_all_genes().as_ref().unwrap());
-        p.add_item(_c);
-        p.add_item(crop::Crop::new(
-            Rect::new(0, 0, TILE_SIZE, TILE_SIZE),
-            0,
-            texture_creator
-                .load_texture("src/images/Crop_Tileset.png")
-                .unwrap(),
-            false,
-            crop::CropType::Potato,
-            Some(genes::Genes::new()),
-        ));
-        p.add_item(crop::Crop::new(
-            Rect::new(0, 0, TILE_SIZE, TILE_SIZE),
-            0,
-            texture_creator
-                .load_texture("src/images/Crop_Tileset.png")
-                .unwrap(),
-            false,
-            crop::CropType::Carrot,
-            Some(genes::Genes::new()),
-        ));
-        p.add_item(crop::Crop::new(
-            Rect::new(0, 0, TILE_SIZE, TILE_SIZE),
-            0,
-            texture_creator
-                .load_texture("src/images/Crop_Tileset.png")
-                .unwrap(),
-            false,
-            crop::CropType::Lettuce,
-            Some(genes::Genes::new()),
-        ));
-    }
-    */
-
-    // REMOVE LATER ^^
 
     let _crop_vec: Vec<crop::Crop> = Vec::new();
 
     // LOAD SAVE DATA
     // Load home area
-    let home_tup = save_load::load_home(&texture_creator, &crop_texture, &tile_texture);
+    let home_tup = save_load::load_home(
+        &texture_creator,
+        &crop_texture,
+        &rotten_texture,
+        &tile_texture,
+    );
     let mut pop = home_tup.0;
     let item_vec = home_tup.1;
 
     // Load market
-    let market_tup = save_load::load_market(&texture_creator, &crop_texture, &tile_texture);
+    let market_tup = save_load::load_market(
+        &texture_creator,
+        &crop_texture,
+        &rotten_texture,
+        &tile_texture,
+    );
     let m_pop = market_tup.0;
     let m_item_vec = market_tup.1;
 
     // Load inventory
-    save_load::load_inventory(p.get_inventory(), &crop_texture);
+    save_load::load_inventory(p.get_inventory(), &crop_texture, &rotten_texture);
 
     // create a store with temp items
     let _seed_textures = texture_creator
@@ -281,6 +244,7 @@ fn main() {
                 if keystate.contains(&Keycode::D) {
                     x_deltav_f += player::ACCEL_RATE;
                 }
+
                 if event_pump.mouse_state().left() || keystate.contains(&Keycode::C) {
                     let coordinates = p.get_facing();
                     // Use inventory slot function
@@ -298,6 +262,7 @@ fn main() {
                                         Rect::new(0, 0, 0, 0),
                                         3,
                                         &crop_texture,
+                                        &rotten_texture,
                                         false,
                                         t,
                                         Some(g.clone()),
@@ -311,6 +276,7 @@ fn main() {
                                             Rect::new(0, 0, 0, 0),
                                             0,
                                             &crop_texture,
+                                            &rotten_texture,
                                             false,
                                             t,
                                             Some(_child.clone()),
@@ -436,6 +402,7 @@ fn main() {
                                 Rect::new(0, 0, 0, 0),
                                 0,
                                 &crop_texture,
+                                &rotten_texture,
                                 false,
                                 t,
                                 Some(genes::Genes::new()),

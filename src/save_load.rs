@@ -12,6 +12,7 @@ use std::io::{Read, Write};
 pub fn load_market<'a>(
     texture_creator: &'a TextureCreator<WindowContext>,
     crop_texture: &'a Texture<'a>,
+    rotten_texture: &'a Texture<'a>,
     tile_texture: &'a Texture<'a>,
 ) -> (population::Population<'a>, Vec<item::Item<'a>>) {
     let mut tile_vec = Vec::new();
@@ -37,6 +38,7 @@ pub fn load_market<'a>(
                     ),
                     0,
                     crop_texture,
+                    rotten_texture,
                     false,
                     crop::CropType::None,
                     None,
@@ -77,6 +79,7 @@ pub fn load_market<'a>(
 pub fn load_home<'a>(
     texture_creator: &'a TextureCreator<WindowContext>,
     crop_texture: &'a Texture<'a>,
+    rotten_texture: &'a Texture<'a>,
     tile_texture: &'a Texture<'a>,
 ) -> (population::Population<'a>, Vec<item::Item<'a>>) {
     let mut tile_vec = Vec::new();
@@ -102,6 +105,7 @@ pub fn load_home<'a>(
                     ),
                     0,
                     crop_texture,
+                    rotten_texture,
                     false,
                     crop::CropType::None,
                     None,
@@ -144,7 +148,11 @@ pub fn load_home<'a>(
                     .unwrap()
                     .get_mut(_y as usize)
                     .unwrap()
-                    .set_crop(crop::Crop::from_save_string(&results, crop_texture));
+                    .set_crop(crop::Crop::from_save_string(
+                        &results,
+                        crop_texture,
+                        rotten_texture,
+                    ));
                 // If crop is present, set tile as tilled
                 if results[5]
                     .parse::<std::string::String>()
@@ -195,6 +203,10 @@ pub fn save_home(pop: population::Population, item_vec: Vec<item::Item>) {
             match _c.get_crop_type() {
                 "None" => {}
                 _ => {
+                    // Don't save if rotten
+                    if _c.rotten() {
+                        continue;
+                    }
                     let output = _c.to_save_string();
                     match file_to_save.write_all(output.as_ref()) {
                         Err(why) => {
@@ -233,7 +245,11 @@ pub fn save_inventory(inventory: &inventory::Inventory) {
     }
 }
 
-pub fn load_inventory<'a>(inventory: &mut inventory::Inventory<'a>, crop_texture: &'a Texture<'a>) {
+pub fn load_inventory<'a>(
+    inventory: &mut inventory::Inventory<'a>,
+    crop_texture: &'a Texture<'a>,
+    rotten_texture: &'a Texture<'a>,
+) {
     let mut inventory_file =
         File::open("saves/inventory_data.txt").expect("Can't open inventory_data.txt");
     let mut contents = String::new();
@@ -243,7 +259,11 @@ pub fn load_inventory<'a>(inventory: &mut inventory::Inventory<'a>, crop_texture
     for line in contents.lines() {
         let results: Vec<&str> = line.split(";").collect();
         if results[0] == "crop" {
-            inventory.add_item(crop::Crop::from_save_string(&results, crop_texture));
+            inventory.add_item(crop::Crop::from_save_string(
+                &results,
+                crop_texture,
+                rotten_texture,
+            ));
         }
     }
 }
