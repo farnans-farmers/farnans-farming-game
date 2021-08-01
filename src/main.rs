@@ -3,7 +3,9 @@
 extern crate sdl2;
 
 // Modules
+mod agent;
 mod anim;
+mod commodities;
 mod crop;
 mod genes;
 mod inventory;
@@ -17,6 +19,7 @@ mod sleep_menu;
 mod store;
 mod tile;
 mod tool;
+mod trade_house;
 
 use anim::Animation;
 
