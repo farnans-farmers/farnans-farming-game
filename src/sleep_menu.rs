@@ -22,12 +22,12 @@ use std::time::Duration;
 use crate::pest_population::PestPopulation;
 use rand::Rng;
 
-pub fn start_sleep_menu(
+pub fn start_sleep_menu<'a>(
     mut in_menu: Option<Menu>,
     wincan: &mut WindowCanvas,
     keystate: HashSet<Keycode>,
     player: &mut Player,
-    pop: &mut Population,
+    pop: &mut Population<'a>,
     r: Rect,
     pest_pop: &mut PestPopulation,
 ) -> Option<Menu> {
@@ -38,7 +38,8 @@ pub fn start_sleep_menu(
         //Generate a random number between 0.0 and 1.0. If that number is lower than the pest populations
         //average chance to attack bugs will attack that night.
         let mut rng = rand::thread_rng();
-        let bug_night_result = rng.gen_range(0.0..1.0);
+        // let bug_night_result = rng.gen_range(0.0..1.0);
+        let bug_night_result: f32 = rng.gen();
         println!("{}", bug_night_result);
         println!("{}", pest_pop.get_avg_attack_chance());
         //let bug_night_result = 5;
@@ -89,8 +90,10 @@ pub fn start_sleep_menu(
         for _x in 0..((BG_W / TILE_SIZE) as i32 + 1) {
             for _y in 0..((BG_H / TILE_SIZE) as i32 + 1) {
                 let n = pop.get_neighbors(_x, _y);
+
                 if bug_night_result <= pest_pop.get_avg_attack_chance() {
-                    // Picks a random pest; if it is has a higher attack than a crops pest resistence, remove the crop from the game (RIP)
+                    // Picks a random pest; if it is has a higher attack than a
+                    // crops pest resistence, remove the crop from the game (RIP)
                     // Otherwise pest is removed from the game.
                     if let Some(g) = pop
                         .get_crop_with_index_mut(_x as u32, _y as u32)
@@ -101,12 +104,11 @@ pub fn start_sleep_menu(
                         let attacking_pest = pest_pop.get_pest(pest_index);
                         let mut _c = pop.get_crop_with_index_mut(_x as u32, _y as u32);
                         if attacking_pest.attack_crop(_c) > g {
-                            _c.set_crop_type("None");
+                            // Change a crop to show the rotten sprite
+                            _c.set_rotten(true);
                             _c.set_stage(0);
                             _c.set_water(false);
                             _c.set_genes(None);
-                            let mut _t = pop.get_tile_with_index_mut(_x as u32, _y as u32);
-                            _t.set_tilled(false);
                         } else {
                             pest_pop.kill_pest(pest_index);
                             pest_pop.add_pest(pest::Pest::new());
@@ -123,14 +125,16 @@ pub fn start_sleep_menu(
                         _t.set_water(false);
                     }
                     _ => {
-                        _c.grow();
-                        _c.pollinate(n);
-                        if !_c.get_watered() {
-                            pop.get_tile_with_index_mut(_x as u32, _y as u32)
-                                .set_water(false);
-                        } else {
-                            pop.get_tile_with_index_mut(_x as u32, _y as u32)
-                                .set_water(true);
+                        if !_c.rotten() {
+                            _c.grow();
+                            _c.pollinate(n);
+                            if !_c.get_watered() {
+                                pop.get_tile_with_index_mut(_x as u32, _y as u32)
+                                    .set_water(false);
+                            } else {
+                                pop.get_tile_with_index_mut(_x as u32, _y as u32)
+                                    .set_water(true);
+                            }
                         }
                     }
                 }

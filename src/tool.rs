@@ -80,6 +80,18 @@ impl InventoryItemTrait for Tool<'_> {
                         println!("None");
                     }
                 }
+                // If crop rotten, don't harvest, just remove
+                if pop.get_crop_with_index(x as u32, y as u32).rotten() {
+                    let mut _c = pop.get_crop_with_index_mut(x as u32, y as u32);
+                    _c.set_stage(0);
+                    _c.set_rotten(false);
+                    _c.set_crop_type_enum(CropType::None);
+                    _c.set_water(false);
+                    _c.set_genes(None);
+                    _c.set_child(None);
+                    return None;
+                }
+
                 // If tile has plant ready to harvest, harvest
                 if pop.get_crop_with_index(x as u32, y as u32).get_stage() == 3 {
                     let _g = pop
@@ -91,10 +103,12 @@ impl InventoryItemTrait for Tool<'_> {
                     let mut _c = pop.get_crop_with_index_mut(x as u32, y as u32);
                     let return_crop_type = _c.get_crop_type_enum();
                     // let _g = _c.get_all_genes().unwrap().clone();
-                    _c.set_crop_type("None");
+                    // _c.set_crop_type("None");
+                    _c.set_crop_type_enum(CropType::None);
                     _c.set_stage(0);
                     _c.set_water(false);
                     _c.set_genes(None);
+                    _c.set_child(None);
                     // let mut _t = pop.get_tile_with_index_mut(x as u32, y as u32);
                     // _t.set_tilled(false);
 

@@ -36,17 +36,15 @@ pub struct Crop<'a> {
     src: Rect,
     /// Texture of sprite sheet.
     texture: &'a Texture<'a>,
+    /// Texture of rotten crop sprite sheet
+    rotten_texture: &'a Texture<'a>,
     /// Boolean to hold whether plant has been
     /// watered or not.
     watered: bool,
-
-    // tex_path: String,
     t: CropType,
-
     genes: Option<genes::Genes>,
-
     pollinated: bool,
-
+    rotten: bool,
     child: Option<genes::Genes>,
 }
 
@@ -64,10 +62,11 @@ impl<'a> Crop<'a> {
         pos: Rect,
         stage: u8,
         texture: &'a Texture<'a>,
+        rotten_texture: &'a Texture<'a>,
         watered: bool,
         t: CropType,
         genes: Option<genes::Genes>,
-    ) -> Crop {
+    ) -> Crop<'a> {
         let (x, y) = match t {
             CropType::None => (0, 0),
             CropType::Carrot => (stage as u32 * TILE_SIZE, 0),
@@ -83,10 +82,12 @@ impl<'a> Crop<'a> {
             stage,
             src,
             texture,
+            rotten_texture,
             watered,
             t,
             genes,
             pollinated: false,
+            rotten: false,
             child: None,
         }
     }
@@ -94,6 +95,29 @@ impl<'a> Crop<'a> {
     /// Sets a crop's `watered` variable to `w`
     pub fn set_water(&mut self, w: bool) {
         self.watered = w;
+    }
+
+    /// Set the x and y of a crop's `src` Rect
+    // pub fn set_src_xy(&mut self, x: i32, y: i32) {
+    //     self.src.set_x(x);
+    //     self.src.set_y(y);
+    // }
+
+    /// Set a crop's texture pointer
+    pub fn set_texture(&mut self, t: &'a Texture<'a>) {
+        self.texture = t;
+    }
+
+    /// Set a crop's `rotten` variable
+    pub fn set_rotten(&mut self, r: bool) {
+        self.rotten = r;
+        if r {
+            self.src.set_x(0);
+        }
+    }
+
+    pub fn rotten(&self) -> bool {
+        self.rotten
     }
 
     /// Checks if a crop has been watered, then increments its
@@ -184,7 +208,11 @@ impl<'a> Crop<'a> {
 
     /// Get a Crop's texture
     pub fn get_texture(&self) -> &Texture {
-        &self.texture
+        if self.rotten {
+            self.rotten_texture
+        } else {
+            self.texture
+        }
     }
 
     /// Get a Crop's `src`
@@ -408,7 +436,7 @@ impl<'a> Crop<'a> {
     /// 12. child value
     /// 13. child water retention
     /// 14. child pest resistance
-    pub fn from_save_string(s: &Vec<&str>, t: &'a Texture<'a>) -> Crop<'a> {
+    pub fn from_save_string(s: &Vec<&str>, t: &'a Texture<'a>, rt: &'a Texture<'a>) -> Crop<'a> {
         let g;
         // println!("Loading from {:?}, len = {:?}", s, s.len());
         // TODO add to this as more genes are added or make from_save_string in Genes
@@ -432,17 +460,15 @@ impl<'a> Crop<'a> {
             ),
             s[3].parse::<u8>().unwrap(),
             t,
+            rt,
             s[4].parse::<bool>().unwrap(),
             s[6].parse::<CropType>().unwrap(),
             g,
         );
         c.set_pollinated(s[5].parse::<bool>().unwrap());
-        println!("CHECK {}", s[11]);
         if s[11] == "None" {
-            println!("None");
             c.set_child(None);
         } else {
-            println!("{:?}", s);
             c.set_child(Some(genes::Genes::make_genes(vec![
                 s[11].parse::<f32>().unwrap(),
                 s[12].parse::<f32>().unwrap(),
