@@ -97,7 +97,6 @@ pub struct MarketHouse {
     bid_table: TradeTable,
     track_bids: HashMap<String, HashMap<String, f32>>,
     last_tick: f32,
-    irs: f32,
 }
 
 impl MarketHouse {
@@ -121,7 +120,6 @@ impl MarketHouse {
             bid_table: TradeTable::new(),
             track_bids: HashMap::new(),
             last_tick: 0.0,
-            irs: 0.0,
         }
     }
 
@@ -139,7 +137,6 @@ impl MarketHouse {
         for agent in self.agents.iter_mut(){
             let (idle_tax,ts) = agent.produce_com_hash(0.0);
             self.ask_table.add(ts);
-            self.irs += idle_tax;
             self.bid_table.add(agent.consume_com_hash())
         }
 
