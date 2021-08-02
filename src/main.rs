@@ -188,8 +188,8 @@ fn main() {
         .unwrap();
     let store_item_0 = MarketItem::new(0, 10, 3, Rect::new(0, 0, 80, 80), CropType::Carrot);
     let store_item_1 = MarketItem::new(7, 12, 2, Rect::new(0, 80, 80, 80), CropType::Corn);
-    let store_item_2 = MarketItem::new(14, 11, 4, Rect::new(0, 160, 80, 80), CropType::Lettuce);
-    let store_item_3 = MarketItem::new(21, 15, 6, Rect::new(0, 240, 80, 80), CropType::Potato);
+    let store_item_2 = MarketItem::new(14, 11, 4, Rect::new(0, 160, 80, 80), CropType::Potato);
+    let store_item_3 = MarketItem::new(21, 15, 6, Rect::new(0, 240, 80, 80), CropType::Lettuce);
 
     let mut market_items = vec![store_item_0, store_item_1, store_item_2, store_item_3];
 
