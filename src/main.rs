@@ -2,6 +2,11 @@
 
 extern crate sdl2;
 
+use crate::market_house::Trades;
+use std::collections::HashMap;
+
+use lazy_static::lazy_static;
+
 // Modules
 mod agent;
 mod anim;
@@ -11,6 +16,7 @@ mod genes;
 mod inventory;
 mod item;
 mod market;
+mod market_house;
 mod market_item;
 mod player;
 mod population;
@@ -19,7 +25,6 @@ mod sleep_menu;
 mod store;
 mod tile;
 mod tool;
-mod trade_house;
 
 use anim::Animation;
 
@@ -64,6 +69,13 @@ pub enum Menu {
 pub enum Area {
     Home,
     Market,
+}
+
+lazy_static! {
+    pub static ref COM_HASH: HashMap<String, commodities::Commodity> = {
+        let mut map = HashMap::new();
+        map
+    };
 }
 
 /// Trait used for items that can exist inside of the inventory

@@ -1,3 +1,4 @@
+use crate::COM_HASH;
 use std::collections::HashMap;
 
 pub struct ESList {
@@ -103,19 +104,21 @@ impl Commodity {
     pub fn get_price(&mut self) -> f32 {
         self.price
     }
+    pub fn add_bid(&mut self, new_val: f32) {
+        self.bids.add(new_val);
+    }
+    pub fn add_ask(&mut self, new_val: f32) {
+        self.asks.add(new_val);
+    }
 }
-
-//TODO
-//static mut instance: Commodities = new Commodities;
 
 pub struct Dependency {
-    com: HashMap<String, Commodity>,
     dependency_map: HashMap<String, f32>,
 }
+
 impl Dependency {
     pub fn new() -> Dependency {
         Dependency {
-            com: HashMap::new(), //TODO Commodities.Instance.com
             dependency_map: HashMap::new(),
         }
     }

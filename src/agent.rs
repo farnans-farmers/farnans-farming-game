@@ -1,7 +1,7 @@
 //TODO change borrow references
 
 use crate::commodities::Commodity;
-use crate::trade_house::{Trade, TradeSubmission};
+use crate::market_house::{Trade, TradeSubmission};
 use rand::Rng;
 use std::cmp::{max, min};
 use std::collections::HashMap;
@@ -243,7 +243,7 @@ impl EconAgent {
     }
 
     //TODO
-    pub fn init_agent(&mut self, init_cash: f32, b: Vec<String>, init_num: f32, _max_stock: f32) {
+    pub fn init_agent(&mut self, init_cash: f32, b: &Vec<String>, init_num: f32, _max_stock: f32) {
         /*
         if self.com.len() == 0{
             self.buildables = b;
@@ -336,7 +336,7 @@ impl EconAgent {
         let num_bids = (1.0 - favorability) * self.stock_pile.get_mut(&c).unwrap().deficit();
         num_bids.max(1.0)
     }
-    pub fn consume(&mut self, com: HashMap<String, Commodity>) -> TradeSubmission {
+    pub fn consume_com_hash(&mut self) -> TradeSubmission {
         let mut bids = TradeSubmission::new();
         let keys = self.stock_pile.keys().cloned().collect::<Vec<_>>();
         for key in keys {
@@ -359,10 +359,12 @@ impl EconAgent {
                 if num_bids < 0.0 {
                     println!("{} buying negative {} for {}", key, num_bids, buy_price);
                 }
+                //TODO
+                /*
                 bids.add(
                     key.clone(),
-                    Trade::new(value.commodity_name.clone(), buy_price, num_bids, &*self),
-                );
+                    Trade::new(value.commodity_name.clone(), buy_price, num_bids, self),
+                );*/
             }
         }
         /*
@@ -386,11 +388,7 @@ impl EconAgent {
         bids
     }
     //TODO
-    pub fn produce(
-        &mut self,
-        mut com: HashMap<String, Commodity>,
-        mut idle_tax: f32,
-    ) -> TradeSubmission {
+    pub fn produce_com_hash(&mut self, mut idle_tax: f32) -> (f32, TradeSubmission) {
         let mut asks = TradeSubmission::new();
 
         /*
@@ -433,7 +431,7 @@ impl EconAgent {
             }
         }
         */
-        asks
+        (idle_tax, asks)
     }
     //TODO
     fn get_cost_of(commodity: String) -> f32 {
