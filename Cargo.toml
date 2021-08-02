@@ -14,3 +14,4 @@ features = ["ttf","image","mixer"]
 [dependencies]
 rand = "0.8.4"
 rand_distr = "0.4.1"
+lazy_static = "1.4.0"
