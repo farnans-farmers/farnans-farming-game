@@ -39,7 +39,8 @@ pub struct Pest {
 impl Pest {
     pub fn new() -> Pest {
         let normal = Normal::new(MEAN, STD_DEV).unwrap();
-        let attack_rate = normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0);
+        let almost_normal = Normal::new(0.2, STD_DEV).unwrap();
+        let attack_rate = almost_normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0);
         let breed_speed = normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0);
         let carrot_dmg = normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0);
         let corn_dmg = normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0);
