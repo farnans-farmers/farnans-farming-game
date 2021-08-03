@@ -212,15 +212,14 @@ impl<'a> Store<'a> {
                     Rect::new(150, 30 + i * 50, 500, 50),
                 )
                 .unwrap();
-            Store::price_draw(wincan, 3, 320, 45 + i * 50, item.amount);
-            Store::price_draw(wincan, 3, 410, 45 + i * 50, item.min);
-            Store::price_draw(wincan, 3, 530, 45 + i * 50, item.max);
+            Store::price_draw(wincan, 3, 380, 45 + i * 50, item.amount);
+            Store::price_draw(wincan, 3, 530, 45 + i * 50, item.price);
             i = i + 1;
         }
     }
 
-    pub fn confirm_purchase(&mut self) -> Option<(i32, crate::crop::CropType, i32)> {
-        let total = self.items_array[self.item_selected as usize].min * self.amount_selected;
+    pub fn confirm_purchase(&mut self) -> Option<(i32, crate::crop::CropType)> {
+        let total = self.items_array[self.item_selected as usize].price * self.amount_selected;
 
         let mut t = None;
 
@@ -228,7 +227,6 @@ impl<'a> Store<'a> {
             t = Some((
                 self.amount_selected,
                 self.items_array[self.item_selected as usize].crop,
-                self.items_array[self.item_selected as usize].growth,
             ));
 
             // self.items_array[self.item_selected as usize].amount =
