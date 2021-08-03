@@ -186,6 +186,7 @@ fn main() {
     let _seed_textures = texture_creator
         .load_texture("src/images/Crop_Tileset.png")
         .unwrap();
+
     let store_item_0 = MarketItem::new(0, 10, 3, 4, Rect::new(0, 0, 80, 80), CropType::Carrot, 0);
     let store_item_1 = MarketItem::new(7, 12, 2, 3, Rect::new(0, 80, 80, 80), CropType::Corn, 0);
     let store_item_2 = MarketItem::new(14, 11, 4, 5, Rect::new(0, 160, 80, 80), CropType::Lettuce, 0);
@@ -194,6 +195,7 @@ fn main() {
     let store_item_5 = MarketItem::new(35, 12, 2, 3, Rect::new(240, 80, 80, 80), CropType::Corn, 3);
     let store_item_6 = MarketItem::new(42, 11, 4, 5, Rect::new(240, 160, 80, 80), CropType::Lettuce, 3);
     let store_item_7 = MarketItem::new(49, 15, 6, 7, Rect::new(240, 240, 80, 80), CropType::Potato, 3);
+
 
 
     let mut market_items = vec![store_item_0, store_item_1, store_item_2, store_item_3, store_item_4, store_item_5, store_item_6, store_item_7];
