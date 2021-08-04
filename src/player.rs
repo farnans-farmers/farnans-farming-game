@@ -49,6 +49,8 @@ pub struct Player<'a> {
     src: Vec<Animation<Rect>>,
     /// Texture of sprite sheet
     texture: Texture<'a>,
+    /// Texture of tool usage sprite sheet
+    tool_texture: Texture<'a>,
     /// Direction the player is facing
     dir: Direction,
     /// Whether the player is moving
@@ -57,6 +59,8 @@ pub struct Player<'a> {
     velocity: (f32, f32),
     /// Player's inventory
     inventory: Inventory<'a>,
+    /// is a tool being used
+    tooluse: bool,
 }
 
 impl<'a> Player<'a> {
@@ -68,6 +72,7 @@ impl<'a> Player<'a> {
     pub fn new(
         pos: Rect,
         texture: Texture<'a>,
+        tool_texture: Texture<'a>,
         texture_creator: &'a TextureCreator<WindowContext>,
     ) -> Player<'a> {
         // Derive the number of frames from the size of the texture.
@@ -94,10 +99,12 @@ impl<'a> Player<'a> {
             pos,
             src: anims,
             texture,
+            tool_texture,
             dir: Direction::Down,
             moving: false,
             velocity: (0.0, 0.0),
             inventory,
+            tooluse: false,
         }
     }
 
@@ -157,7 +164,7 @@ impl<'a> Player<'a> {
         self.inventory.set_selected(_selected);
     }
 
-    #[allow(dead_code)]
+    ///#[allow(dead_code)]
     pub fn get_selected(&self) -> i32 {
         self.inventory.get_selected()
     }
@@ -180,7 +187,69 @@ impl<'a> Player<'a> {
     pub fn draw(&mut self, wincan: &mut WindowCanvas, player_cam_pos: Rect) {
         self.inventory.draw(wincan);
         let src = self.src();
-        wincan.copy(self.texture(), src, player_cam_pos).unwrap();
+        if self.tooluse {
+            wincan.copy(self.tool_texture(), src, player_cam_pos).unwrap();
+            if self.get_selected() == 1 {
+                if self.get_dir() == 0 {
+                    let src = Rect::new(0 as i32, 0 as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                }
+                if self.get_dir() == 1 {
+                    let src = Rect::new(0 as i32, PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                }
+                if self.get_dir() == 2 {
+                    let src = Rect::new(0 as i32, 2*PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                }
+                if self.get_dir() == 3 {
+                    let src = Rect::new(0 as i32, 3*PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                }
+            }
+            else if self.get_selected() == 2 {
+                if self.get_dir() == 0 {
+                    let src = Rect::new(PLAYER_WIDTH as i32, 0 as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                }
+                if self.get_dir() == 1 {
+                    let src = Rect::new(PLAYER_WIDTH as i32, PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                }
+                if self.get_dir() == 2 {
+                    let src = Rect::new(PLAYER_WIDTH as i32, 2*PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                }
+                if self.get_dir() == 3 {
+                    let src = Rect::new(PLAYER_WIDTH as i32, 3*PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                }
+            }
+            else if self.get_selected() == 3 {
+                if self.get_dir() == 0 {
+                    let src = Rect::new(2*PLAYER_WIDTH as i32, 0 as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                }
+                if self.get_dir() == 1 {
+                    let src = Rect::new(2*PLAYER_WIDTH as i32, PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                }
+                if self.get_dir() == 2 {
+                    let src = Rect::new(2*PLAYER_WIDTH as i32, 2*PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                }
+                if self.get_dir() == 3 {
+                    let src = Rect::new(2*PLAYER_WIDTH as i32, 3*PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                }
+            }
+            else {
+                if self.get_dir() == 0 {
+                    let src = Rect::new(3*PLAYER_WIDTH as i32, 0 as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                }
+                if self.get_dir() == 1 {
+                    let src = Rect::new(3*PLAYER_WIDTH as i32, PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                }
+                if self.get_dir() == 2 {
+                    let src = Rect::new(3*PLAYER_WIDTH as i32, 2*PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                }
+                if self.get_dir() == 3 {
+                    let src = Rect::new(3*PLAYER_WIDTH as i32, 3*PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                }
+            }
+
+        }
+        else {
+            wincan.copy(self.texture(), src, player_cam_pos).unwrap();
+        }
     }
 
     /// Set a player's x position, clamping between given bounds
@@ -193,6 +262,14 @@ impl<'a> Player<'a> {
     pub fn update_pos_y(&mut self, vel: (i32, i32), y_bounds: (i32, i32)) {
         self.pos
             .set_y((self.pos.y() + vel.1).clamp(y_bounds.0, y_bounds.1));
+    }
+
+    pub fn tooluse(&self) -> bool {
+        self.tooluse
+    }
+
+    pub fn set_tooluse(&mut self, r: bool) {
+        self.tooluse = r;
     }
 
     /// Stop a player from moving in the x direction
@@ -320,6 +397,10 @@ impl<'a> Player<'a> {
     /// Get texture of player
     pub fn texture(&self) -> &Texture {
         &self.texture
+    }
+
+    pub fn tool_texture(&self) -> &Texture {
+        &self.tool_texture
     }
 
     pub fn check_collision(&self, a: &Rect) -> bool {
