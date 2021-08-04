@@ -4,8 +4,8 @@ use sdl2::render::{Texture, WindowCanvas};
 use std::str::FromStr;
 
 use crate::genes;
-use crate::inventory_item_trait;
 use crate::population::Population;
+use crate::InventoryItemTrait;
 
 // Import constant from main
 use crate::{CAM_H, CAM_W, TILE_SIZE};
@@ -14,7 +14,8 @@ use crate::{CAM_H, CAM_W, TILE_SIZE};
 use rand::Rng;
 
 /// Crop type enum
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
+
 pub enum CropType {
     None,
     Carrot,
@@ -34,17 +35,17 @@ pub struct Crop<'a> {
     /// appropriate tile.
     src: Rect,
     /// Texture of sprite sheet.
-    texture: Texture<'a>,
+    texture: &'a Texture<'a>,
+    /// Texture of rotten crop sprite sheet
+    rotten_texture: &'a Texture<'a>,
     /// Boolean to hold whether plant has been
     /// watered or not.
     watered: bool,
-
-    // tex_path: String,
     t: CropType,
-
     genes: Option<genes::Genes>,
-
     pollinated: bool,
+    rotten: bool,
+    child: Option<genes::Genes>,
 }
 
 impl<'a> Crop<'a> {
@@ -60,11 +61,12 @@ impl<'a> Crop<'a> {
     pub fn new(
         pos: Rect,
         stage: u8,
-        texture: Texture<'a>,
+        texture: &'a Texture<'a>,
+        rotten_texture: &'a Texture<'a>,
         watered: bool,
         t: CropType,
         genes: Option<genes::Genes>,
-    ) -> Crop {
+    ) -> Crop<'a> {
         let (x, y) = match t {
             CropType::None => (0, 0),
             CropType::Carrot => (stage as u32 * TILE_SIZE, 0),
@@ -80,17 +82,42 @@ impl<'a> Crop<'a> {
             stage,
             src,
             texture,
+            rotten_texture,
             watered,
             t,
             genes,
             pollinated: false,
-            // some_internal_genetic_value: rng.gen_range(0, 100),
+            rotten: false,
+            child: None,
         }
     }
 
     /// Sets a crop's `watered` variable to `w`
     pub fn set_water(&mut self, w: bool) {
         self.watered = w;
+    }
+
+    /// Set the x and y of a crop's `src` Rect
+    // pub fn set_src_xy(&mut self, x: i32, y: i32) {
+    //     self.src.set_x(x);
+    //     self.src.set_y(y);
+    // }
+
+    /// Set a crop's texture pointer
+    pub fn set_texture(&mut self, t: &'a Texture<'a>) {
+        self.texture = t;
+    }
+
+    /// Set a crop's `rotten` variable
+    pub fn set_rotten(&mut self, r: bool) {
+        self.rotten = r;
+        if r {
+            self.src.set_x(0);
+        }
+    }
+
+    pub fn rotten(&self) -> bool {
+        self.rotten
     }
 
     /// Checks if a crop has been watered, then increments its
@@ -101,13 +128,22 @@ impl<'a> Crop<'a> {
             // growth rate, let it grow
             if let Some(g) = self.get_gene(genes::GeneType::GrowthRate) {
                 let mut rng = rand::thread_rng();
-                let check: f32 = rng.gen();
-                if check < g {
+                let grow_check: f32 = rng.gen();
+                if grow_check < g {
                     self.stage = (self.stage + 1).clamp(0, 3);
                     // Change src from sprite sheet
                     self.src.set_x(self.src.x() + (TILE_SIZE as i32));
-                    // Plant requires more water after growing
-                    self.watered = false;
+                    if let Some(mut w) = self.get_gene(genes::GeneType::WaterRetention) {
+                        let mut rng = rand::thread_rng();
+                        let watered_check: f32 = rng.gen();
+                        w = w / 2.0;
+                        if watered_check < w {
+                            self.watered = true;
+                        } else {
+                            // Plant requires more water after growing
+                            self.watered = false;
+                        }
+                    }
                 }
             }
         }
@@ -162,9 +198,21 @@ impl<'a> Crop<'a> {
         self.genes = g;
     }
 
+    pub fn set_child(&mut self, c: Option<genes::Genes>) {
+        self.child = c;
+    }
+
+    pub fn get_child(&self) -> &Option<genes::Genes> {
+        &self.child
+    }
+
     /// Get a Crop's texture
     pub fn get_texture(&self) -> &Texture {
-        &self.texture
+        if self.rotten {
+            self.rotten_texture
+        } else {
+            self.texture
+        }
     }
 
     /// Get a Crop's `src`
@@ -218,6 +266,10 @@ impl<'a> Crop<'a> {
         self.stage = n;
     }
 
+    pub fn set_pollinated(&mut self, p: bool) {
+        self.pollinated = p;
+    }
+
     pub fn get_crop_type(&self) -> &str {
         match self.t {
             CropType::None => "None",
@@ -266,6 +318,83 @@ impl<'a> Crop<'a> {
         self.src = Rect::new(x as i32, y as i32, TILE_SIZE, TILE_SIZE);
     }
 
+    pub fn distance(&self, x: i32, y: i32) -> f32 {
+        ((((self.get_x() / TILE_SIZE as i32) - x).abs() as f32).powi(2)
+            + (((self.get_y() / TILE_SIZE as i32) - y).abs() as f32).powi(2))
+        .sqrt()
+    }
+
+    // pub fn pollinate(&mut self, pop: &mut Population) {
+    pub fn pollinate(&mut self, neighbors: Vec<(genes::Genes, f32)>) {
+        // If self is already pollinated, return immediately
+        if self.pollinated || self.stage != 3 {
+            return;
+        }
+        // TODO tweak pollination prob
+        let mut prob: f32 = 0.4; // Pollination probability
+                                 // let x = self.get_x() / TILE_SIZE as i32;
+                                 // let y = self.get_y() / TILE_SIZE as i32;
+                                 // let neighbors = pop.get_neighbors(x, y);
+        let mut rng = rand::thread_rng();
+        let mut r: f32;
+        // println!(
+        //     "Checking pollen at ({}, {}) with {:?}",
+        //     self.get_x() / TILE_SIZE as i32,
+        //     self.get_y() / TILE_SIZE as i32,
+        //     neighbors,
+        // );
+        for c in neighbors {
+            if c.1 > 1.5 {
+                // If second ring, use lower probability
+                prob = 0.1;
+            }
+            // Pick a random number
+            r = rng.gen();
+            // If r < prob, pollinate
+            if r < prob {
+                println!(
+                    "Pollinated at ({}, {})",
+                    self.get_x() / TILE_SIZE as i32,
+                    self.get_y() / TILE_SIZE as i32
+                );
+                self.set_pollinated(true);
+                self.breed(&c.0);
+                return;
+            }
+        }
+    }
+
+    /// Combine the genes of self and another crop to make child genes.
+    /// For now, we just take an average and have a chance for mutation
+    fn breed(&mut self, g: &genes::Genes) {
+        // TODO tune mutation chance
+        let mutation: f32 = 0.10; // Percent chance of mutation
+        let mut v: Vec<f32> = Vec::new(); // Vector to hold f32 values for child genes
+        let mut rng = rand::thread_rng();
+        let mut r: f32;
+
+        let types = vec![
+            genes::GeneType::GrowthRate,
+            genes::GeneType::Value,
+            genes::GeneType::WaterRetention,
+            genes::GeneType::PestResistance,
+        ];
+
+        for t in types {
+            let mut cur: f32 = (self.genes.as_ref().unwrap().get_gene(t) + g.get_gene(t)) / 2.0;
+
+            // Check for mutation
+            r = rng.gen();
+            if r < mutation {
+                cur = rng.gen();
+            }
+
+            v.push(cur);
+        }
+
+        self.set_child(Some(genes::Genes::make_genes(v)));
+    }
+
     /// Generate string to save crop to file
     pub fn to_save_string(&self) -> String {
         let mut s = String::from("crop;");
@@ -273,9 +402,15 @@ impl<'a> Crop<'a> {
         s.push_str(((self.get_y() / TILE_SIZE as i32).to_string() + ";").as_ref());
         s.push_str(((self.stage).to_string() + ";").as_ref());
         s.push_str(((self.watered).to_string() + ";").as_ref());
+        s.push_str(((self.pollinated).to_string() + ";").as_ref());
         s.push_str((self.get_crop_type().to_owned() + ";").as_ref());
         if let Some(g) = self.genes.as_ref() {
             s.push_str(g.to_save_string().as_ref());
+        }
+        if let Some(c) = self.child.as_ref() {
+            s.push_str(c.to_save_string().as_ref());
+        } else {
+            s.push_str(String::from("None;").as_ref());
         }
         // s.push_str(self.genes.as_ref().unwrap().to_save_string().as_ref());
         s.push('\n');
@@ -284,18 +419,39 @@ impl<'a> Crop<'a> {
     }
 
     /// Load a crop from a save string
-    pub fn from_save_string(s: &Vec<&str>, t: Texture<'a>) -> Crop<'a> {
+    /// Save string format:
+    /// 0. "crop" (ignore)
+    /// 1. x
+    /// 2. y
+    /// 3. stage
+    /// 4. watered
+    /// 5. pollinated
+    /// 6. type
+    /// 7. growth rate gene
+    /// 8. value gene
+    /// 9. water retention gene
+    /// 10. pest resistance
+    /// CHILD
+    /// 11. child growth rate / "None" if no child
+    /// 12. child value
+    /// 13. child water retention
+    /// 14. child pest resistance
+    pub fn from_save_string(s: &Vec<&str>, t: &'a Texture<'a>, rt: &'a Texture<'a>) -> Crop<'a> {
         let g;
-        println!("Loading from {:?}, len = {:?}", s, s.len());
-        if s.len() > 7 {
+        // println!("Loading from {:?}, len = {:?}", s, s.len());
+        // TODO add to this as more genes are added or make from_save_string in Genes
+
+        if s.len() > 8 {
             g = Some(genes::Genes::make_genes(vec![
-                s[6].parse::<f32>().unwrap(),
                 s[7].parse::<f32>().unwrap(),
+                s[8].parse::<f32>().unwrap(),
+                s[9].parse::<f32>().unwrap(),
+                s[10].parse::<f32>().unwrap(),
             ]));
         } else {
             g = None;
         }
-        Crop::new(
+        let mut c = Crop::new(
             Rect::new(
                 s[1].parse::<i32>().unwrap() * TILE_SIZE as i32,
                 s[2].parse::<i32>().unwrap() * TILE_SIZE as i32,
@@ -304,14 +460,27 @@ impl<'a> Crop<'a> {
             ),
             s[3].parse::<u8>().unwrap(),
             t,
+            rt,
             s[4].parse::<bool>().unwrap(),
-            s[5].parse::<CropType>().unwrap(),
+            s[6].parse::<CropType>().unwrap(),
             g,
-        )
+        );
+        c.set_pollinated(s[5].parse::<bool>().unwrap());
+        if s[11] == "None" {
+            c.set_child(None);
+        } else {
+            c.set_child(Some(genes::Genes::make_genes(vec![
+                s[11].parse::<f32>().unwrap(),
+                s[12].parse::<f32>().unwrap(),
+                s[13].parse::<f32>().unwrap(),
+                s[14].parse::<f32>().unwrap(),
+            ])));
+        }
+        c
     }
 }
 
-impl inventory_item_trait for Crop<'_> {
+impl InventoryItemTrait for Crop<'_> {
     /// Sort inventory so that you take the best item from the inventory
     /// This can be a combination of factors
     /// i.e. 2*speed + resistance
@@ -332,7 +501,10 @@ impl inventory_item_trait for Crop<'_> {
         &self,
         square: (i32, i32),
         pop: &mut Population,
-    ) -> Option<(Option<CropType>, Option<genes::Genes>)> {
+    ) -> Option<(Option<CropType>, Option<genes::Genes>, Option<genes::Genes>)> {
+        if self.stage != 0 {
+            return None;
+        }
         let (x, y) = square;
         if pop.get_tile_with_index(x as u32, y as u32).tilled()
             && pop
@@ -348,9 +520,27 @@ impl inventory_item_trait for Crop<'_> {
             _c.set_genes(self.get_all_genes().clone());
 
             // Return none for right now to signal a crop was placed
-            return Some((Some(CropType::None), None));
+            return Some((Some(CropType::None), None, None));
         }
         return None;
+    }
+
+    /// Generate string to save crop to file
+    fn to_save_string(&self) -> Option<String> {
+        // let mut s = String::from("crop;");
+        // s.push_str(((self.get_x() / TILE_SIZE as i32).to_string() + ";").as_ref());
+        // s.push_str(((self.get_y() / TILE_SIZE as i32).to_string() + ";").as_ref());
+        // s.push_str(((self.stage).to_string() + ";").as_ref());
+        // s.push_str(((self.watered).to_string() + ";").as_ref());
+        // s.push_str(((self.pollinated).to_string() + ";").as_ref());
+        // s.push_str((self.get_crop_type().to_owned() + ";").as_ref());
+        // if let Some(g) = self.genes.as_ref() {
+        //     s.push_str(g.to_save_string().as_ref());
+        // }
+        // // s.push_str(self.genes.as_ref().unwrap().to_save_string().as_ref());
+        // s.push('\n');
+
+        Some(self.to_save_string())
     }
 }
 
@@ -367,27 +557,3 @@ impl FromStr for CropType {
         }
     }
 }
-
-// Implement Serialize
-// impl Serialize for Crop<'_> {
-//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-//     where
-//         S: Serializer,
-//     {
-//         let mut seq = serializer.serialize_seq(Some(self.get_all_genes().as_ref().unwrap()));
-
-//         let mut state = serializer.serialize_struct("Crop", 7)?;
-//         state.serialize_field("x", &self.pos.x())?;
-//         state.serialize_field("y", &self.pos.y())?;
-//         state.serialize_field("stage", &self.get_stage())?;
-//         state.serialize_field("watered", &self.get_watered())?;
-//         state.serialize_field("type", &self.get_crop_type_enum())?;
-//         state.serialize_field("genes", &self.genes.unwrap())?;
-//         state.serialize_field("pollinated", &self.pollinated)?;
-//         state.end()
-//     }
-// }
-
-// impl Deserialize for Crop<'_> {
-
-// }

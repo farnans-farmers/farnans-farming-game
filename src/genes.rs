@@ -7,17 +7,22 @@ const MEAN: f32 = 0.5;
 const STD_DEV: f32 = 0.1;
 
 /// Gene type enum
+#[derive(Copy, Clone, Debug)]
 pub enum GeneType {
     GrowthRate,
     Value,
+    WaterRetention,
+    PestResistance,
 }
 
+#[derive(Debug)]
 struct Gene {
     gene_type: GeneType,
     value: f32,
 }
 
 /// Genes struct
+#[derive(Debug)]
 pub struct Genes {
     genes: Vec<Gene>,
 }
@@ -27,16 +32,16 @@ impl Genes {
     /// Normal Distribution
     pub fn new() -> Genes {
         let normal = Normal::new(MEAN, STD_DEV).unwrap();
+        let growth_var = normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0);
+        let water_ret_var = normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0);
+        let pest_resist_var = normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0);
+        let value_var = (growth_var + water_ret_var + pest_resist_var) / 3.0;
         Genes {
             genes: vec![
-                Gene::new(
-                    GeneType::GrowthRate,
-                    normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0),
-                ),
-                Gene::new(
-                    GeneType::Value,
-                    normal.sample(&mut rand::thread_rng()).clamp(0.0, 1.0),
-                ),
+                Gene::new(GeneType::GrowthRate, growth_var),
+                Gene::new(GeneType::Value, value_var),
+                Gene::new(GeneType::WaterRetention, water_ret_var),
+                Gene::new(GeneType::PestResistance, pest_resist_var),
             ],
         }
     }
@@ -46,6 +51,8 @@ impl Genes {
             genes: vec![
                 Gene::new(GeneType::GrowthRate, *v.get(0).unwrap()),
                 Gene::new(GeneType::Value, *v.get(1).unwrap()),
+                Gene::new(GeneType::WaterRetention, *v.get(2).unwrap()),
+                Gene::new(GeneType::PestResistance, *v.get(3).unwrap()),
             ],
         }
     }
@@ -55,6 +62,8 @@ impl Genes {
         match t {
             GeneType::GrowthRate => self.genes.get(0).unwrap().value,
             GeneType::Value => self.genes.get(1).unwrap().value,
+            GeneType::WaterRetention => self.genes.get(2).unwrap().value,
+            GeneType::PestResistance => self.genes.get(3).unwrap().value,
         }
     }
 
@@ -75,6 +84,10 @@ impl Genes {
         }
         s
     }
+
+    pub fn num_genes(&self) -> usize {
+        self.genes.len()
+    }
 }
 
 impl Gene {
@@ -91,6 +104,8 @@ impl std::fmt::Display for GeneType {
         match self {
             GeneType::GrowthRate => write!(f, "GrowthRate"),
             GeneType::Value => write!(f, "Value"),
+            GeneType::WaterRetention => write!(f, "WaterRetention"),
+            GeneType::PestResistance => write!(f, "PestResistance"),
         }
     }
 }
@@ -100,12 +115,6 @@ impl std::fmt::Display for Gene {
         write!(f, "GeneType: {}, value: {}", self.gene_type, self.value)
     }
 }
-
-// impl std::fmt::Display for Vec<Gene> {
-//     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-
-//     }
-// }
 
 impl std::fmt::Display for Genes {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -121,6 +130,14 @@ impl std::clone::Clone for Genes {
             genes: vec![
                 Gene::new(GeneType::GrowthRate, self.get_gene(GeneType::GrowthRate)),
                 Gene::new(GeneType::Value, self.get_gene(GeneType::Value)),
+                Gene::new(
+                    GeneType::WaterRetention,
+                    self.get_gene(GeneType::WaterRetention),
+                ),
+                Gene::new(
+                    GeneType::PestResistance,
+                    self.get_gene(GeneType::PestResistance),
+                ),
             ],
         }
     }

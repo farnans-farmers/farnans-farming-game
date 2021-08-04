@@ -5,9 +5,9 @@ use sdl2::render::WindowCanvas;
 use crate::crop::Crop;
 use crate::crop::CropType;
 use crate::genes;
-use crate::inventory_item_trait;
 use crate::population::Population;
 use crate::tool::Tool;
+use crate::InventoryItemTrait;
 
 use sdl2::image::LoadTexture;
 use sdl2::render::TextureCreator;
@@ -15,7 +15,7 @@ use sdl2::video::WindowContext;
 
 // use sdl2::render::TextureQuery;
 
-static INVENTORY_X_POS: i32 = 295;
+static INVENTORY_X_POS: i32 = 261;
 static INVENTORY_Y_POS: i32 = 640;
 
 static ITEM_BOX_SIZE: i32 = 64;
@@ -27,16 +27,16 @@ static NUMBER_SIZE: i32 = 20;
 /// Inventory slots are sorted, so you have the "best" seed at the bottom of the queue
 /// This is done so that seed can have different genetics, but still have one inventory slot
 /// The vectors are sorted by their value: a number that is determined in the crop class
-struct Inventory_Item<'a> {
-    items: Vec<Box<dyn inventory_item_trait + 'a>>,
+pub struct InventoryItem<'a> {
+    items: Vec<Box<dyn InventoryItemTrait + 'a>>,
     is_tool: bool,
 }
 
-impl<'a> Inventory_Item<'a> {
+impl<'a> InventoryItem<'a> {
     /// Takes in is_tool: used to differentiate tools from crops
     /// and initializes vector of inventory_item_trait
-    pub fn new(is_tool: bool) -> Inventory_Item<'a> {
-        Inventory_Item {
+    pub fn new(is_tool: bool) -> InventoryItem<'a> {
+        InventoryItem {
             items: Vec::new(),
             is_tool,
         }
@@ -49,7 +49,7 @@ impl<'a> Inventory_Item<'a> {
     /// Insert item into sorted vector
     /// Right now its just insertion sort
     /// Might change to a more efficient insertion if there is time
-    pub fn add_item(&mut self, new_item: Box<dyn inventory_item_trait + 'a>) {
+    pub fn add_item(&mut self, new_item: Box<dyn InventoryItemTrait + 'a>) {
         let mut i = 0;
         let mut insert_pos = self.get_len() as usize;
         for item in &self.items {
@@ -63,11 +63,11 @@ impl<'a> Inventory_Item<'a> {
     }
 
     /// This will pop the highest sorted item at index 0
-    pub fn pop_item(&mut self) -> Box<dyn inventory_item_trait + 'a> {
+    pub fn pop_item(&mut self) -> Box<dyn InventoryItemTrait + 'a> {
         self.items.remove(0 as usize)
     }
 
-    pub fn get_item(&self, index: i32) -> Option<&Box<dyn inventory_item_trait + 'a>> {
+    pub fn get_item(&self, index: i32) -> Option<&Box<dyn InventoryItemTrait + 'a>> {
         if index >= self.get_len() {
             return None;
         }
@@ -79,7 +79,7 @@ impl<'a> Inventory_Item<'a> {
 /// Also keeps track of the current selected inventory slot
 /// squares is used to draw the inventory slot. It is kept here so that it doesn't have to be initialized each time you want to draw
 pub struct Inventory<'a> {
-    inventory_slots: Vec<Inventory_Item<'a>>,
+    inventory_slots: Vec<InventoryItem<'a>>,
     selected: i32,
     squares: Vec<Rect>,
 }
@@ -88,8 +88,8 @@ pub struct Inventory<'a> {
 impl<'a> Inventory<'a> {
     pub fn new(texture_creator: &'a TextureCreator<WindowContext>) -> Inventory<'a> {
         // Initializes inventory slots and sets tool slots to true
-        let mut inventory_slots: Vec<Inventory_Item> =
-            (0..10).map(|x| Inventory_Item::new(x < 3)).collect();
+        let mut inventory_slots: Vec<InventoryItem> =
+            (0..11).map(|x| InventoryItem::new(x < 3)).collect();
 
         // Add tool slots into the inventory
         inventory_slots[0].add_item(Box::new(Tool::new(
@@ -97,7 +97,7 @@ impl<'a> Inventory<'a> {
             texture_creator
                 .load_texture("src/images/itemMenu.png")
                 .unwrap(),
-            crate::tool::tool_type::hand,
+            crate::tool::ToolType::Hand,
         )));
 
         inventory_slots[1].add_item(Box::new(Tool::new(
@@ -105,7 +105,7 @@ impl<'a> Inventory<'a> {
             texture_creator
                 .load_texture("src/images/itemMenu.png")
                 .unwrap(),
-            crate::tool::tool_type::hoe,
+            crate::tool::ToolType::Hoe,
         )));
 
         inventory_slots[2].add_item(Box::new(Tool::new(
@@ -113,13 +113,13 @@ impl<'a> Inventory<'a> {
             texture_creator
                 .load_texture("src/images/itemMenu.png")
                 .unwrap(),
-            crate::tool::tool_type::watering_can,
+            crate::tool::ToolType::WateringCan,
         )));
 
         let temp_select = 0;
 
         // Initialize squares to be drawn
-        let squares: Vec<Rect> = (0..10)
+        let squares: Vec<Rect> = (0..11)
             .map(|x| {
                 Rect::new(
                     INVENTORY_X_POS + (x * (ITEM_BOX_SIZE + BORDER_SIZE)),
@@ -146,7 +146,7 @@ impl<'a> Inventory<'a> {
             .fill_rect(Rect::new(
                 INVENTORY_X_POS - BORDER_SIZE,
                 INVENTORY_Y_POS - BORDER_SIZE,
-                (10 * (ITEM_BOX_SIZE + BORDER_SIZE) + BORDER_SIZE) as u32,
+                (11 * (ITEM_BOX_SIZE + BORDER_SIZE) + BORDER_SIZE) as u32,
                 (ITEM_BOX_SIZE + 2 * BORDER_SIZE) as u32,
             ))
             .expect("ERROR");
@@ -240,21 +240,37 @@ impl<'a> Inventory<'a> {
         self.selected = _selected
     }
 
+    #[allow(dead_code)]
     pub fn get_selected(&self) -> i32 {
         self.selected
     }
 
-    /// Add item into the correct inventory slot
+    /// Map a crop or seed type to an inventory index.
     /// Right now the correct slot is hard coded
-    pub fn add_item(&mut self, new_crop: Crop<'a>) {
-        let inventory_slot_index = match new_crop.get_crop_type_enum() {
+    fn crop_idx(kind: CropType, seedy: bool) -> usize {
+        let r: usize = match kind {
+            CropType::None => panic!("there is no inv slot for no crop"),
             CropType::Carrot => 3,
-            CropType::Corn => 4,
-            CropType::Potato => 5,
-            CropType::Lettuce => 6,
-            _ => 0,
+            CropType::Corn => 5,
+            CropType::Potato => 7,
+            CropType::Lettuce => 9,
         };
-        self.inventory_slots[inventory_slot_index].add_item(Box::new(new_crop));
+        if seedy {
+            r + 1
+        } else {
+            r
+        }
+    }
+
+    /// Add item into the correct inventory slot
+    pub fn add_item(&mut self, new_crop: Crop<'a>) {
+        let seedy = new_crop.get_stage() != 3;
+        let k = Inventory::crop_idx(new_crop.get_crop_type_enum(), seedy);
+        self.inventory_slots[k].add_item(Box::new(new_crop));
+    }
+
+    pub fn get_inventory_slot(&self, index: i32) -> Option<&InventoryItem> {
+        self.inventory_slots.get(index as usize)
     }
 
     /// Use the inventory slot for the correct function
@@ -262,19 +278,19 @@ impl<'a> Inventory<'a> {
     pub fn use_inventory(
         &mut self,
         square: (i32, i32),
-        mut pop: &mut Population,
-    ) -> Option<(Option<CropType>, Option<genes::Genes>)> {
+        pop: &mut Population,
+    ) -> Option<(Option<CropType>, Option<genes::Genes>, Option<genes::Genes>)> {
         let current_item = self.inventory_slots[self.selected as usize].get_item(0);
         match current_item {
             Some(x) => {
                 let ret_val = x.inventory_input(square, pop);
 
                 match ret_val {
-                    Some((t, g)) => {
+                    Some((t, g, child)) => {
                         match (t, g) {
                             (Some(_t), Some(_g)) => {
                                 // If crop harvested...
-                                Some((Some(_t), Some(_g)))
+                                Some((Some(_t), Some(_g), child))
                             }
                             (Some(_t), None) => {
                                 if matches!(_t, CropType::None) {
@@ -295,6 +311,17 @@ impl<'a> Inventory<'a> {
                 }
             }
             None => None,
+        }
+    }
+
+    /// Eat a food yum. Or no food!
+    pub fn eat(&mut self, kind: CropType) -> bool {
+        let k = Inventory::crop_idx(kind, false);
+        if self.inventory_slots[k].get_len() == 0 {
+            false
+        } else {
+            self.inventory_slots.get_mut(k).unwrap().pop_item();
+            true
         }
     }
 }

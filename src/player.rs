@@ -4,7 +4,8 @@
 use std::time::{Duration, Instant};
 
 // Imports
-use sdl2::image::LoadTexture;
+
+use rand::Rng;
 use sdl2::rect::Rect;
 use sdl2::render::Texture;
 use sdl2::render::TextureCreator;
@@ -16,8 +17,11 @@ use crate::crop::Crop;
 use crate::crop::CropType;
 use crate::genes;
 use crate::inventory::Inventory;
-use crate::item::Item;
+
 use crate::population::Population;
+
+// Import constants from main
+use crate::{BG_H, BG_W, TILE_SIZE};
 
 // Player sprites are 54x90 px.
 pub const PLAYER_WIDTH: u32 = 54;
@@ -55,7 +59,6 @@ pub struct Player<'a> {
     inventory: Inventory<'a>,
 }
 
-// TODO implement player animation
 impl<'a> Player<'a> {
     /// Creates a new `Player` instance.
     ///
@@ -107,21 +110,25 @@ impl<'a> Player<'a> {
     }
 
     /// Get left bound of player
+    #[allow(dead_code)]
     pub fn left(&self) -> i32 {
         self.pos.left()
     }
 
     /// Get right bound of player
+    #[allow(dead_code)]
     pub fn right(&self) -> i32 {
         self.pos.right()
     }
 
     /// Get top bound of player
+    #[allow(dead_code)]
     pub fn top(&self) -> i32 {
         self.pos.top()
     }
 
     /// Get bottom bound of player
+    #[allow(dead_code)]
     pub fn bottom(&self) -> i32 {
         self.pos.bottom()
     }
@@ -150,6 +157,7 @@ impl<'a> Player<'a> {
         self.inventory.set_selected(_selected);
     }
 
+    #[allow(dead_code)]
     pub fn get_selected(&self) -> i32 {
         self.inventory.get_selected()
     }
@@ -157,8 +165,8 @@ impl<'a> Player<'a> {
     pub fn use_inventory(
         &mut self,
         square: (i32, i32),
-        mut pop: &mut Population,
-    ) -> Option<(Option<CropType>, Option<genes::Genes>)> {
+        pop: &mut Population,
+    ) -> Option<(Option<CropType>, Option<genes::Genes>, Option<genes::Genes>)> {
         self.inventory.use_inventory(square, pop)
         /*match return_crop{
             Some(x) => Some(x),
@@ -254,6 +262,32 @@ impl<'a> Player<'a> {
         };
     }
 
+    /// Returns the grid coordinates of the
+    /// tile the player is facing
+    pub fn get_facing(&self) -> (i32, i32) {
+        let offset: (i32, i32) = {
+            match self.get_dir() {
+                // Down
+                0 => (0, 1),
+                // Left
+                1 => (-1, 0),
+                // Right
+                2 => (1, 0),
+                // Up
+                3 => (0, -1),
+                // Other (shouldn't happen)
+                _ => (0, 0),
+            }
+        };
+        let coordinates = (
+            (((self.x() + TILE_SIZE as i32 / 2) / TILE_SIZE as i32) + offset.0)
+                .clamp(0, (BG_W / TILE_SIZE) as i32),
+            (((self.y() + TILE_SIZE as i32) / TILE_SIZE as i32) + offset.1)
+                .clamp(0, (BG_H / TILE_SIZE) as i32),
+        );
+        coordinates
+    }
+
     pub fn get_dir(&self) -> i32 {
         let k = match self.dir {
             Direction::Down => 0,
@@ -296,7 +330,35 @@ impl<'a> Player<'a> {
             || a.left() > b.right())
     }
 
+    #[allow(dead_code)]
     pub fn get_inventory(&mut self) -> &mut Inventory<'a> {
         &mut self.inventory
+    }
+
+    /// Eat two or three randomly selected crops. Returns the number of
+    /// crops that the PC wanted to eat but couldn't.
+    pub fn dinner(&mut self) -> i32 {
+        let mut rng = rand::thread_rng();
+        let mut n = if rng.gen_ratio(1, 3) { 3 } else { 2 };
+        // Shuffle a list of the available crop types.
+        let mut opts = [
+            CropType::Carrot,
+            CropType::Corn,
+            CropType::Potato,
+            CropType::Lettuce,
+        ];
+        rand::seq::SliceRandom::shuffle(&mut opts[..], &mut rng);
+        // The crops are in random order. If we have them, eat them in the
+        // same order; otherwise, try the next.
+        for kind in opts {
+            if n <= 0 {
+                return 0;
+            }
+            if self.inventory.eat(kind) {
+                println!("eat a {:?}", kind);
+                n -= 1;
+            }
+        }
+        n
     }
 }

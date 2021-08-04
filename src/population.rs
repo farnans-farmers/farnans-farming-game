@@ -1,40 +1,39 @@
 use crate::crop::Crop;
+use crate::genes;
 use crate::tile::Tile;
-use crate::{CAM_H, CAM_W, TILE_SIZE};
-use sdl2::rect::Rect;
-use sdl2::render::{Texture, WindowCanvas};
+use crate::{BOTTOM_TILE_BOUND, RIGHT_TILE_BOUND, TILE_SIZE};
 
 //Struct used to combine tile and crop structs into one for easy storage into the vector
-pub struct Crop_Tile<'a> {
+pub struct CropTile<'a> {
     pub tile: Tile<'a>,
     pub crop: Crop<'a>,
 }
 
-impl<'a> Crop_Tile<'a> {
-    pub fn new(tile: Tile<'a>, crop: Crop<'a>) -> Crop_Tile<'a> {
-        Crop_Tile { tile, crop }
+impl<'a> CropTile<'a> {
+    pub fn new(tile: Tile<'a>, crop: Crop<'a>) -> CropTile<'a> {
+        CropTile { tile, crop }
     }
 
-    pub fn setCrop(&mut self, c: Crop<'a>) {
+    pub fn set_crop(&mut self, c: Crop<'a>) {
         self.crop = c;
     }
 }
 
 pub struct Population<'a> {
-    crop_tile_vec: Vec<Vec<Crop_Tile<'a>>>,
+    crop_tile_vec: Vec<Vec<CropTile<'a>>>,
 }
 
 impl<'a> Population<'a> {
-    pub fn new(crop_tile_vec: Vec<Vec<Crop_Tile<'a>>>) -> Population<'a> {
+    pub fn new(crop_tile_vec: Vec<Vec<CropTile<'a>>>) -> Population<'a> {
         Population { crop_tile_vec }
     }
 
     //Lends out the whole vector
-    pub fn get_vec(&self) -> &Vec<Vec<Crop_Tile>> {
+    pub fn get_vec(&self) -> &Vec<Vec<CropTile>> {
         &self.crop_tile_vec
     }
 
-    pub fn get_vec_mut(&mut self) -> &mut Vec<Vec<Crop_Tile<'a>>> {
+    pub fn get_vec_mut(&mut self) -> &mut Vec<Vec<CropTile<'a>>> {
         &mut self.crop_tile_vec
     }
 
@@ -78,4 +77,38 @@ impl<'a> Population<'a> {
     pub fn plant_seed(&self) {}
 
     pub fn destroy_plant(&self) {}
+
+    /// Returns an array of neighboring crops, sorted by distance from
+    /// (x,y)
+    pub fn get_neighbors(&self, x: i32, y: i32) -> Vec<(genes::Genes, f32)> {
+        let mut v: Vec<&Crop> = Vec::new();
+        // Loop through nearest rings
+        for col in (x - 2).clamp(0, RIGHT_TILE_BOUND)..(x + 2).clamp(0, RIGHT_TILE_BOUND) {
+            for row in (y - 2).clamp(0, BOTTOM_TILE_BOUND)..(y + 2).clamp(0, BOTTOM_TILE_BOUND) {
+                // Don't let a plant pollinate itself
+                if col == x && row == y {
+                    continue;
+                }
+                let c = self.get_crop_with_index(col as u32, row as u32);
+                if c.get_crop_type_enum() != crate::crop::CropType::None && c.get_stage() == 3 {
+                    v.push(c);
+                }
+            }
+        }
+        // Sort vector
+        v.sort_by_cached_key(|k| (k.distance(x, y) * 100.0) as i32);
+        // Extract clones of genes and distances
+        let mut r: Vec<(genes::Genes, f32)> = Vec::new();
+        for i in v {
+            r.push((
+                i.get_all_genes().as_ref().unwrap().clone(),
+                i.distance(x, y),
+            ));
+        }
+        r
+    }
+
+    // pub fn pollinate(&self, x: i32, y: i32) {
+    //     // let mut c =
+    // }
 }

@@ -1,23 +1,23 @@
 use crate::crop::CropType;
 use crate::genes;
-use crate::inventory_item_trait;
 use crate::population::Population;
+use crate::InventoryItemTrait;
 use sdl2::rect::Rect;
 use sdl2::render::Texture;
 
 /// This class is for tool functionality
 /// Right now, just have 3 tools
 
-pub enum tool_type {
-    hand,
-    hoe,
-    watering_can,
+pub enum ToolType {
+    Hand,
+    Hoe,
+    WateringCan,
 }
 
 pub struct Tool<'a> {
     src: Rect,
     texture: Texture<'a>,
-    current_type: tool_type,
+    current_type: ToolType,
 }
 
 impl<'a> Tool<'a> {
@@ -26,7 +26,7 @@ impl<'a> Tool<'a> {
     /// # Arguments
     /// * `pos` - Position of the player.
     /// * `texture` - Sprite sheet texture
-    pub fn new(src: Rect, texture: Texture<'a>, t: tool_type) -> Tool<'a> {
+    pub fn new(src: Rect, texture: Texture<'a>, t: ToolType) -> Tool<'a> {
         Tool {
             src,
             texture,
@@ -35,7 +35,7 @@ impl<'a> Tool<'a> {
     }
 }
 
-impl inventory_item_trait for Tool<'_> {
+impl InventoryItemTrait for Tool<'_> {
     fn get_value(&self) -> i32 {
         1
     }
@@ -45,16 +45,19 @@ impl inventory_item_trait for Tool<'_> {
     fn src(&self) -> Rect {
         self.src
     }
+    fn to_save_string(&self) -> Option<String> {
+        None
+    }
     fn inventory_input(
         &self,
         square: (i32, i32),
         pop: &mut Population,
-    ) -> Option<(Option<CropType>, Option<genes::Genes>)> {
+    ) -> Option<(Option<CropType>, Option<genes::Genes>, Option<genes::Genes>)> {
         let (x, y) = square;
 
         match self.current_type {
             // Hand
-            tool_type::hand => {
+            ToolType::Hand => {
                 // TODO remove debugging that prints genes
                 if let Some(_i) = pop
                     .get_crop_with_index(x as u32, y as u32)
@@ -66,8 +69,29 @@ impl inventory_item_trait for Tool<'_> {
                             .get_all_genes()
                             .as_ref()
                             .unwrap()
-                    )
+                    );
+                    if let Some(p) = pop
+                        .get_crop_with_index(x as u32, y as u32)
+                        .get_child()
+                        .as_ref()
+                    {
+                        println!("{}", p);
+                    } else {
+                        println!("None");
+                    }
                 }
+                // If crop rotten, don't harvest, just remove
+                if pop.get_crop_with_index(x as u32, y as u32).rotten() {
+                    let mut _c = pop.get_crop_with_index_mut(x as u32, y as u32);
+                    _c.set_stage(0);
+                    _c.set_rotten(false);
+                    _c.set_crop_type_enum(CropType::None);
+                    _c.set_water(false);
+                    _c.set_genes(None);
+                    _c.set_child(None);
+                    return None;
+                }
+
                 // If tile has plant ready to harvest, harvest
                 if pop.get_crop_with_index(x as u32, y as u32).get_stage() == 3 {
                     let _g = pop
@@ -79,18 +103,22 @@ impl inventory_item_trait for Tool<'_> {
                     let mut _c = pop.get_crop_with_index_mut(x as u32, y as u32);
                     let return_crop_type = _c.get_crop_type_enum();
                     // let _g = _c.get_all_genes().unwrap().clone();
-                    _c.set_crop_type("None");
+                    // _c.set_crop_type("None");
+                    _c.set_crop_type_enum(CropType::None);
                     _c.set_stage(0);
                     _c.set_water(false);
                     _c.set_genes(None);
-                    let mut _t = pop.get_tile_with_index_mut(x as u32, y as u32);
-                    _t.set_tilled(false);
+                    _c.set_child(None);
+                    // let mut _t = pop.get_tile_with_index_mut(x as u32, y as u32);
+                    // _t.set_tilled(false);
 
-                    return Some((Some(return_crop_type), Some(_g)));
+                    let child = _c.get_child().clone();
+
+                    return Some((Some(return_crop_type), Some(_g), child));
                 }
             }
             // Hoe
-            tool_type::hoe => {
+            ToolType::Hoe => {
                 // If tile is empty, set as tilled dirt
                 if pop
                     .get_crop_with_index(x as u32, y as u32)
@@ -104,7 +132,7 @@ impl inventory_item_trait for Tool<'_> {
                 }
             }
             // Watering can
-            tool_type::watering_can => {
+            ToolType::WateringCan => {
                 if !pop.get_crop_with_index(x as u32, y as u32).get_watered() {
                     pop.get_crop_with_index_mut(x as u32, y as u32)
                         .set_water(true);

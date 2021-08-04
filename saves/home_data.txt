@@ -1,0 +1,4 @@
+item;200;200;400;320;src/images/Barn.png;true
+item;2000;2000;400;320;src/images/house.png;true
+item;2920;2000;80;160;src/images/go_market.png;true
+crop;18;27;2;true;false;Carrot;0.47094136;0.5143052;0.4795519;0.59242237;None;
