@@ -1,2 +1,5 @@
 item;2000;2000;400;320;src/images/marketstall.png;true
+item;1000;2000;400;320;src/images/marketstall1.png;true
+item;2000;1000;400;320;src/images/marketstall2.png;true
+item;1000;1000;400;320;src/images/marketstall3.png;true
 item;2920;2000;80;160;src/images/go_home.png;true
