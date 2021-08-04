@@ -1,5 +1,20 @@
-use crate::COM_HASH;
 use std::collections::HashMap;
+
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub enum CommodityKind {
+    CarrotSeed = 0,
+    CarrotCrop = 1,
+    CornSeed = 2,
+    CornCrop = 3,
+    PotatoSeed = 4,
+    PotatoCrop = 5,
+    LettuceSeed = 6,
+    LettuceCrop = 7,
+}
+
+impl CommodityKind {
+    pub const SIZE: usize = 8;
+}
 
 pub struct ESList {
     avg: f32,
