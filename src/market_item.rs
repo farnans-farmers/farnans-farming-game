@@ -11,26 +11,31 @@ use sdl2::rect::Rect;
 pub struct MarketItem {
     pub item_label_offset: i32,
     pub amount: i32,
-    pub price: i32,
+    pub min: i32,
+    pub max: i32,
     pub pos: Rect,
     pub crop: CropType,
-    // texture: Texture,
+    pub growth: i32,
 }
 
 impl MarketItem {
     pub fn new(
         item_label_offset: i32,
         amount: i32,
-        price: i32,
+        min: i32,
+        max: i32,
         pos: Rect,
-        crop: CropType, /*, texture: Texture */
+        crop: CropType,
+        growth: i32,
     ) -> MarketItem {
         MarketItem {
             item_label_offset,
             amount,
-            price,
+            min,
+            max,
             pos,
             crop,
+            growth,
             //texture,
         }
     }
