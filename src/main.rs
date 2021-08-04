@@ -2,12 +2,11 @@
 
 extern crate sdl2;
 
+// Modules
 use crate::market_house::Trades;
 use std::collections::HashMap;
 
 use lazy_static::lazy_static;
-
-// Modules
 mod agent;
 mod anim;
 mod commodities;
@@ -163,6 +162,9 @@ fn main() {
         texture_creator
             .load_texture("src/images/farmer.png")
             .unwrap(),
+        texture_creator
+            .load_texture("src/images/farmer_tools.png")
+            .unwrap(),
         &texture_creator,
     );
 
@@ -256,9 +258,11 @@ fn main() {
                 if keystate.contains(&Keycode::D) {
                     x_deltav_f += player::ACCEL_RATE;
                 }
-
                 if event_pump.mouse_state().left() || keystate.contains(&Keycode::C) {
                     let coordinates = p.get_facing();
+                    p.set_tooluse(true);
+
+
                     // Use inventory slot function
                     // Result is given when we want to add an item to the inventory
                     // This is done when a fully grown crop is used by the hand
@@ -269,6 +273,7 @@ fn main() {
                                 Some((Some(t), Some(g), child)) => {
                                     //Return multiple seeds from harvesting a plant
                                     //This may want to be determined on a plant's genes later
+                                    p.set_tooluse(true);
 
                                     let mut grown_crop = crop::Crop::new(
                                         Rect::new(0, 0, 0, 0),
@@ -550,7 +555,12 @@ fn main() {
         }
 
         // Draw inventory
+
         p.draw(&mut wincan, player_cam_pos);
+        p.set_tooluse(false);
+
+
+
         //ui.draw(&mut wincan);
 
         match in_menu {
