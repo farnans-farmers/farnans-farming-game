@@ -3,10 +3,6 @@
 extern crate sdl2;
 
 // Modules
-use crate::market_house::Trades;
-use std::collections::HashMap;
-
-use lazy_static::lazy_static;
 mod agent;
 mod anim;
 mod commodities;
@@ -70,13 +66,6 @@ pub enum Menu {
 pub enum Area {
     Home,
     Market,
-}
-
-lazy_static! {
-    pub static ref COM_HASH: HashMap<String, commodities::Commodity> = {
-        let mut map = HashMap::new();
-        map
-    };
 }
 
 /// Trait used for items that can exist inside of the inventory
@@ -261,7 +250,6 @@ fn main() {
                 if event_pump.mouse_state().left() || keystate.contains(&Keycode::C) {
                     let coordinates = p.get_facing();
                     p.set_tooluse(true);
-
 
                     // Use inventory slot function
                     // Result is given when we want to add an item to the inventory
@@ -558,8 +546,6 @@ fn main() {
 
         p.draw(&mut wincan, player_cam_pos);
         p.set_tooluse(false);
-
-
 
         //ui.draw(&mut wincan);
 
