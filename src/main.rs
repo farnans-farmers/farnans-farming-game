@@ -251,7 +251,6 @@ fn main() {
                     let coordinates = p.get_facing();
                     p.set_tooluse(true);
 
-
                     // Use inventory slot function
                     // Result is given when we want to add an item to the inventory
                     // This is done when a fully grown crop is used by the hand
@@ -547,8 +546,6 @@ fn main() {
 
         p.draw(&mut wincan, player_cam_pos);
         p.set_tooluse(false);
-
-
 
         //ui.draw(&mut wincan);
 

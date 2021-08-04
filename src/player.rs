@@ -188,66 +188,129 @@ impl<'a> Player<'a> {
         self.inventory.draw(wincan);
         let src = self.src();
         if self.tooluse {
-            wincan.copy(self.tool_texture(), src, player_cam_pos).unwrap();
+            wincan
+                .copy(self.tool_texture(), src, player_cam_pos)
+                .unwrap();
             if self.get_selected() == 1 {
                 if self.get_dir() == 0 {
                     let src = Rect::new(0 as i32, 0 as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
                 }
                 if self.get_dir() == 1 {
-                    let src = Rect::new(0 as i32, PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                    let src =
+                        Rect::new(0 as i32, PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
                 }
                 if self.get_dir() == 2 {
-                    let src = Rect::new(0 as i32, 2*PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                    let src = Rect::new(
+                        0 as i32,
+                        2 * PLAYER_HEIGHT as i32,
+                        PLAYER_HEIGHT,
+                        PLAYER_WIDTH,
+                    );
                 }
                 if self.get_dir() == 3 {
-                    let src = Rect::new(0 as i32, 3*PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                    let src = Rect::new(
+                        0 as i32,
+                        3 * PLAYER_HEIGHT as i32,
+                        PLAYER_HEIGHT,
+                        PLAYER_WIDTH,
+                    );
                 }
-            }
-            else if self.get_selected() == 2 {
+            } else if self.get_selected() == 2 {
                 if self.get_dir() == 0 {
                     let src = Rect::new(PLAYER_WIDTH as i32, 0 as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
                 }
                 if self.get_dir() == 1 {
-                    let src = Rect::new(PLAYER_WIDTH as i32, PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                    let src = Rect::new(
+                        PLAYER_WIDTH as i32,
+                        PLAYER_HEIGHT as i32,
+                        PLAYER_HEIGHT,
+                        PLAYER_WIDTH,
+                    );
                 }
                 if self.get_dir() == 2 {
-                    let src = Rect::new(PLAYER_WIDTH as i32, 2*PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                    let src = Rect::new(
+                        PLAYER_WIDTH as i32,
+                        2 * PLAYER_HEIGHT as i32,
+                        PLAYER_HEIGHT,
+                        PLAYER_WIDTH,
+                    );
                 }
                 if self.get_dir() == 3 {
-                    let src = Rect::new(PLAYER_WIDTH as i32, 3*PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                    let src = Rect::new(
+                        PLAYER_WIDTH as i32,
+                        3 * PLAYER_HEIGHT as i32,
+                        PLAYER_HEIGHT,
+                        PLAYER_WIDTH,
+                    );
                 }
-            }
-            else if self.get_selected() == 3 {
+            } else if self.get_selected() == 3 {
                 if self.get_dir() == 0 {
-                    let src = Rect::new(2*PLAYER_WIDTH as i32, 0 as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                    let src = Rect::new(
+                        2 * PLAYER_WIDTH as i32,
+                        0 as i32,
+                        PLAYER_HEIGHT,
+                        PLAYER_WIDTH,
+                    );
                 }
                 if self.get_dir() == 1 {
-                    let src = Rect::new(2*PLAYER_WIDTH as i32, PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                    let src = Rect::new(
+                        2 * PLAYER_WIDTH as i32,
+                        PLAYER_HEIGHT as i32,
+                        PLAYER_HEIGHT,
+                        PLAYER_WIDTH,
+                    );
                 }
                 if self.get_dir() == 2 {
-                    let src = Rect::new(2*PLAYER_WIDTH as i32, 2*PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                    let src = Rect::new(
+                        2 * PLAYER_WIDTH as i32,
+                        2 * PLAYER_HEIGHT as i32,
+                        PLAYER_HEIGHT,
+                        PLAYER_WIDTH,
+                    );
                 }
                 if self.get_dir() == 3 {
-                    let src = Rect::new(2*PLAYER_WIDTH as i32, 3*PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                    let src = Rect::new(
+                        2 * PLAYER_WIDTH as i32,
+                        3 * PLAYER_HEIGHT as i32,
+                        PLAYER_HEIGHT,
+                        PLAYER_WIDTH,
+                    );
                 }
-            }
-            else {
+            } else {
                 if self.get_dir() == 0 {
-                    let src = Rect::new(3*PLAYER_WIDTH as i32, 0 as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                    let src = Rect::new(
+                        3 * PLAYER_WIDTH as i32,
+                        0 as i32,
+                        PLAYER_HEIGHT,
+                        PLAYER_WIDTH,
+                    );
                 }
                 if self.get_dir() == 1 {
-                    let src = Rect::new(3*PLAYER_WIDTH as i32, PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                    let src = Rect::new(
+                        3 * PLAYER_WIDTH as i32,
+                        PLAYER_HEIGHT as i32,
+                        PLAYER_HEIGHT,
+                        PLAYER_WIDTH,
+                    );
                 }
                 if self.get_dir() == 2 {
-                    let src = Rect::new(3*PLAYER_WIDTH as i32, 2*PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                    let src = Rect::new(
+                        3 * PLAYER_WIDTH as i32,
+                        2 * PLAYER_HEIGHT as i32,
+                        PLAYER_HEIGHT,
+                        PLAYER_WIDTH,
+                    );
                 }
                 if self.get_dir() == 3 {
-                    let src = Rect::new(3*PLAYER_WIDTH as i32, 3*PLAYER_HEIGHT as i32, PLAYER_HEIGHT, PLAYER_WIDTH);
+                    let src = Rect::new(
+                        3 * PLAYER_WIDTH as i32,
+                        3 * PLAYER_HEIGHT as i32,
+                        PLAYER_HEIGHT,
+                        PLAYER_WIDTH,
+                    );
                 }
             }
-
-        }
-        else {
+        } else {
             wincan.copy(self.texture(), src, player_cam_pos).unwrap();
         }
     }

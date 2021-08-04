@@ -36,7 +36,7 @@ impl TradeSubmission {
         for _i in 0..CommodityKind::SIZE {
             submission.push(None);
         }
-        TradeSubmission{submission}
+        TradeSubmission { submission }
     }
     pub fn add(&mut self, s: CommodityKind, t: Trade) {
         self.submission[s as usize] = Some(t);
@@ -53,7 +53,7 @@ impl TradeTable {
         for _i in 0..CommodityKind::SIZE {
             trades.push(Vec::new());
         }
-        TradeTable{trades}
+        TradeTable { trades }
     }
 
     pub fn shuffle(&mut self) {
