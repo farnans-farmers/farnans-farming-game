@@ -219,7 +219,7 @@ impl<'a> Store<'a> {
         }
     }
 
-  pub fn confirm_purchase(&mut self) -> Option<(i32, crate::crop::CropType, i32)> {
+    pub fn confirm_purchase(&mut self) -> Option<(i32, crate::crop::CropType, i32)> {
         let total = self.items_array[self.item_selected as usize].min * self.amount_selected;
 
         let mut t = None;
